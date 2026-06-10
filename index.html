@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phish or Legit? — A passkey demo</title>
+  <meta name="description" content="Can you tell a real login page from a phishing copy? Almost nobody can. Then register a device-bound passkey and watch it catch every phish — because it won't work on the fake domain." />
+  <meta name="theme-color" content="#0b0f1a" />
+  <!-- Emoji favicon (no asset file needed) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎣</text></svg>" />
+  <!-- Social sharing -->
+  <meta property="og:title" content="Phish or Legit? — a passkey demo" />
+  <meta property="og:description" content="Two near-identical login pages. One steals your password. Can your eyes tell them apart? (Spoiler: almost nobody can.) Then try a phishing-proof passkey." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ───────────── TITLE SCREEN ───────────── -->
+    <section id="screen-title" class="screen active">
+      <div class="title-wrap">
+        <div class="hero-badge">🎣</div>
+        <h1>Phish <span class="muted">or</span> Legit?</h1>
+        <p class="tagline">
+          Two near-identical homepages for a brand you know. One is real, one steals your password.
+          Can your <em>eyes</em> tell them apart? <br />
+          <strong>(Spoiler: almost nobody can.)</strong>
+        </p>
+
+        <div class="passkey-panel">
+          <div class="passkey-panel__head">
+            <span class="key-glyph">🔑</span>
+            <div>
+              <h3>Device-bound passkey</h3>
+              <p class="muted small">
+                Register one and you'll <strong>never</strong> guess again — your passkey
+                refuses to work on the fake site, so the phish reveals itself.
+              </p>
+            </div>
+          </div>
+          <button id="btn-register" class="btn btn-key">Register a passkey on this device</button>
+          <p id="passkey-status" class="passkey-status"></p>
+        </div>
+
+        <div class="rounds-select">
+          <span class="rounds-label">Game length:</span>
+          <div class="seg" id="rounds-seg">
+            <button class="seg-btn active" data-rounds="5">5 rounds</button>
+            <button class="seg-btn" data-rounds="10">10 rounds</button>
+          </div>
+          <span class="rounds-hint muted small">drawn from 25 look-alike sites</span>
+        </div>
+
+        <div class="mode-buttons">
+          <button id="btn-play-eyes" class="btn btn-ghost">
+            <span class="mode-label">Play with your eyes 👀</span>
+            <span class="mode-sub">Guess the real site. Good luck.</span>
+          </button>
+          <button id="btn-play-passkey" class="btn btn-primary" disabled>
+            <span class="mode-label">Play with your passkey 🔑</span>
+            <span class="mode-sub" id="passkey-mode-sub">Register a passkey first</span>
+          </button>
+        </div>
+
+        <p id="lifetime-stats" class="lifetime-stats"></p>
+
+        <button id="btn-how" class="link-btn">How do passkeys stop phishing?</button>
+        <p class="disclaimer muted small">
+          Educational anti-phishing simulation. Brand names and logos belong to their respective
+          owners and are shown only to illustrate real-world look-alike domains.
+        </p>
+      </div>
+    </section>
+
+    <!-- ───────────── ROUND SCREEN ───────────── -->
+    <section id="screen-round" class="screen">
+      <header class="round-bar">
+        <button id="btn-quit" class="link-btn">‹ Quit</button>
+        <div class="round-meta">
+          <span id="round-counter">Round 1 / 5</span>
+          <span class="dot">•</span>
+          <span id="round-mode" class="mode-pill">👀 Eyes</span>
+          <span id="round-diff" class="diff-pill diff-medium">Medium</span>
+        </div>
+        <div class="score-meta">Score: <strong id="score">0</strong></div>
+      </header>
+
+      <div class="scenario" id="scenario"></div>
+
+      <div class="windows" id="windows"></div>
+
+      <p class="hint" id="round-hint"></p>
+    </section>
+
+    <!-- ───────────── RESULT OVERLAY ───────────── -->
+    <div id="result-overlay" class="overlay">
+      <div class="result-card" id="result-card">
+        <div class="result-icon" id="result-icon"></div>
+        <h2 id="result-title"></h2>
+        <p id="result-body"></p>
+        <div class="reveal" id="result-reveal"></div>
+        <button id="btn-passkey-demo" class="link-btn result-demo-btn">🛡️ See what a passkey would do here</button>
+        <button id="btn-next" class="btn btn-primary">Next round ›</button>
+      </div>
+    </div>
+
+    <!-- ───────────── SUMMARY SCREEN ───────────── -->
+    <section id="screen-summary" class="screen">
+      <div class="summary-wrap">
+        <div class="hero-badge" id="summary-badge">🎣</div>
+        <h1 id="summary-title"></h1>
+        <p id="summary-body" class="tagline"></p>
+        <div class="summary-stat">
+          <span id="summary-score" class="big-score"></span>
+          <span class="muted">rounds survived</span>
+        </div>
+        <div id="summary-breakdown" class="summary-breakdown"></div>
+        <div id="summary-cta" class="summary-cta"></div>
+        <div class="summary-actions">
+          <button id="btn-replay" class="btn btn-ghost">Play again</button>
+          <button id="btn-home" class="btn btn-primary">Back to title</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── HOW-IT-WORKS MODAL ───────────── -->
+    <div id="how-overlay" class="overlay">
+      <div class="how-card">
+        <button id="btn-how-close" class="close-x" aria-label="Close">✕</button>
+        <h2>🔑 Why passkeys can't be phished</h2>
+        <ol class="how-list">
+          <li>
+            <strong>A passkey is locked to a domain.</strong>
+            When you register, the secret key is bound to the exact site
+            (e.g. <code>coinbase.com</code>) — and stored in your device's secure hardware.
+          </li>
+          <li>
+            <strong>Your browser checks the domain for you.</strong>
+            It will only offer a passkey whose domain matches the site you're on.
+            A homoglyph look-alike like <code>cоinbase.com</code> (Cyrillic “о”) is a
+            <em>different domain</em> at the byte level — so it gets nothing.
+          </li>
+          <li>
+            <strong>So the fake site gets nothing.</strong>
+            The phishing page can copy every pixel, but it can't fake the domain
+            your passkey is bound to. The browser simply finds no key — and that's your signal.
+          </li>
+          <li>
+            <strong>Nothing to steal, nothing to type.</strong>
+            There's no password to phish, no code to read out. The private key never
+            leaves your device.
+          </li>
+        </ol>
+        <p class="muted small">
+          This demo reproduces that exact behavior: in passkey mode, the fake site
+          reports <em>"no passkey for this domain"</em> — just like a real browser would.
+        </p>
+        <button id="btn-how-close-2" class="btn btn-primary">Got it</button>
+      </div>
+    </div>
+
+    <!-- ─── Simulated browser "passkey" dialog (passkey mode) ─── -->
+    <div id="passkey-sheet" class="overlay sheet-overlay">
+      <div class="pk-sheet">
+        <div class="pk-sheet-head">
+          <span class="pk-sheet-lock">🔒</span>
+          <span class="pk-sheet-domain" id="pk-sheet-domain"></span>
+        </div>
+        <div class="pk-sheet-body" id="pk-sheet-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
