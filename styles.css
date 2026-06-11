@@ -1,19 +1,20 @@
 :root {
-  /* CIBC-inspired palette: deep red-tinted dark + CIBC red & gold accents */
-  --bg: #100a0c;
-  --bg-soft: #1a1012;
-  --panel: #1d1316;
-  --panel-2: #271619;
-  --border: #3a242a;
-  --text: #f4ecee;
-  --muted: #bda3a8;
-  --accent: #c8102e;       /* CIBC red */
-  --accent-2: #8e0c22;     /* deep red */
-  --gold: #e0a73a;         /* CIBC gold accent */
+  /* Calm, professional dark — neutral slate with CIBC red & gold ACCENTS
+     (red lives on buttons/pills, not the background, so it reads friendly). */
+  --bg: #0e1015;
+  --bg-soft: #161922;
+  --panel: #171b24;
+  --panel-2: #1f2430;
+  --border: #2c3242;
+  --text: #eef1f6;
+  --muted: #9aa3b5;
+  --accent: #d4283d;       /* CIBC red (a touch brighter so it feels friendly) */
+  --accent-2: #a3122a;     /* deep red for gradient depth */
+  --gold: #e0a73a;         /* warm gold accent */
   --green: #2fd27a;
   --red: #ff6470;
   --amber: #ffb454;
-  --shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   --radius: 16px;
 }
 
@@ -23,8 +24,8 @@ html, body {
   margin: 0;
   padding: 0;
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(200, 16, 46, 0.20), transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, rgba(224, 167, 58, 0.12), transparent 55%),
+    radial-gradient(1100px 560px at 85% -20%, rgba(212, 40, 61, 0.10), transparent 60%),
+    radial-gradient(800px 440px at -10% 0%, rgba(224, 167, 58, 0.07), transparent 55%),
     var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -50,7 +51,7 @@ html, body {
 }
 .hero-badge {
   font-size: 56px;
-  filter: drop-shadow(0 8px 20px rgba(200, 16, 46, 0.55));
+  filter: drop-shadow(0 8px 22px rgba(212, 40, 61, 0.3));
   margin-bottom: 8px;
 }
 h1 {

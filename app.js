@@ -840,7 +840,7 @@ function renderRound() {
   $("#windows").appendChild(buildWindow(brand, leftReal));
   $("#windows").appendChild(buildWindow(brand, !leftReal));
 
-  const inspect = " <span class=\"muted\">(hover a URL to see the full address)</span>";
+  const inspect = " <span class=\"muted\">(hover a URL for the full address · keys 1 / 2)</span>";
   const eyesHint =
     brand.difficulty === "easy"
       ? "The pages are identical — the address bar is your only clue, and this one's catchable. Find the real " + brand.name + "."
@@ -1194,8 +1194,9 @@ function renderBreakdown() {
       );
     })
     .join("");
+  const diffLabel = { mixed: "Mixed", easymed: "Easy–Med", medhard: "Med–Hard", hard: "All Hard" }[state.difficultyPref] || "Mixed";
   $("#summary-breakdown").innerHTML =
-    `<div class="bd-title">${state.mode === "eyes" ? "By eye" : "With your passkey"} — accuracy by difficulty</div>` + rows;
+    `<div class="bd-title">${state.mode === "eyes" ? "By eye" : "With your passkey"} · ${diffLabel} · ${state.totalRounds} rounds — accuracy by difficulty</div>` + rows;
 }
 
 // ============================================================
@@ -1248,6 +1249,32 @@ function init() {
   $("#how-overlay").addEventListener("click", (e) => {
     if (e.target.id === "how-overlay") closeOverlay("#how-overlay");
   });
+
+  // Keyboard play: ← / 1 = left tab, → / 2 = right tab, Enter = advance.
+  document.addEventListener("keydown", (e) => {
+    const resultOpen = $("#result-overlay").classList.contains("active");
+    const sheetOpen = $("#passkey-sheet").classList.contains("active");
+    const roundOpen = $("#screen-round").classList.contains("active");
+    if (sheetOpen) {
+      const close = $("#pk-sheet-close");
+      if (close && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); close.click(); }
+      return;
+    }
+    if (resultOpen) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("#btn-next").click(); }
+      return;
+    }
+    if (roundOpen && !state.resolved) {
+      if (e.key === "ArrowLeft" || e.key === "1") { e.preventDefault(); pickWindow(0); }
+      else if (e.key === "ArrowRight" || e.key === "2") { e.preventDefault(); pickWindow(1); }
+    }
+  });
+}
+
+function pickWindow(idx) {
+  const w = document.querySelectorAll("#windows .window")[idx];
+  const btn = w && w.querySelector('[data-act="signin"]');
+  if (btn) btn.click();
 }
 
 // ============================================================
