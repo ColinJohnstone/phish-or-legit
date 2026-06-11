@@ -3,30 +3,35 @@
 A small web game that shows, viscerally, why **device-bound passkeys** beat phishing.
 
 You're shown two **full brand homepages** for a company you know, each with a "Sign in"
-button. The set has **25 look-alike scenarios** (Apple, Google, Microsoft, PayPal, Amazon,
-Netflix, Chase, Coinbase, Facebook, Instagram, LinkedIn, Twitter, Spotify, Dropbox, Slack,
-GitHub, Discord, Steam, Reddit, Twitch, Adobe, Binance, Wells Fargo, Bank of America, eBay).
-Each game randomly draws **5 or 10** of them (your choice on the title screen) — no repeats
-within a game.
+button. The set has **33 look-alike scenarios** spanning seven real phishing techniques.
+Each game randomly draws **5 or 10** of them (your choice on the title screen), ordered
+**easy → hard**, with no repeats within a game.
 
-The two pages in a round look identical — the difference is in the address bar. Each
-scenario carries a **difficulty** (shown as a pill), and a game ramps **easy → hard**:
+The two pages in a round look identical — the difference is in the address bar — and each
+scenario shows a **difficulty pill**:
 
-- **Easy** — catchable if you look: misspellings/digit swaps (`amaz0n.com`, `gooogle.com`,
-  `netflx.com`, `faceb00k.com`) and an **http / "Not secure"** page (no padlock).
-- **Medium** — correctly spelled, wrong domain: combosquats (`apple-id.com`,
-  `chase-secure.com`, `spotify-premium.com`) and wrong TLDs (`twitch.com` vs `twitch.tv`,
-  `steampowered.co`).
-- **Hard** — invisible or structural: **homoglyphs** (Cyrillic `о`/`і`, e.g. `cоinbase.com`),
-  **subdomain tricks** (`linkedin.com.secure-signin.net` — the real domain is the part before
-  the first `/`), and the **`@` trick** (`accounts.binance.com@secure-wallet.io` actually goes
-  to `secure-wallet.io`).
+- **Typosquatting — omission / transposition / substitution** *(easy–medium)* — a dropped,
+  swapped, doubled, or digit-for-letter character: `gogle.com`, `amzon.com`, `facebok.com`,
+  `yuotube.com` (ou→uo), `instargam.com` (ra→ar), `twitterr.com`, `yaho0.com`.
+- **Subdomain stuffing** *(hard)* — the real brand appears as a *subdomain* of the attacker's
+  domain: `chase.com.login.verify-identity.net`, `fedex.com…shipment-delivery.top`,
+  `ups.com…reschedule-portal.biz`. The true owner is the **last two labels**.
+- **Look-alike TLDs** *(medium)* — right name, wrong ending: `zoom.download` (real `zoom.us`),
+  `discord.support`, `steampowered.gl`, `roblox.login`, `uber.help`, `airbnb.rentals`.
+- **Comb-glyphs / blended letters** *(hard)* — `walrnart.com` and `rnicrosoft.com` (`rn`→`m`),
+  `disneypIus.com` and `saIesforce.com` (capital `I`→`l`), `twltch.tv` (`l`→`i`), `ebav.com`
+  (`v`→`y`).
+- **IDN homoglyphs** *(hard)* — `cоinbase.com` (Cyrillic `о`), `spotıfy.com` (dotless `ı`).
+- **The `@` trick** *(hard)* — `accounts.binance.com@secure-wallet.io` actually loads
+  `secure-wallet.io` (everything before `@` is ignored).
+- **Not secure (http)** *(easy)* — `http://paypal-account.com`, no padlock.
 
-After each round the result **boxes the exact difference** in red — even the single invisible
-homoglyph character — names the technique + difficulty, and for homoglyphs shows the real
-**`xn--…` (punycode)** address your browser would actually display (the one tell that survives
-in eyes-mode). The end-of-game summary breaks your **accuracy down by difficulty**, so the
-"easy: 2/2, hard: 0/2 by eye vs. all-green with a passkey" story is unmissable.
+After each round the result **boxes the exact difference** in red — the swapped character, the
+appended root domain, or the invisible homoglyph — names the technique + difficulty, and for
+IDN homoglyphs shows the real **`xn--…` (punycode)** address your browser would actually
+display. The end-of-game summary breaks **accuracy down by difficulty**, so the "easy 2/2,
+hard 0/2 by eye vs. all-green with a passkey" story is unmissable. Lifetime accuracy
+(by eye vs. with a passkey) persists across sessions.
 
 The hard rounds are a coin-flip even for experts — you'll *feel* yourself guessing. Then play
 with a passkey and catch every one.
