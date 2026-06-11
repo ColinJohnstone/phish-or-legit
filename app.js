@@ -380,83 +380,86 @@ const BRANDS = [
 //   medium — correctly spelled but wrong domain (combosquat, wrong TLD)
 //   hard   — invisible or structural (homoglyph, subdomain trick, @-trick)
 const HG = HOMOGLYPH_NOTE;
+// Every URL carries a realistic login subdomain + path, so the real and
+// fake are comparable in length and prefix — you can't win by "pick the
+// shorter one." The real banks/carriers genuinely use long URLs.
 const PHISH = {
   // ─── Character omission (drop a letter) — EASY ───
-  Google:    { difficulty: "easy", legit: "www.google.com", fake: "www.gogle.com",
+  Google:    { difficulty: "easy", legit: "accounts.google.com/signin", fake: "accounts.gogle.com/signin",
     technique: "Typosquat — omission", lesson: "A letter is missing: <b>gogle</b> drops an “o”. Skim-readers never notice a dropped character." },
-  Amazon:    { difficulty: "easy", legit: "www.amazon.com", fake: "www.amzon.com",
+  Amazon:    { difficulty: "easy", legit: "www.amazon.com/ap/signin", fake: "www.amzon.com/ap/signin",
     technique: "Typosquat — omission", lesson: "<b>amzon</b> is missing the “a”. The brand still reads right at a glance — that's the trap." },
-  Facebook:  { difficulty: "easy", legit: "www.facebook.com", fake: "www.facebok.com",
+  Facebook:  { difficulty: "easy", legit: "www.facebook.com/login", fake: "www.facebok.com/login",
     technique: "Typosquat — omission", lesson: "<b>facebok</b> drops an “o”. One missing letter in a familiar word is easy to miss." },
-  LinkedIn:  { difficulty: "easy", legit: "www.linkedin.com", fake: "www.linkdin.com",
+  LinkedIn:  { difficulty: "easy", legit: "www.linkedin.com/login", fake: "www.linkdin.com/login",
     technique: "Typosquat — omission", lesson: "<b>linkdin</b> is missing the “e”. Your brain auto-corrects it to the real word." },
-  Slack:     { difficulty: "easy", legit: "slack.com", fake: "sack.com",
+  Slack:     { difficulty: "easy", legit: "app.slack.com/signin", fake: "app.sack.com/signin",
     technique: "Typosquat — omission", lesson: "Drop the “l” and Slack becomes <b>sack</b> — a different, unrelated domain entirely." },
-  Adobe:     { difficulty: "easy", legit: "account.adobe.com", fake: "www.adob.com",
+  Adobe:     { difficulty: "easy", legit: "account.adobe.com/sign-in", fake: "account.adob.com/sign-in",
     technique: "Typosquat — omission", lesson: "<b>adob</b> drops the trailing “e”. Truncated brand names are a classic look-alike." },
 
   // ─── Substitution & transposition — EASY/MEDIUM ───
-  YouTube:   { difficulty: "easy", legit: "www.youtube.com", fake: "www.yuotube.com",
+  YouTube:   { difficulty: "easy", legit: "www.youtube.com/account", fake: "www.yuotube.com/account",
     technique: "Typosquat — transposition", lesson: "Two letters are flipped: <b>yuotube</b> swaps “ou” for “uo”. Transposed letters read almost normally." },
-  Yahoo:     { difficulty: "easy", legit: "www.yahoo.com", fake: "www.yaho0.com",
+  Yahoo:     { difficulty: "easy", legit: "login.yahoo.com/account", fake: "login.yaho0.com/account",
     technique: "Typosquat — digit for letter", lesson: "The last “o” is a zero: <b>yaho0</b>. Numbers standing in for letters are a staple of phishing." },
-  Twitter:   { difficulty: "medium", legit: "www.twitter.com", fake: "www.twitterr.com",
+  Twitter:   { difficulty: "medium", legit: "www.twitter.com/i/flow/login", fake: "www.twitterr.com/i/flow/login",
     technique: "Typosquat — doubled letter", lesson: "An extra “r”: <b>twitterr</b>. Doubled letters slip past quick reads — and the page is a perfect copy." },
-  Instagram: { difficulty: "medium", legit: "www.instagram.com", fake: "www.instargam.com",
+  Instagram: { difficulty: "medium", legit: "www.instagram.com/accounts/login", fake: "www.instargam.com/accounts/login",
     technique: "Typosquat — transposition", lesson: "“ra” becomes “ar”: <b>instargam</b>. The letters are all correct, just two of them are swapped." },
-  GitHub:    { difficulty: "medium", legit: "github.com", fake: "githbu.com",
+  GitHub:    { difficulty: "medium", legit: "github.com/login", fake: "githbu.com/login",
     technique: "Typosquat — transposition", lesson: "“ub” becomes “bu”: <b>githbu</b>. A flipped pair at the end is genuinely hard to catch." },
-  Spotify:   { difficulty: "hard", legit: "www.spotify.com", fake: "www.spotıfy.com",
+  Spotify:   { difficulty: "hard", legit: "accounts.spotify.com/login", fake: "accounts.spotıfy.com/login",
     technique: "Homoglyph — dotless “ı”", lesson: "The “i” is a Turkish dotless <b>ı</b> (U+0131) — same shape, missing only the dot. " + HG },
 
   // ─── Subdomain stuffing (real brand as a subdomain) — HARD ───
-  Chase:           { difficulty: "hard", legit: "www.chase.com", fake: "chase.com.login.verify-identity.net",
+  Chase:           { difficulty: "hard", legit: "secure.chase.com/web/auth/login", fake: "chase.com.login.verify-identity.net/auth",
     technique: "Subdomain stuffing", lesson: "Read right-to-left: the real domain is <b>verify-identity.net</b>. “chase.com” is just a subdomain label glued on the front to fool a left-to-right reader." },
-  "Wells Fargo":   { difficulty: "hard", legit: "www.wellsfargo.com", fake: "wellsfargo.com.secure.accounts.web-login.space",
+  "Wells Fargo":   { difficulty: "hard", legit: "connect.secure.wellsfargo.com/auth/login", fake: "wellsfargo.com.secure.accounts.web-login.space/signon",
     technique: "Subdomain stuffing", lesson: "The actual site is <b>web-login.space</b> — everything before it is attacker-chosen text, including a fake “wellsfargo.com”." },
-  "Bank of America": { difficulty: "hard", legit: "www.bankofamerica.com", fake: "bankofamerica.com.security.update-auth.info",
+  "Bank of America": { difficulty: "hard", legit: "secure.bankofamerica.com/login/sign-in/signOn", fake: "bankofamerica.com.security.update-auth.info/login",
     technique: "Subdomain stuffing", lesson: "The registrable domain is <b>update-auth.info</b>, not bankofamerica.com. The bank name is only a subdomain prefix." },
-  FedEx:           { difficulty: "hard", legit: "www.fedex.com", fake: "fedex.com.package-tracking.shipment-delivery.top",
+  FedEx:           { difficulty: "hard", legit: "www.fedex.com/en-us/tracking/manage", fake: "fedex.com.package-tracking.shipment-delivery.top/track",
     technique: "Subdomain stuffing", lesson: "The real domain is <b>shipment-delivery.top</b>. Delivery-themed subdomains make the long chain feel plausible." },
-  DHL:             { difficulty: "hard", legit: "www.dhl.com", fake: "dhl.com.alert.delivery-status.holding-facility.site",
+  DHL:             { difficulty: "hard", legit: "www.dhl.com/en/express/tracking.html", fake: "dhl.com.alert.delivery-status.holding-facility.site/track",
     technique: "Subdomain stuffing", lesson: "The site is actually <b>holding-facility.site</b>. “dhl.com” at the start is bait — the truth is always the last two labels." },
-  UPS:             { difficulty: "hard", legit: "www.ups.com", fake: "ups.com.mychoice.package.reschedule-portal.biz",
+  UPS:             { difficulty: "hard", legit: "www.ups.com/track/manage/mychoice", fake: "ups.com.mychoice.package.reschedule-portal.biz/track",
     technique: "Subdomain stuffing", lesson: "The owner of this page is <b>reschedule-portal.biz</b>. UPS branding is stuffed into the subdomains to hide that." },
 
   // ─── Look-alike top-level domains — MEDIUM ───
-  Zoom:    { difficulty: "medium", legit: "zoom.us", fake: "zoom.download",
+  Zoom:    { difficulty: "medium", legit: "zoom.us/signin", fake: "zoom.download/signin",
     technique: "Wrong TLD", lesson: "Correct name, wrong ending. Zoom is <b>zoom.us</b>; <b>zoom.download</b> is a cheap generic TLD owned by someone else." },
-  Discord: { difficulty: "medium", legit: "discord.com", fake: "discord.support",
+  Discord: { difficulty: "medium", legit: "discord.com/login", fake: "discord.support/login",
     technique: "Wrong TLD", lesson: "Discord lives on <b>discord.com</b>. The friendly-looking <b>discord.support</b> is a different registration entirely." },
-  Steam:   { difficulty: "medium", legit: "store.steampowered.com", fake: "steampowered.gl",
+  Steam:   { difficulty: "medium", legit: "store.steampowered.com/login", fake: "store.steampowered.gl/login",
     technique: "Wrong TLD", lesson: "Steam's store is <b>steampowered.com</b>. Swapping to <b>.gl</b> makes a brand-new domain that just looks official." },
-  Roblox:  { difficulty: "medium", legit: "www.roblox.com", fake: "roblox.login",
+  Roblox:  { difficulty: "medium", legit: "www.roblox.com/login", fake: "www.roblox.login/account",
     technique: "Wrong TLD", lesson: "<b>roblox.login</b> reads like a sign-in page, but “.login” is a TLD — the real site is <b>roblox.com</b>." },
-  Uber:    { difficulty: "medium", legit: "www.uber.com", fake: "uber.help",
+  Uber:    { difficulty: "medium", legit: "auth.uber.com/login", fake: "auth.uber.help/login",
     technique: "Wrong TLD", lesson: "A support-looking <b>uber.help</b> is not Uber. The genuine domain is <b>uber.com</b>." },
-  Airbnb:  { difficulty: "medium", legit: "www.airbnb.com", fake: "airbnb.rentals",
+  Airbnb:  { difficulty: "medium", legit: "www.airbnb.com/login", fake: "www.airbnb.rentals/login",
     technique: "Wrong TLD", lesson: "<b>airbnb.rentals</b> sounds on-brand, but it's a separate domain. Airbnb is <b>airbnb.com</b>." },
 
   // ─── Visual deception: blended Latin letters (comb-glyphs) — HARD ───
-  Walmart:    { difficulty: "hard", legit: "www.walmart.com", fake: "www.walrnart.com",
+  Walmart:    { difficulty: "hard", legit: "www.walmart.com/account/login", fake: "www.walrnart.com/account/login",
     technique: "Comb-glyph (rn → m)", lesson: "There's no “m” — it's “r” + “n”: <b>walrnart</b>. Side by side, “rn” is nearly indistinguishable from “m”." },
-  Microsoft:  { difficulty: "hard", legit: "www.microsoft.com", fake: "www.rnicrosoft.com",
+  Microsoft:  { difficulty: "hard", legit: "login.microsoft.com/account", fake: "login.rnicrosoft.com/account",
     technique: "Comb-glyph (rn → m)", lesson: "That “m” is actually “rn”: <b>rnicrosoft</b>. The blended pair fakes a single letter." },
-  "Disney+":  { difficulty: "hard", legit: "www.disneyplus.com", fake: "www.disneypIus.com",
+  "Disney+":  { difficulty: "hard", legit: "www.disneyplus.com/login", fake: "www.disneypIus.com/login",
     technique: "Comb-glyph (capital I → l)", lesson: "The “l” is a capital “I”: disneyp<b>I</b>us. In many fonts capital-I and lowercase-l are identical." },
-  Salesforce: { difficulty: "hard", legit: "www.salesforce.com", fake: "www.saIesforce.com",
+  Salesforce: { difficulty: "hard", legit: "login.salesforce.com/sign-in", fake: "login.saIesforce.com/sign-in",
     technique: "Comb-glyph (capital I → l)", lesson: "“salesforce” uses a capital “I” for the “l”: sa<b>I</b>esforce. Same pixel shape, different character." },
-  Twitch:     { difficulty: "medium", legit: "www.twitch.tv", fake: "www.twltch.tv",
+  Twitch:     { difficulty: "medium", legit: "www.twitch.tv/login", fake: "www.twltch.tv/login",
     technique: "Comb-glyph (l → i)", lesson: "The “i” is really a lowercase “l”: tw<b>l</b>tch. The missing dot is the only clue." },
-  eBay:       { difficulty: "medium", legit: "www.ebay.com", fake: "www.ebav.com",
+  eBay:       { difficulty: "medium", legit: "signin.ebay.com/signin", fake: "signin.ebav.com/signin",
     technique: "Comb-glyph (v → y)", lesson: "The “y” is a “v”: <b>ebav</b>. In some sans-serif fonts a “v” passes for a “y” at a glance." },
 
   // ─── Distinct extras (not in the core five) ───
-  PayPal:  { difficulty: "easy", fakeScheme: "http", legit: "www.paypal.com", fake: "www.paypal-account.com",
+  PayPal:  { difficulty: "easy", fakeScheme: "http", legit: "www.paypal.com/signin", fake: "www.paypal-account.com/signin",
     technique: "Not secure (http) + look-alike", lesson: "Two red flags: it's <b>http://</b> with no padlock, and the real domain is <b>paypal-account.com</b> — not paypal.com." },
-  Coinbase: { difficulty: "hard", legit: "www.coinbase.com", fake: "www.cоinbase.com",
+  Coinbase: { difficulty: "hard", legit: "www.coinbase.com/signin", fake: "www.cоinbase.com/signin",
     technique: "Homoglyph (Cyrillic “о”)", lesson: "The first “o” is a Cyrillic <b>о</b>, not a Latin o — pixel-identical. " + HG },
-  Binance: { difficulty: "hard", legit: "accounts.binance.com", fake: "accounts.binance.com@secure-wallet.io",
+  Binance: { difficulty: "hard", legit: "accounts.binance.com/en/user/login", fake: "accounts.binance.com@secure-wallet.io/login",
     technique: "The “@” trick", lesson: "Everything before the <b>@</b> is just a username and is ignored — the browser actually goes to <b>secure-wallet.io</b>. The “accounts.binance.com” is pure bait." },
 };
 BRANDS.forEach((b) => { if (PHISH[b.name]) Object.assign(b, PHISH[b.name]); });
@@ -735,16 +738,17 @@ function renderRound() {
   $("#windows").appendChild(buildWindow(brand, leftReal));
   $("#windows").appendChild(buildWindow(brand, !leftReal));
 
+  const inspect = " <span class=\"muted\">(hover a URL to see the full address)</span>";
   const eyesHint =
     brand.difficulty === "easy"
-      ? "The pages are identical — the address bar is your only clue, and this one's catchable. Sign in on the genuine site."
+      ? "The pages are identical — the address bar is your only clue, and this one's catchable. Find the real " + brand.name + "."
       : brand.difficulty === "hard"
-      ? "The pages are identical and the address bar barely helps on this one. Pick the site you'd trust with your password — good luck."
-      : "Both pages look right. Only one address bar actually belongs to " + brand.name + ". Sign in on the genuine one.";
+      ? "Identical pages, and the address bar barely helps. Which domain really belongs to " + brand.name + "? Good luck."
+      : "Both look right. Only one address bar actually belongs to " + brand.name + ".";
   $("#round-hint").innerHTML =
     state.mode === "eyes"
-      ? eyesHint
-      : "Click “Sign in” on either tab. Your device — not your eyes — decides what's genuine.";
+      ? eyesHint + inspect
+      : "Click “Sign in” on either tab. Your device — not your eyes — decides what's genuine." + inspect;
 }
 
 function buildWindow(brand, isReal) {
@@ -765,14 +769,20 @@ function buildWindow(brand, isReal) {
     ? `<span class="lock insecure">⚠</span><span class="notsecure">Not secure</span>`
     : `<span class="lock secure">🔒</span>`;
 
+  // Show the address with the path muted (like a real browser) so length
+  // alone is not a tell; the full URL is on hover via title=.
+  const slash = domain.indexOf("/");
+  const hostPart = slash === -1 ? domain : domain.slice(0, slash);
+  const pathPart = slash === -1 ? "" : domain.slice(slash);
+
   // Each window is a full, unique brand homepage. The ONLY real
   // difference is the host (and sometimes the scheme) in the address bar.
   win.innerHTML = `
     <div class="win-chrome">
       <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-      <div class="urlbar">
+      <div class="urlbar" title="${scheme}${domain}">
         ${lock}
-        <span class="host">${scheme}${domain}</span>
+        <span class="urladdr"><span class="host">${scheme}${hostPart}</span><span class="urlpath">${pathPart}</span></span>
       </div>
     </div>
     <div class="site" style="--nav-bg:${brand.navBg};--nav-fg:${brand.navFg};--hero-bg:${brand.heroBg};--hero-fg:${brand.heroFg}">
@@ -948,15 +958,17 @@ function highlightDiff(legit, fake) {
   return fake.slice(0, p) + `<span class="diffmark">${mid}</span>` + fake.slice(fake.length - s);
 }
 
-// For subdomain-stuffing the whole string differs, so instead highlight
-// the actual registrable domain (the last two labels) — the real owner.
+// For subdomain-stuffing / @-tricks the whole string differs, so instead
+// highlight the actual registrable domain (the last two labels of the
+// host) — the real owner of the page.
 function highlightRoot(fake) {
-  const at = fake.split("@").pop();        // ignore any userinfo before @
-  const parts = at.split(".");
+  const host = fake.split("@").pop().split("/")[0]; // drop userinfo + path
+  const parts = host.split(".");
   if (parts.length < 2) return fake;
   const root = parts.slice(-2).join(".");
-  const i = fake.lastIndexOf(root);
-  return fake.slice(0, i) + `<span class="diffmark">${root}</span>`;
+  const i = fake.indexOf(root);
+  if (i < 0) return fake;
+  return fake.slice(0, i) + `<span class="diffmark">${root}</span>` + fake.slice(i + root.length);
 }
 
 // The ASCII (punycode) form a real browser actually shows — only

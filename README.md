@@ -33,6 +33,12 @@ display. The end-of-game summary breaks **accuracy down by difficulty**, so the 
 hard 0/2 by eye vs. all-green with a passkey" story is unmissable. Lifetime accuracy
 (by eye vs. with a passkey) persists across sessions.
 
+Every URL carries a realistic login subdomain + path (real banks and carriers genuinely use
+long URLs), and the address bar **clips both sides to the same width with no ellipsis** — so
+you can't win by "pick the shorter URL," and the path is muted just like a real browser.
+**Hover any address** to reveal the full URL — the discriminating part of a subdomain-stuffing
+or `@`-trick attack is at the *end*, where you have to look.
+
 The hard rounds are a coin-flip even for experts — you'll *feel* yourself guessing. Then play
 with a passkey and catch every one.
 

@@ -255,8 +255,20 @@ h1 .muted { font-weight: 400; }
 .urlbar .lock.secure { color: #1a8f4c; }
 .urlbar .lock.insecure { color: #c0392b; font-weight: 700; }
 .urlbar .notsecure { color: #c0392b; font-weight: 600; font-size: 0.76rem; margin-right: 2px; }
-.urlbar .host { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.urlbar .path { color: #9aa3b2; }
+/* Address clips with NO ellipsis (an ellipsis is itself a length tell);
+   the full URL is available on hover via the title attribute. */
+.urlbar .urladdr {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 215px;       /* clip long URLs for BOTH sides — hover to inspect */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  cursor: help;
+}
+@media (max-width: 820px) { .urlbar .urladdr { max-width: 56vw; } }
+.urlbar .host { white-space: nowrap; }
+.urlbar .urlpath { color: #9aa3b2; white-space: nowrap; }
 
 .win-body {
   padding: 36px 30px 40px;
