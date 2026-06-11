@@ -3,9 +3,11 @@
 A small web game that shows, viscerally, why **device-bound passkeys** beat phishing.
 
 You're shown two **full brand homepages** for a company you know, each with a "Sign in"
-button. The set has **33 look-alike scenarios** spanning seven real phishing techniques.
-Each game randomly draws **5 or 10** of them (your choice on the title screen), ordered
-**easy → hard**, with no repeats within a game.
+button. The set has **39 look-alike scenarios** spanning a dozen distinct phishing
+techniques. On the title screen you choose the **game length** (5 or 10 rounds) and a
+**difficulty** — *Mixed*, *Easy–Med*, *Med–Hard*, or *All Hard* — and each game draws a
+fresh set ordered **easy → hard**, with **no technique appearing more than twice** (and no
+brand repeats).
 
 The two pages in a round look identical — the difference is in the address bar — and each
 scenario shows a **difficulty pill**:
@@ -24,6 +26,11 @@ scenario shows a **difficulty pill**:
 - **IDN homoglyphs** *(hard)* — `cоinbase.com` (Cyrillic `о`), `spotıfy.com` (dotless `ı`).
 - **The `@` trick** *(hard)* — `accounts.binance.com@secure-wallet.io` actually loads
   `secure-wallet.io` (everything before `@` is ignored).
+- **Brand hidden in the path** *(hard)* — `account-billing.net/netflix/login` — the real
+  domain is `account-billing.net`; the brand after the first `/` is meaningless.
+- **Combosquat** *(medium)* — `apple-id-verify.com` (real brand + extra words).
+- **Run-together "www"** *(medium)* — `wwwpinterest.com` (no dot after `www`).
+- **TLD typo** *(medium)* — `whatsapp.cm` instead of `.com`.
 - **Not secure (http)** *(easy)* — `http://paypal-account.com`, no padlock.
 
 After each round the result **boxes the exact difference** in red — the swapped character, the

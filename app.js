@@ -371,6 +371,44 @@ const BRANDS = [
     mark: () => monogram("SF", "#00a1e0"),
     home: () => heroCards({ h1: "Welcome back to Salesforce.", sub: "Log in to your CRM dashboard.", cards: ["Sales", "Service", "Marketing"] }),
   },
+
+  // ── 6 more brands, each introducing a fresh technique family ──
+  {
+    name: "Apple", color: "#0071e3", kind: "email",
+    navBg: "#161617", navFg: "#f5f5f7", heroBg: "#000000", heroFg: "#f5f5f7", legit: "appleid.apple.com",
+    mark: logoApple, nameHtml: ``,
+    home: () => `<div class="ap-hero"><p class="eyebrow" style="color:#f5f5f7;opacity:.7">Apple Account</p><h1 style="font-size:2.1rem">Sign in.</h1><p class="lede">One account for everything Apple.</p></div>`,
+  },
+  {
+    name: "Netflix", color: "#e50914", kind: "streaming",
+    navBg: "transparent", navFg: "#ffffff", heroBg: "#000000", heroFg: "#ffffff", legit: "www.netflix.com",
+    mark: logoNetflix, nameHtml: `<span style="color:#e50914;font-weight:800;letter-spacing:1px;font-size:1.05rem">NETFLIX</span>`,
+    home: () => heroCenter({ h1: "Unlimited movies, TV shows, and more.", sub: "Sign in to continue watching.", cta: "Sign In" }),
+  },
+  {
+    name: "USPS", color: "#004b87", kind: "shopping",
+    navBg: "#004b87", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", legit: "www.usps.com",
+    mark: () => monogram("US", "#004b87", "#fff"),
+    home: () => heroCards({ h1: "Track & Manage your mail.", sub: "Sign in to schedule redelivery and holds.", cards: ["Track", "Redelivery", "Hold Mail"] }),
+  },
+  {
+    name: "Pinterest", color: "#e60023", kind: "social",
+    navBg: "#ffffff", navFg: "#111111", heroBg: "#fff8f8", heroFg: "#111111", legit: "www.pinterest.com",
+    mark: () => monogram("P", "#e60023"),
+    home: () => heroCenter({ h1: "Get your next great idea.", sub: "Log in to see ideas made for you.", cta: "Log in" }),
+  },
+  {
+    name: "WhatsApp", color: "#25d366", kind: "social",
+    navBg: "#075e54", navFg: "#ffffff", heroBg: "#ece5dd", heroFg: "#111111", legit: "web.whatsapp.com",
+    mark: () => monogram("W", "#25d366"),
+    home: () => heroCenter({ h1: "Message privately.", sub: "Scan the code or sign in to use WhatsApp Web.", cta: "Sign in" }),
+  },
+  {
+    name: "Snapchat", color: "#111111", kind: "social",
+    navBg: "#fffc00", navFg: "#111111", heroBg: "#fffc00", heroFg: "#111111", legit: "accounts.snapchat.com",
+    mark: () => monogram("S", "#111111", "#fffc00"),
+    home: () => heroCenter({ h1: "Open Snapchat on the web.", sub: "Log in to chat with friends.", cta: "Log in" }),
+  },
 ];
 
 // ── Phishing technique + difficulty per brand ─────────────────────
@@ -461,6 +499,20 @@ const PHISH = {
     technique: "Homoglyph (Cyrillic “о”)", lesson: "The first “o” is a Cyrillic <b>о</b>, not a Latin o — pixel-identical. " + HG },
   Binance: { difficulty: "hard", legit: "accounts.binance.com/en/user/login", fake: "accounts.binance.com@secure-wallet.io/login",
     technique: "The “@” trick", lesson: "Everything before the <b>@</b> is just a username and is ignored — the browser actually goes to <b>secure-wallet.io</b>. The “accounts.binance.com” is pure bait." },
+
+  // ─── New technique families ───
+  Apple:     { difficulty: "medium", legit: "appleid.apple.com/sign-in", fake: "apple-id-verify.com/sign-in",
+    technique: "Look-alike domain (combosquat)", lesson: "<b>apple-id-verify.com</b> bolts extra words onto the brand. Apple ID sign-in only happens on <b>apple.com</b> — the added words make a brand-new, unrelated domain." },
+  Netflix:   { difficulty: "hard", legit: "www.netflix.com/login", fake: "account-billing.net/netflix/login",
+    technique: "Brand hidden in the path", lesson: "The word “netflix” here is in the <b>path</b>, not the domain. The actual site is <b>account-billing.net</b> — what comes before the first single “/” is all that matters." },
+  USPS:      { difficulty: "hard", legit: "tools.usps.com/go/TrackConfirmAction", fake: "package-status.info/usps/redelivery",
+    technique: "Brand hidden in the path", lesson: "“usps” sits in the <b>path</b>; the real domain is <b>package-status.info</b>. A brand name after the first “/” means nothing." },
+  Pinterest: { difficulty: "medium", legit: "www.pinterest.com/login", fake: "wwwpinterest.com/login",
+    technique: "Run-together “www” (missing dot)", lesson: "There's no dot after “www”: <b>wwwpinterest.com</b> is a single label — a different domain from <b>www.pinterest.com</b>." },
+  WhatsApp:  { difficulty: "medium", legit: "web.whatsapp.com/", fake: "web.whatsapp.cm/",
+    technique: "TLD typo (.cm vs .com)", lesson: "The ending is <b>.cm</b> (Cameroon), not <b>.com</b> — a one-letter TLD typo that catches fast fingers and fast eyes alike." },
+  Snapchat:  { difficulty: "easy", legit: "accounts.snapchat.com/login", fake: "accounts.snapch4t.com/login",
+    technique: "Typosquat — digit for letter", lesson: "The “a” is a <b>4</b>: snapch4t. Numbers swapped for letters are a classic, and easy to catch if you read it." },
 };
 BRANDS.forEach((b) => { if (PHISH[b.name]) Object.assign(b, PHISH[b.name]); });
 
@@ -470,6 +522,7 @@ const state = {
   round: 0,          // 0-based index into deck
   score: 0,
   roundsChoice: 5,   // how many rounds the player picked (5 or 10)
+  difficultyPref: "mixed", // 'mixed' | 'easymed' | 'medhard' | 'hard'
   totalRounds: 5,    // rounds in the current game
   deck: [],          // random subset of BRANDS for this game
   realIsLeft: true,  // which window is the real one this round
@@ -685,17 +738,66 @@ function base64UrlToBuf(s) {
 // ============================================================
 //  Game flow
 // ============================================================
+// Map a brand's technique string to a coarse "family" so we can cap how
+// often a family appears in one game.
+function familyOf(tech) {
+  const t = (tech || "").toLowerCase();
+  if (t.includes("omission")) return "omission";
+  if (t.includes("transposition")) return "transposition";
+  if (t.includes("doubled")) return "doubled";
+  if (t.includes("digit")) return "substitution";
+  if (t.includes("combosquat")) return "combosquat";
+  if (t.includes("subdomain")) return "subdomain";
+  if (t.includes("in the path") || t.includes("brand hidden")) return "brandpath";
+  if (t.includes("run-together") || t.includes("missing dot")) return "wwwrunon";
+  if (t.includes("tld typo")) return "tldtypo";
+  if (t.includes("wrong tld")) return "tld";
+  if (t.includes("rn →")) return "comb-rn";
+  if (t.includes("comb-glyph")) return "comb-letter";
+  if (t.includes("homoglyph")) return "homoglyph";
+  if (t.includes("@")) return "at";
+  if (t.includes("not secure") || t.includes("http")) return "http";
+  return "other";
+}
+
+function allowedDifficulties(pref) {
+  if (pref === "easymed") return new Set(["easy", "medium"]);
+  if (pref === "medhard") return new Set(["medium", "hard"]);
+  if (pref === "hard") return new Set(["hard"]);
+  return new Set(["easy", "medium", "hard"]); // mixed
+}
+
+// Draw n brands, capping each technique family at 2; relax only if the
+// pool is too small to fill the game otherwise.
+function drawDeck(eligible, n) {
+  const shuffled = shuffle(eligible);
+  const counts = {};
+  const picked = [];
+  for (const b of shuffled) {
+    if (picked.length >= n) break;
+    const f = familyOf(b.technique);
+    if ((counts[f] || 0) < 2) { counts[f] = (counts[f] || 0) + 1; picked.push(b); }
+  }
+  if (picked.length < n) {
+    for (const b of shuffled) {
+      if (picked.length >= n) break;
+      if (!picked.includes(b)) picked.push(b);
+    }
+  }
+  return picked;
+}
+
 function startGame(mode) {
   state.mode = mode;
   state.round = 0;
   state.score = 0;
   state.results = [];
-  state.totalRounds = Math.min(state.roundsChoice, BRANDS.length);
-  // Draw a fresh random subset of distinct brands (no repeats), then
-  // order them easy → hard so difficulty ramps up over the game.
+  const allowed = allowedDifficulties(state.difficultyPref);
+  const eligible = BRANDS.filter((b) => allowed.has(b.difficulty));
+  state.totalRounds = Math.min(state.roundsChoice, eligible.length);
+  // Draw distinct brands (≤2 per technique family), then order easy → hard.
   const rank = { easy: 0, medium: 1, hard: 2 };
-  state.deck = shuffle(BRANDS)
-    .slice(0, state.totalRounds)
+  state.deck = drawDeck(eligible, state.totalRounds)
     .sort((a, b) => (rank[a.difficulty] || 1) - (rank[b.difficulty] || 1));
   show("#screen-round");
   renderRound();
@@ -1119,6 +1221,14 @@ function init() {
     btn.addEventListener("click", () => {
       state.roundsChoice = parseInt(btn.dataset.rounds, 10);
       $("#rounds-seg").querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+  // Difficulty selector
+  $("#diff-seg").querySelectorAll(".seg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.difficultyPref = btn.dataset.diff;
+      $("#diff-seg").querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
     });
   });
