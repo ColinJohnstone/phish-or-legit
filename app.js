@@ -471,6 +471,7 @@ const state = {
   deck: [],          // random subset of BRANDS for this game
   realIsLeft: true,  // which window is the real one this round
   resolved: false,   // round already decided?
+  pickedReal: false, // did the player click the genuine site this round?
   results: [],       // per-round { difficulty, correct } for the summary
   passkey: {
     registered: false,
@@ -811,6 +812,7 @@ function onEyesPick(win, isReal) {
   if (state.resolved) return;
   state.resolved = true;
   const brand = state.deck[state.round];
+  state.pickedReal = isReal; // which site the player clicked (for the passkey demo)
   recordResult(brand, isReal);
 
   // flash verdicts on both windows
@@ -843,7 +845,7 @@ async function onPasskeyAttempt(win, isReal, brand) {
     // dialog, then explain what happened.
     state.resolved = true;
     recordResult(brand, true);
-    showNoPasskeySheet(brand.fake, () => {
+    showPasskeySheet(false, brand.fake, () => {
       markWindows(brand, win, "fake");
       state.score++; // correctly avoiding the phish counts as a win
       $("#score").textContent = state.score;
@@ -884,9 +886,10 @@ async function onPasskeyAttempt(win, isReal, brand) {
   );
 }
 
-// Simulate the browser's own passkey dialog coming up empty on a site
-// you never registered with — the real experience a phishing page hits.
-function showNoPasskeySheet(domain, onClose) {
+// Simulate the browser's own passkey dialog. On the genuine domain it
+// finds the passkey and signs in; on a look-alike it comes up empty —
+// the real experience a phishing page hits.
+function showPasskeySheet(success, domain, onClose) {
   const body = $("#pk-sheet-body");
   $("#pk-sheet-domain").textContent = domain;
   body.innerHTML =
@@ -894,12 +897,17 @@ function showNoPasskeySheet(domain, onClose) {
     `<div class="pk-searching"><span class="pk-spinner"></span> Checking this device for a passkey…</div>`;
   openOverlay("#passkey-sheet");
   setTimeout(() => {
-    body.innerHTML =
-      `<div class="pk-illus pk-illus-fail">🔑</div>` +
-      `<div class="pk-title">No passkeys available</div>` +
-      `<div class="pk-sub">There are no passkeys for <b>${domain}</b> on this device.<br>` +
-      `Make sure you’re on the right website.</div>` +
-      `<button class="btn btn-primary pk-close" id="pk-sheet-close">Close</button>`;
+    body.innerHTML = success
+      ? `<div class="pk-illus">✅</div>` +
+        `<div class="pk-title">Signed in</div>` +
+        `<div class="pk-sub pk-sub-ok">Verified with Face&nbsp;ID / Touch&nbsp;ID. You're signed in to ` +
+        `<b>${domain}</b> — no password typed.</div>` +
+        `<button class="btn btn-primary pk-close" id="pk-sheet-close">Done</button>`
+      : `<div class="pk-illus pk-illus-fail">🔑</div>` +
+        `<div class="pk-title">No passkeys available</div>` +
+        `<div class="pk-sub">There are no passkeys for <b>${domain}</b> on this device.<br>` +
+        `Make sure you’re on the right website.</div>` +
+        `<button class="btn btn-primary pk-close" id="pk-sheet-close">Close</button>`;
     $("#pk-sheet-close").addEventListener("click", () => {
       closeOverlay("#passkey-sheet");
       onClose();
@@ -996,7 +1004,9 @@ function showResult(title, body, brand) {
   // Offer the inline passkey demo only in eyes mode (passkey mode just showed it).
   const demoBtn = $("#btn-passkey-demo");
   demoBtn.style.display = state.mode === "eyes" ? "" : "none";
-  demoBtn.textContent = "🛡️ See what a passkey would do here";
+  demoBtn.textContent = state.pickedReal
+    ? "🔑 See your passkey sign in here"
+    : "🛡️ See how a passkey would've blocked this";
   openOverlay("#result-overlay");
 }
 function resultOk(title, body, brand) { showResult(title, body, brand); }
@@ -1083,10 +1093,13 @@ function init() {
 
   $("#btn-register").addEventListener("click", registerPasskey);
 
-  // "See what a passkey would do here" on an eyes-mode result.
+  // "See what a passkey would do here" on an eyes-mode result — reflect
+  // the site the player actually clicked: real → signs in, fake → refuses.
   $("#btn-passkey-demo").addEventListener("click", () => {
     const brand = state.deck[state.round];
-    if (brand) showNoPasskeySheet(brand.fake, () => {});
+    if (!brand) return;
+    if (state.pickedReal) showPasskeySheet(true, brand.legit, () => {});
+    else showPasskeySheet(false, brand.fake, () => {});
   });
 
   // Game-length selector (5 or 10 rounds)
