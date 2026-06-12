@@ -68,6 +68,16 @@ Two ways to play:
   for `<domain>` — make sure you're on the right website"* — exactly what a phishing page
   hits in real life. You win every time.
 
+## Game options & feel
+
+Tune it on the title screen: **rounds** (5 / 10 / 15 / 20), **difficulty** (Mixed / Easy–Med /
+Med–Hard / All Hard), and a per-round **timer** (Off / Chill 25s / Normal 15s / Blitz ⚡ 8s —
+run out and you're "phished," because a hesitating user is a phished user). It's built to feel
+like a quiz game: **Kahoot-style background music and sound effects** (all synthesized with the
+Web Audio API — no asset files), a **🔊 mute toggle** (top-right, remembered), **streak**
+tracking 🔥, **confetti** on hot streaks and strong finishes, count-up score, and slide-in
+rounds. Play from the keyboard too: **`1` / `2`** (or `←` / `→`) to pick, **Enter** to advance.
+
 ## The point
 
 A passkey's private key is bound to the site's **domain** (the WebAuthn "Relying Party

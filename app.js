@@ -523,11 +523,13 @@ const state = {
   score: 0,
   roundsChoice: 5,   // how many rounds the player picked (5 or 10)
   difficultyPref: "mixed", // 'mixed' | 'easymed' | 'medhard' | 'hard'
+  timerSeconds: 25,  // 0 = off
   totalRounds: 5,    // rounds in the current game
   deck: [],          // random subset of BRANDS for this game
   realIsLeft: true,  // which window is the real one this round
   resolved: false,   // round already decided?
   pickedReal: false, // did the player click the genuine site this round?
+  streak: 0,         // consecutive correct answers
   results: [],       // per-round { difficulty, correct } for the summary
   passkey: {
     registered: false,
@@ -784,6 +786,189 @@ function base64UrlToBuf(s) {
 }
 
 // ============================================================
+//  Sound — synthesized music + SFX via Web Audio (no asset files)
+// ============================================================
+const Sound = {
+  ctx: null, master: null, musicBus: null, sfxBus: null,
+  enabled: true, loopId: null, step: 0,
+  load() {
+    try { const v = JSON.parse(localStorage.getItem("phishgame.sound")); if (v !== null) this.enabled = v; } catch (_) {}
+  },
+  ensure() {
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain(); this.master.gain.value = this.enabled ? 0.9 : 0; this.master.connect(this.ctx.destination);
+    this.musicBus = this.ctx.createGain(); this.musicBus.gain.value = 0.5; this.musicBus.connect(this.master);
+    this.sfxBus = this.ctx.createGain(); this.sfxBus.gain.value = 0.7; this.sfxBus.connect(this.master);
+  },
+  resume() { this.ensure(); if (this.ctx && this.ctx.state === "suspended") this.ctx.resume(); },
+  setEnabled(on) {
+    this.enabled = on;
+    try { localStorage.setItem("phishgame.sound", JSON.stringify(on)); } catch (_) {}
+    if (this.master) this.master.gain.value = on ? 0.9 : 0;
+  },
+  osc(bus, freq, t, dur, type, peak, attack) {
+    if (!this.ctx) return;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type || "triangle"; o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak || 0.3, t + (attack || 0.01));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t + dur + 0.03);
+    return o;
+  },
+  noise(bus, t, dur, peak) {
+    if (!this.ctx) return;
+    const n = Math.floor(this.ctx.sampleRate * dur);
+    const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const src = this.ctx.createBufferSource(); src.buffer = buf;
+    const g = this.ctx.createGain(); g.gain.value = peak || 0.2;
+    const hp = this.ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 6000;
+    src.connect(hp); hp.connect(g); g.connect(bus); src.start(t); src.stop(t + dur);
+  },
+  sfx(name) {
+    this.resume();
+    if (!this.ctx || !this.enabled) return;
+    const t = this.ctx.currentTime, b = this.sfxBus;
+    if (name === "pick") { this.osc(b, 320, t, 0.08, "square", 0.18); }
+    else if (name === "correct") { [523, 659, 784, 1047].forEach((f, i) => this.osc(b, f, t + i * 0.07, 0.18, "triangle", 0.32)); }
+    else if (name === "wrong") { this.osc(b, 200, t, 0.35, "sawtooth", 0.3); this.osc(b, 150, t + 0.12, 0.3, "sawtooth", 0.28); }
+    else if (name === "block") { this.osc(b, 440, t, 0.1, "square", 0.25); this.osc(b, 660, t + 0.1, 0.22, "triangle", 0.28); }
+    else if (name === "tick") { this.osc(b, 880, t, 0.05, "square", 0.18); }
+    else if (name === "timeout") { this.osc(b, 180, t, 0.5, "sawtooth", 0.32); }
+    else if (name === "start") { [392, 523, 659].forEach((f, i) => this.osc(b, f, t + i * 0.06, 0.16, "triangle", 0.3)); }
+    else if (name === "win") { [523, 659, 784, 1047, 1319].forEach((f, i) => this.osc(b, f, t + i * 0.1, 0.4, "triangle", 0.34)); }
+    else if (name === "lose") { [392, 330, 262].forEach((f, i) => this.osc(b, f, t + i * 0.14, 0.4, "sawtooth", 0.26)); }
+  },
+  // Upbeat looping lobby music: bass + arpeggio + kick/hat over a vi–IV–I–V loop.
+  startMusic() {
+    this.resume();
+    if (!this.ctx || this.loopId) return;
+    const A2 = 110, F2 = 87.31, C3 = 130.81, G2 = 98.0;
+    const A3 = 220, C4 = 261.63, E4 = 329.63, F4 = 349.23, G4 = 392, B3 = 246.94, D4 = 293.66;
+    const bass = [A2, A2, F2, F2, C3, C3, G2, G2];
+    const arp = [
+      [A3, C4, E4, C4], [A3, C4, E4, C4], [A3, C4, F4, C4], [A3, C4, F4, C4],
+      [C4, E4, G4, E4], [C4, E4, G4, E4], [B3, D4, G4, D4], [B3, D4, G4, D4],
+    ];
+    const stepMs = 150; // eighth notes
+    this.step = 0;
+    const tick = () => {
+      if (!this.ctx) return;
+      const t = this.ctx.currentTime + 0.02;
+      const s = this.step % 8, half = this.step % 2;
+      if (half === 0) this.osc(this.musicBus, bass[s], t, 0.22, "triangle", 0.22); // bass on the beat
+      this.osc(this.musicBus, arp[s][this.step % 4], t, 0.16, "square", 0.07);     // arpeggio
+      if (half === 0) { this.osc(this.musicBus, 60, t, 0.13, "sine", 0.5); }        // kick
+      this.noise(this.musicBus, t, 0.03, 0.05);                                     // hat
+      this.step++;
+    };
+    tick();
+    this.loopId = setInterval(tick, stepMs);
+  },
+  stopMusic() { if (this.loopId) { clearInterval(this.loopId); this.loopId = null; } },
+};
+
+// ============================================================
+//  Per-round countdown timer
+// ============================================================
+const Timer = { iv: null, end: 0, dur: 0, lastTick: 99 };
+function startTimer() {
+  stopTimer();
+  if (!state.timerSeconds) { $("#timer-wrap").style.display = "none"; return; }
+  Timer.dur = state.timerSeconds;
+  Timer.end = performance.now() + Timer.dur * 1000;
+  Timer.lastTick = Timer.dur + 1;
+  $("#timer-wrap").style.display = "";
+  const fill = $("#timer-fill"), num = $("#timer-num");
+  const frame = () => {
+    const remain = Math.max(0, Timer.end - performance.now());
+    const frac = remain / (Timer.dur * 1000);
+    fill.style.width = (frac * 100).toFixed(1) + "%";
+    fill.className = "timer-fill " + (frac > 0.5 ? "t-ok" : frac > 0.25 ? "t-warn" : "t-danger");
+    const secs = Math.ceil(remain / 1000);
+    num.textContent = secs;
+    if (secs <= 5 && secs !== Timer.lastTick && secs > 0) { Sound.sfx("tick"); Timer.lastTick = secs; }
+    if (remain <= 0) { stopTimer(); onTimeout(); }
+  };
+  frame();
+  Timer.iv = setInterval(frame, 90);
+}
+function stopTimer() { if (Timer.iv) { clearInterval(Timer.iv); Timer.iv = null; } }
+function onTimeout() {
+  if (state.resolved) return;
+  state.resolved = true;
+  const brand = state.deck[state.round];
+  state.streak = 0; updateStreak();
+  recordResult(brand, false);
+  Sound.sfx("timeout");
+  markWindows(brand, document.querySelector("#windows .window"), "timeout");
+  resultBad(
+    "⏱️ Time's up.",
+    `You ran out of time — and a hesitating user is a phished user. ${brand.lesson}`,
+    brand
+  );
+}
+
+// ============================================================
+//  Confetti (lightweight canvas burst)
+// ============================================================
+function confetti(amount, power) {
+  const cv = $("#confetti");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  const colors = ["#d4283d", "#e0a73a", "#2fd27a", "#5b8cff", "#ffffff"];
+  const parts = [];
+  const n = amount || 90;
+  for (let i = 0; i < n; i++) {
+    parts.push({
+      x: cv.width / 2 + (Math.random() - 0.5) * 120,
+      y: cv.height / 3,
+      vx: (Math.random() - 0.5) * (power || 9),
+      vy: -Math.random() * (power || 9) - 4,
+      g: 0.22 + Math.random() * 0.12,
+      s: 5 + Math.random() * 6,
+      rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3,
+      c: colors[(Math.random() * colors.length) | 0], life: 0,
+    });
+  }
+  let frames = 0;
+  const draw = () => {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    let alive = false;
+    for (const p of parts) {
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+      if (p.y < cv.height + 20) alive = true;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, 1 - p.life / 160);
+      ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+      ctx.restore();
+    }
+    frames++;
+    if (alive && frames < 200) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, cv.width, cv.height);
+  };
+  draw();
+}
+
+function updateStreak() {
+  const el = $("#streak");
+  if (!el) return;
+  if (state.streak >= 2) { el.style.display = ""; el.textContent = "🔥 " + state.streak; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+  else { el.style.display = "none"; }
+}
+function bumpScore() {
+  const el = $("#score");
+  el.textContent = state.score;
+  el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+}
+
+// ============================================================
 //  Game flow
 // ============================================================
 // Map a brand's technique string to a coarse "family" so we can cap how
@@ -839,6 +1024,7 @@ function startGame(mode) {
   state.mode = mode;
   state.round = 0;
   state.score = 0;
+  state.streak = 0;
   state.results = [];
   const allowed = allowedDifficulties(state.difficultyPref);
   const eligible = BRANDS.filter((b) => allowed.has(b.difficulty));
@@ -847,6 +1033,9 @@ function startGame(mode) {
   const rank = { easy: 0, medium: 1, hard: 2 };
   state.deck = drawDeck(eligible, state.totalRounds)
     .sort((a, b) => (rank[a.difficulty] || 1) - (rank[b.difficulty] || 1));
+  updateStreak();
+  Sound.startMusic();
+  Sound.sfx("start");
   show("#screen-round");
   renderRound();
 }
@@ -885,8 +1074,12 @@ function renderRound() {
   // Build the two windows (each is a full brand homepage)
   const leftReal = state.realIsLeft;
   $("#windows").innerHTML = "";
-  $("#windows").appendChild(buildWindow(brand, leftReal));
-  $("#windows").appendChild(buildWindow(brand, !leftReal));
+  const w1 = buildWindow(brand, leftReal), w2 = buildWindow(brand, !leftReal);
+  w1.classList.add("win-enter", "win-enter-l");
+  w2.classList.add("win-enter", "win-enter-r");
+  $("#windows").appendChild(w1);
+  $("#windows").appendChild(w2);
+  startTimer();
 
   const inspect = " <span class=\"muted\">(hover a URL for the full address · keys 1 / 2)</span>";
   const eyesHint =
@@ -958,6 +1151,8 @@ function buildWindow(brand, isReal) {
 
 // Single entry point for the "Sign in" button in either mode.
 function onSignIn(win, isReal, brand) {
+  if (state.resolved) return;
+  Sound.sfx("pick");
   if (state.mode === "eyes") onEyesPick(win, isReal);
   else onPasskeyAttempt(win, isReal, brand);
 }
@@ -971,6 +1166,7 @@ function recordResult(brand, correct) {
 function onEyesPick(win, isReal) {
   if (state.resolved) return;
   state.resolved = true;
+  stopTimer();
   const brand = state.deck[state.round];
   state.pickedReal = isReal; // which site the player clicked (for the passkey demo)
   recordResult(brand, isReal);
@@ -980,13 +1176,20 @@ function onEyesPick(win, isReal) {
 
   if (isReal) {
     state.score++;
-    $("#score").textContent = state.score;
+    state.streak++;
+    bumpScore();
+    updateStreak();
+    Sound.sfx("correct");
+    if (state.streak >= 3) confetti(70, 8);
     resultOk(
       "🎉 Right — that one was real.",
       `Nicely spotted. ${brand.lesson} But be honest: were you sure, or was it a coin-flip?`,
       brand
     );
   } else {
+    state.streak = 0;
+    updateStreak();
+    Sound.sfx("wrong");
     resultBad(
       "💀 Phished.",
       `You just handed your password to attackers. ${brand.lesson}`,
@@ -998,6 +1201,7 @@ function onEyesPick(win, isReal) {
 // ---------- Passkey mode: the browser knows ------------------------
 async function onPasskeyAttempt(win, isReal, brand) {
   if (state.resolved) return;
+  stopTimer();
 
   if (!isReal) {
     // Actually ask the browser for a passkey. With a real authenticator
@@ -1016,7 +1220,10 @@ async function onPasskeyAttempt(win, isReal, brand) {
       recordResult(brand, true);
       markWindows(brand, win, "fake");
       state.score++; // correctly avoiding the phish counts as a win
-      $("#score").textContent = state.score;
+      state.streak++;
+      bumpScore();
+      updateStreak();
+      Sound.sfx("block");
       resultBad(
         "🛡️ Phish blocked — by your passkey.",
         `Your browser looked for a passkey for <code>${brand.fake}</code> and found <strong>none</strong>. ` +
@@ -1048,8 +1255,11 @@ async function onPasskeyAttempt(win, isReal, brand) {
   }
   state.resolved = true;
   state.score++;
+  state.streak++;
   recordResult(brand, true);
-  $("#score").textContent = state.score;
+  bumpScore();
+  updateStreak();
+  Sound.sfx("correct");
   markWindows(brand, win, "real");
   resultOk(
     "✅ Signed in — instantly and safely.",
@@ -1210,6 +1420,8 @@ function nextRound() {
 
 // ---------- Summary ------------------------------------------------
 function showSummary() {
+  stopTimer();
+  Sound.stopMusic();
   show("#screen-summary");
   const s = state.score;
   const T = state.totalRounds;
@@ -1217,6 +1429,15 @@ function showSummary() {
   renderBreakdown();
   addGameToStats(state.mode, T, s);
   renderLifetime();
+
+  // End-of-game flourish
+  const ratio = T ? s / T : 0;
+  if (ratio >= 0.6) {
+    Sound.sfx("win");
+    confetti(s >= T ? 180 : 110, s >= T ? 12 : 9);
+  } else {
+    Sound.sfx("lose");
+  }
 
   if (state.mode === "eyes") {
     $("#summary-badge").textContent = s >= T ? "🍀" : "🎣";
@@ -1321,15 +1542,34 @@ function init() {
       btn.classList.add("active");
     });
   });
+  // Timer selector
+  $("#timer-seg").querySelectorAll(".seg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.timerSeconds = parseInt(btn.dataset.timer, 10);
+      $("#timer-seg").querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+  // Sound
+  Sound.load();
+  const soundBtn = $("#btn-sound");
+  soundBtn.textContent = Sound.enabled ? "🔊" : "🔇";
+  soundBtn.addEventListener("click", () => {
+    Sound.resume();
+    Sound.setEnabled(!Sound.enabled);
+    soundBtn.textContent = Sound.enabled ? "🔊" : "🔇";
+  });
+  // Unlock audio on the first user gesture (autoplay policy).
+  document.addEventListener("pointerdown", () => Sound.resume(), { once: true });
   $("#btn-play-eyes").addEventListener("click", () => startGame("eyes"));
   $("#btn-play-passkey").addEventListener("click", () => {
     if (!state.passkey.registered) return;
     startGame("passkey");
   });
   $("#btn-next").addEventListener("click", nextRound);
-  $("#btn-quit").addEventListener("click", () => { closeOverlay("#result-overlay"); show("#screen-title"); });
+  $("#btn-quit").addEventListener("click", () => { stopTimer(); Sound.stopMusic(); closeOverlay("#result-overlay"); show("#screen-title"); });
   $("#btn-replay").addEventListener("click", () => startGame(state.mode));
-  $("#btn-home").addEventListener("click", () => show("#screen-title"));
+  $("#btn-home").addEventListener("click", () => { Sound.stopMusic(); show("#screen-title"); });
 
   $("#btn-how").addEventListener("click", () => openOverlay("#how-overlay"));
   $("#btn-how-close").addEventListener("click", () => closeOverlay("#how-overlay"));

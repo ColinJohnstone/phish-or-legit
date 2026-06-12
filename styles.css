@@ -202,6 +202,71 @@ h1 .muted { font-weight: 400; }
 .site-footer a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
 .site-footer a:hover { text-decoration: underline; }
 
+/* ── Sound toggle + confetti ── */
+.sound-toggle {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 60;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+.sound-toggle:hover { background: var(--panel-2); transform: scale(1.05); }
+.confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 80; }
+
+/* ── Countdown timer ── */
+.timer-wrap {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.timer-track {
+  flex: 1;
+  height: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.timer-fill { height: 100%; width: 100%; border-radius: 999px; transition: background 0.3s; }
+.timer-fill.t-ok { background: var(--green); }
+.timer-fill.t-warn { background: var(--amber); }
+.timer-fill.t-danger { background: var(--accent); }
+.timer-num { min-width: 1.6em; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); }
+
+/* ── Streak + score pop ── */
+.streak-pill {
+  background: rgba(224, 167, 58, 0.16);
+  border: 1px solid rgba(224, 167, 58, 0.4);
+  color: var(--gold);
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.pop { animation: pop-bump 0.32s cubic-bezier(.2,1.4,.4,1); display: inline-block; }
+@keyframes pop-bump { 0% { transform: scale(1); } 40% { transform: scale(1.5); } 100% { transform: scale(1); } }
+
+/* ── Window entrance ── */
+.win-enter { animation: win-in 0.42s cubic-bezier(.2,.9,.3,1) both; }
+.win-enter-l { animation-name: win-in-l; }
+.win-enter-r { animation-name: win-in-r; }
+@keyframes win-in-l { from { opacity: 0; transform: translateX(-26px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes win-in-r { from { opacity: 0; transform: translateX(26px) scale(0.97); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .win-enter, .pop { animation: none; }
+}
+
 .lifetime-stats { margin: 16px 0 4px; font-size: 0.9rem; color: var(--muted); }
 .lifetime-stats:empty { display: none; }
 .lifetime-stats b { color: var(--text); }

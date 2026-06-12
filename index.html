@@ -17,6 +17,8 @@
 </head>
 <body>
   <div id="app">
+    <button id="btn-sound" class="sound-toggle" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+    <canvas id="confetti" class="confetti-canvas"></canvas>
     <!-- ───────────── TITLE SCREEN ───────────── -->
     <section id="screen-title" class="screen active">
       <div class="title-wrap">
@@ -47,10 +49,12 @@
         </div>
 
         <div class="rounds-select">
-          <span class="rounds-label">Game length:</span>
+          <span class="rounds-label">Rounds:</span>
           <div class="seg" id="rounds-seg">
-            <button class="seg-btn active" data-rounds="5">5 rounds</button>
-            <button class="seg-btn" data-rounds="10">10 rounds</button>
+            <button class="seg-btn active" data-rounds="5">5</button>
+            <button class="seg-btn" data-rounds="10">10</button>
+            <button class="seg-btn" data-rounds="15">15</button>
+            <button class="seg-btn" data-rounds="20">20</button>
           </div>
         </div>
         <div class="rounds-select">
@@ -60,6 +64,15 @@
             <button class="seg-btn" data-diff="easymed">Easy–Med</button>
             <button class="seg-btn" data-diff="medhard">Med–Hard</button>
             <button class="seg-btn" data-diff="hard">All Hard</button>
+          </div>
+        </div>
+        <div class="rounds-select">
+          <span class="rounds-label">Timer:</span>
+          <div class="seg" id="timer-seg">
+            <button class="seg-btn" data-timer="0">Off</button>
+            <button class="seg-btn active" data-timer="25">Chill</button>
+            <button class="seg-btn" data-timer="15">Normal</button>
+            <button class="seg-btn" data-timer="8">Blitz ⚡</button>
           </div>
         </div>
         <p class="rounds-hint muted small" style="margin:0 0 16px">No technique appears more than twice per game.</p>
@@ -125,9 +138,15 @@
           <span class="dot">•</span>
           <span id="round-mode" class="mode-pill">👀 Eyes</span>
           <span id="round-diff" class="diff-pill diff-medium">Medium</span>
+          <span id="streak" class="streak-pill" style="display:none"></span>
         </div>
         <div class="score-meta">Score: <strong id="score">0</strong></div>
       </header>
+
+      <div id="timer-wrap" class="timer-wrap" style="display:none">
+        <div class="timer-track"><div id="timer-fill" class="timer-fill"></div></div>
+        <span id="timer-num" class="timer-num"></span>
+      </div>
 
       <div class="scenario" id="scenario"></div>
 
