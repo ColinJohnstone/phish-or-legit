@@ -52,8 +52,12 @@ with a passkey and catch every one.
 ## Passkey registration
 
 Click **Register a passkey on this device** to create a real platform passkey via Touch ID /
-Windows Hello (stored in this computer's secure hardware). Then play passkey mode — the
-passkey only works on the genuine domain, so the look-alike is instantly exposed.
+Windows Hello (stored in this computer's secure hardware), then **Test your passkey** to run a
+real sign-in ceremony and feel it work. In passkey mode the demo runs **genuine WebAuthn**:
+the real site signs you in with your actual passkey, and the look-alike triggers the browser's
+own "no passkey for this site" refusal (a credential the device doesn't have). Where there's no
+platform authenticator (or you opened it as a file), it falls back to a simulated illustration
+so the demo still runs.
 
 Two ways to play:
 

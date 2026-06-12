@@ -607,6 +607,8 @@ function reflectPasskeyState() {
     statusEl.className = "passkey-status ok";
     playBtn.disabled = false;
     subEl.textContent = "You'll spot every phish";
+    const testBtn = $("#btn-test-passkey");
+    if (testBtn) testBtn.style.display = "";
   }
 }
 
@@ -687,30 +689,76 @@ function finalizeRegistration(credentialId, real) {
   }
 }
 
-// Authenticate with the real passkey (best-effort, for UX realism).
-async function assertPasskey() {
-  const canWebAuthn =
+// A real platform passkey actually exists on this device (vs. simulated).
+function realPasskeyAvailable() {
+  const id = state.passkey.credentialId;
+  return !!(
     window.PublicKeyCredential &&
     window.isSecureContext &&
-    typeof navigator.credentials?.get === "function" &&
-    state.passkey.credentialId &&
-    !state.passkey.credentialId.startsWith("simulated");
-  if (!canWebAuthn) return true; // simulated success
+    navigator.credentials &&
+    typeof navigator.credentials.get === "function" &&
+    id &&
+    !id.startsWith("simulated") &&
+    !id.startsWith("phone-")
+  );
+}
+
+// Run a REAL WebAuthn ceremony.
+//   kind 'real' → asks for the passkey you registered (Touch ID, succeeds)
+//   kind 'fake' → asks for a credential that doesn't exist on this device,
+//                 so the browser shows its own native "no passkey" UI and
+//                 genuinely fails — the real phishing-site experience.
+// Returns { sim:true } when there's no real authenticator (caller should
+// fall back to the simulated illustration).
+async function attemptPasskey(kind) {
+  if (!realPasskeyAvailable()) return { sim: true };
+  const allowCredentials =
+    kind === "real"
+      ? [{ type: "public-key", id: base64UrlToBuf(state.passkey.credentialId), transports: ["internal"] }]
+      : [{ type: "public-key", id: randomBytes(32), transports: ["internal"] }];
   try {
     await navigator.credentials.get({
-      publicKey: {
-        challenge: randomBytes(32),
-        timeout: 60000,
-        userVerification: "preferred",
-        allowCredentials: [
-          { type: "public-key", id: base64UrlToBuf(state.passkey.credentialId) },
-        ],
-      },
+      publicKey: { challenge: randomBytes(32), timeout: 60000, userVerification: "preferred", allowCredentials },
     });
-    return true;
+    return { ok: true };
   } catch (err) {
-    if (err && err.name === "NotAllowedError") return false;
-    return true; // any other hiccup: don't punish the player
+    return { ok: false, err };
+  }
+}
+
+// Back-compat shim for the passkey-mode real path.
+async function assertPasskey() {
+  const r = await attemptPasskey("real");
+  if (r.sim) return true;       // simulated success
+  return r.ok ? true : false;   // false = user cancelled the real prompt
+}
+
+// "Test your passkey" on the home screen — a real sign-in ceremony so you
+// can feel the passkey work before you play.
+async function testPasskey() {
+  const status = $("#passkey-status");
+  if (!state.passkey.registered) {
+    status.className = "passkey-status info";
+    status.textContent = "Register a passkey first, then test it.";
+    return;
+  }
+  status.className = "passkey-status info";
+  status.textContent = "Waiting for Face ID / Touch ID…";
+  const r = await attemptPasskey("real");
+  if (r.sim) {
+    status.className = "passkey-status info";
+    status.innerHTML =
+      "✓ Passkey verified (simulated). Open this over <b>https</b> or <b>localhost</b> in a real browser to feel the actual Touch&nbsp;ID prompt.";
+  } else if (r.ok) {
+    status.className = "passkey-status ok";
+    status.innerHTML =
+      "✓ It works! Verified with your device on <b>" + location.hostname + "</b> — no password typed. A look-alike domain would get nothing.";
+  } else {
+    status.className = "passkey-status err";
+    status.textContent =
+      r.err && r.err.name === "NotAllowedError"
+        ? "Cancelled, or no matching passkey on this device — tap to try again."
+        : "Couldn't verify: " + (r.err && r.err.message ? r.err.message : "unknown error");
   }
 }
 
@@ -952,12 +1000,20 @@ async function onPasskeyAttempt(win, isReal, brand) {
   if (state.resolved) return;
 
   if (!isReal) {
-    // Real browser behavior: NO credential is bound to this domain, so
-    // the browser's passkey dialog comes up empty. We reproduce that
-    // dialog, then explain what happened.
-    state.resolved = true;
-    recordResult(brand, true);
-    showPasskeySheet(false, brand.fake, () => {
+    // Actually ask the browser for a passkey. With a real authenticator
+    // this pops the OS's own dialog, which finds nothing (no matching
+    // credential) and refuses — the genuine phishing-site experience.
+    // Without one, fall back to the simulated illustration.
+    const btn = win.querySelector('[data-act="signin"]');
+    btn.disabled = true;
+    btn.textContent = "Verifying…";
+    const r = await attemptPasskey("fake");
+    btn.disabled = false;
+    btn.textContent = "🔑 Sign in";
+
+    const blocked = () => {
+      state.resolved = true;
+      recordResult(brand, true);
       markWindows(brand, win, "fake");
       state.score++; // correctly avoiding the phish counts as a win
       $("#score").textContent = state.score;
@@ -969,7 +1025,13 @@ async function onPasskeyAttempt(win, isReal, brand) {
         brand,
         /*passkeyWin=*/true
       );
-    });
+    };
+
+    if (r.sim) {
+      showPasskeySheet(false, brand.fake, blocked); // simulated illustration
+    } else {
+      blocked(); // the real OS dialog already showed and refused
+    }
     return;
   }
 
@@ -998,33 +1060,43 @@ async function onPasskeyAttempt(win, isReal, brand) {
   );
 }
 
-// Simulate the browser's own passkey dialog. On the genuine domain it
-// finds the passkey and signs in; on a look-alike it comes up empty —
-// the real experience a phishing page hits.
-function showPasskeySheet(success, domain, onClose) {
+// The passkey dialog. When `immediate` is false we play a short
+// "searching…" animation (the simulated illustration, used only when no
+// real authenticator exists). When `immediate` is true the real browser
+// dialog already ran, so we jump straight to confirming the outcome.
+function passkeySheetFinalHTML(success, domain) {
+  return success
+    ? `<div class="pk-illus">✅</div>` +
+      `<div class="pk-title">Signed in</div>` +
+      `<div class="pk-sub pk-sub-ok">Verified with Face&nbsp;ID / Touch&nbsp;ID. You're signed in to ` +
+      `<b>${domain}</b> — no password typed.</div>` +
+      `<button class="btn btn-primary pk-close" id="pk-sheet-close">Done</button>`
+    : `<div class="pk-illus pk-illus-fail">🔑</div>` +
+      `<div class="pk-title">No passkey for this site</div>` +
+      `<div class="pk-sub">Your device had no passkey for <b>${domain}</b>, so sign-in was refused.<br>` +
+      `A look-alike domain gets nothing — that's the phishing defence.</div>` +
+      `<button class="btn btn-primary pk-close" id="pk-sheet-close">Close</button>`;
+}
+
+function showPasskeySheet(success, domain, onClose, immediate) {
   const body = $("#pk-sheet-body");
   $("#pk-sheet-domain").textContent = domain;
-  body.innerHTML =
-    `<div class="pk-illus">🔑</div>` +
-    `<div class="pk-searching"><span class="pk-spinner"></span> Checking this device for a passkey…</div>`;
   openOverlay("#passkey-sheet");
-  setTimeout(() => {
-    body.innerHTML = success
-      ? `<div class="pk-illus">✅</div>` +
-        `<div class="pk-title">Signed in</div>` +
-        `<div class="pk-sub pk-sub-ok">Verified with Face&nbsp;ID / Touch&nbsp;ID. You're signed in to ` +
-        `<b>${domain}</b> — no password typed.</div>` +
-        `<button class="btn btn-primary pk-close" id="pk-sheet-close">Done</button>`
-      : `<div class="pk-illus pk-illus-fail">🔑</div>` +
-        `<div class="pk-title">No passkeys available</div>` +
-        `<div class="pk-sub">There are no passkeys for <b>${domain}</b> on this device.<br>` +
-        `Make sure you’re on the right website.</div>` +
-        `<button class="btn btn-primary pk-close" id="pk-sheet-close">Close</button>`;
+  const finish = () => {
+    body.innerHTML = passkeySheetFinalHTML(success, domain);
     $("#pk-sheet-close").addEventListener("click", () => {
       closeOverlay("#passkey-sheet");
-      onClose();
+      if (onClose) onClose();
     });
-  }, 1300);
+  };
+  if (immediate) {
+    finish();
+  } else {
+    body.innerHTML =
+      `<div class="pk-illus">🔑</div>` +
+      `<div class="pk-searching"><span class="pk-spinner"></span> Checking this device for a passkey…</div>`;
+    setTimeout(finish, 1300);
+  }
 }
 
 function markWindows(brand, clickedWin, clickedVerdict) {
@@ -1207,14 +1279,30 @@ function init() {
   renderLifetime();
 
   $("#btn-register").addEventListener("click", registerPasskey);
+  $("#btn-test-passkey").addEventListener("click", testPasskey);
 
-  // "See what a passkey would do here" on an eyes-mode result — reflect
-  // the site the player actually clicked: real → signs in, fake → refuses.
-  $("#btn-passkey-demo").addEventListener("click", () => {
+  // "See what a passkey would do here" on an eyes-mode result. Runs a
+  // REAL WebAuthn ceremony when a real passkey exists: the genuine site
+  // signs in with your actual passkey (Touch ID); the look-alike triggers
+  // the browser's own "no passkey" failure. Falls back to the simulated
+  // illustration when there's no real authenticator.
+  $("#btn-passkey-demo").addEventListener("click", async (e) => {
     const brand = state.deck[state.round];
     if (!brand) return;
-    if (state.pickedReal) showPasskeySheet(true, brand.legit, () => {});
-    else showPasskeySheet(false, brand.fake, () => {});
+    const btn = e.currentTarget;
+    const wantReal = state.pickedReal;
+    btn.disabled = true;
+    const r = await attemptPasskey(wantReal ? "real" : "fake");
+    btn.disabled = false;
+    if (r.sim) {
+      showPasskeySheet(wantReal, wantReal ? brand.legit : brand.fake, () => {});
+    } else if (wantReal) {
+      if (r.ok) showPasskeySheet(true, brand.legit, () => {}, /*immediate=*/ true);
+      // if the user cancelled the real prompt, do nothing (let them retry)
+    } else {
+      // the real attempt to use a passkey on the look-alike was refused
+      showPasskeySheet(false, brand.fake, () => {}, /*immediate=*/ true);
+    }
   });
 
   // Game-length selector (5 or 10 rounds)

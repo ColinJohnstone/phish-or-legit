@@ -39,7 +39,10 @@
               </p>
             </div>
           </div>
-          <button id="btn-register" class="btn btn-key">Register a passkey on this device</button>
+          <div class="key-actions">
+            <button id="btn-register" class="btn btn-key">Register a passkey on this device</button>
+            <button id="btn-test-passkey" class="btn btn-ghost" style="display:none">🔐 Test your passkey</button>
+          </div>
           <p id="passkey-status" class="passkey-status"></p>
         </div>
 
@@ -75,10 +78,41 @@
         <p id="lifetime-stats" class="lifetime-stats"></p>
 
         <button id="btn-how" class="link-btn">How do passkeys stop phishing?</button>
-        <p class="disclaimer muted small">
-          Educational anti-phishing simulation. Brand names and logos belong to their respective
-          owners and are shown only to illustrate real-world look-alike domains.
-        </p>
+
+        <!-- How it works -->
+        <div class="how-steps">
+          <div class="how-step">
+            <span class="step-n">1</span>
+            <h4>Register a passkey</h4>
+            <p>Touch ID / Windows Hello creates a key bound to this exact site — then test it.</p>
+          </div>
+          <div class="how-step">
+            <span class="step-n">2</span>
+            <h4>Spot the phish</h4>
+            <p>Two identical-looking pages. Only the address bar differs — and barely.</p>
+          </div>
+          <div class="how-step">
+            <span class="step-n">3</span>
+            <h4>Let the passkey win</h4>
+            <p>It refuses the look-alike domain, so the phish reveals itself. Every time.</p>
+          </div>
+        </div>
+
+        <!-- Techniques covered -->
+        <div class="tech-showcase">
+          <p class="muted small">39 look-alikes across techniques like:</p>
+          <div class="tech-chips">
+            <span>Typosquatting</span><span>Homoglyphs</span><span>Subdomain stuffing</span>
+            <span>Wrong TLDs</span><span>Comb-glyphs</span><span>“@” tricks</span>
+            <span>Brand-in-path</span><span>Not-secure http</span>
+          </div>
+        </div>
+
+        <footer class="site-footer">
+          <a href="https://github.com/ColinJohnstone/phish-or-legit" target="_blank" rel="noopener">View on GitHub</a>
+          <span class="dot">•</span>
+          <span class="muted small">Educational anti-phishing demo. Brand names &amp; logos belong to their owners.</span>
+        </footer>
       </div>
     </section>
 
