@@ -407,6 +407,9 @@ a:focus-visible,
 .menu-foot .lifetime-stats { margin: 0 0 6px; }
 .menu-links { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
 .menu-links a.btn { color: var(--text); }
+.credit { margin: 14px 0 0; font-size: 0.78rem; color: var(--muted); opacity: 0.7; }
+.credit a { color: inherit; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--muted) 45%, transparent); }
+.credit a:hover { color: var(--text); opacity: 1; }
 
 /* Shrink the hero on short screens so the whole menu still fits */
 @media (max-height: 720px) {
