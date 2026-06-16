@@ -420,101 +420,175 @@ const BRANDS = [
 const HG = HOMOGLYPH_NOTE;
 // Every URL carries a realistic login subdomain + path, so the real and
 // fake are comparable in length and prefix — you can't win by "pick the
-// shorter one." The real banks/carriers genuinely use long URLs.
+// shorter one." All brands here are FICTIONAL (no real trademarks).
 const PHISH = {
-  // ─── Character omission (drop a letter) — EASY ───
-  Google:    { difficulty: "easy", legit: "accounts.google.com/signin", fake: "accounts.gogle.com/signin",
-    technique: "Typosquat — omission", lesson: "A letter is missing: <b>gogle</b> drops an “o”. Skim-readers never notice a dropped character." },
-  Amazon:    { difficulty: "easy", legit: "www.amazon.com/ap/signin", fake: "www.amzon.com/ap/signin",
-    technique: "Typosquat — omission", lesson: "<b>amzon</b> is missing the “a”. The brand still reads right at a glance — that's the trap." },
-  Facebook:  { difficulty: "easy", legit: "www.facebook.com/login", fake: "www.facebok.com/login",
-    technique: "Typosquat — omission", lesson: "<b>facebok</b> drops an “o”. One missing letter in a familiar word is easy to miss." },
-  LinkedIn:  { difficulty: "easy", legit: "www.linkedin.com/login", fake: "www.linkdin.com/login",
-    technique: "Typosquat — omission", lesson: "<b>linkdin</b> is missing the “e”. Your brain auto-corrects it to the real word." },
-  Slack:     { difficulty: "easy", legit: "app.slack.com/signin", fake: "app.sack.com/signin",
-    technique: "Typosquat — omission", lesson: "Drop the “l” and Slack becomes <b>sack</b> — a different, unrelated domain entirely." },
-  Adobe:     { difficulty: "easy", legit: "account.adobe.com/sign-in", fake: "account.adob.com/sign-in",
-    technique: "Typosquat — omission", lesson: "<b>adob</b> drops the trailing “e”. Truncated brand names are a classic look-alike." },
+  // ─── Character omission ───
+  Google:    { difficulty: "easy", legit: "accounts.goozle.com/signin", fake: "accounts.gozle.com/signin",
+    technique: "Typosquat — omission", lesson: "A letter is missing: <b>gozle</b> drops an “o”. Skim-readers never notice a dropped character." },
+  Amazon:    { difficulty: "easy", legit: "www.amazor.com/ap/signin", fake: "www.amzor.com/ap/signin",
+    technique: "Typosquat — omission", lesson: "<b>amzor</b> is missing an “a”. The brand still reads right at a glance — that's the trap." },
+  Facebook:  { difficulty: "easy", legit: "www.faceblock.com/login", fake: "www.facblock.com/login",
+    technique: "Typosquat — omission", lesson: "<b>facblock</b> drops the “e”. One missing letter in a familiar word is easy to miss." },
+  LinkedIn:  { difficulty: "easy", legit: "www.linkup.com/login", fake: "www.linup.com/login",
+    technique: "Typosquat — omission", lesson: "<b>linup</b> is missing the “k”. Your brain auto-corrects it to the real word." },
+  Slack:     { difficulty: "easy", legit: "app.slacka.com/signin", fake: "app.slaca.com/signin",
+    technique: "Typosquat — omission", lesson: "Drop a “k” and <b>slaca</b> is a different, unrelated domain entirely." },
+  Adobe:     { difficulty: "easy", legit: "account.adobi.com/sign-in", fake: "account.adbi.com/sign-in",
+    technique: "Typosquat — omission", lesson: "<b>adbi</b> drops the “o”. Truncated brand names are a classic look-alike." },
 
-  // ─── Substitution & transposition — EASY/MEDIUM ───
-  YouTube:   { difficulty: "easy", legit: "www.youtube.com/account", fake: "www.yuotube.com/account",
-    technique: "Typosquat — transposition", lesson: "Two letters are flipped: <b>yuotube</b> swaps “ou” for “uo”. Transposed letters read almost normally." },
-  Yahoo:     { difficulty: "easy", legit: "login.yahoo.com/account", fake: "login.yaho0.com/account",
-    technique: "Typosquat — digit for letter", lesson: "The last “o” is a zero: <b>yaho0</b>. Numbers standing in for letters are a staple of phishing." },
-  Twitter:   { difficulty: "medium", legit: "www.twitter.com/i/flow/login", fake: "www.twitterr.com/i/flow/login",
-    technique: "Typosquat — doubled letter", lesson: "An extra “r”: <b>twitterr</b>. Doubled letters slip past quick reads — and the page is a perfect copy." },
-  Instagram: { difficulty: "medium", legit: "www.instagram.com/accounts/login", fake: "www.instargam.com/accounts/login",
-    technique: "Typosquat — transposition", lesson: "“ra” becomes “ar”: <b>instargam</b>. The letters are all correct, just two of them are swapped." },
-  GitHub:    { difficulty: "medium", legit: "github.com/login", fake: "githbu.com/login",
-    technique: "Typosquat — transposition", lesson: "“ub” becomes “bu”: <b>githbu</b>. A flipped pair at the end is genuinely hard to catch." },
-  Spotify:   { difficulty: "hard", legit: "accounts.spotify.com/login", fake: "accounts.spotıfy.com/login",
+  // ─── Substitution & transposition ───
+  YouTube:   { difficulty: "easy", legit: "www.vidtube.com/account", fake: "www.vidtbue.com/account",
+    technique: "Typosquat — transposition", lesson: "Two letters are flipped: <b>vidtbue</b> swaps “ub” for “bu”. Transposed letters read almost normally." },
+  Yahoo:     { difficulty: "easy", legit: "login.wahoo.com/account", fake: "login.wah0o.com/account",
+    technique: "Typosquat — digit for letter", lesson: "The last “o” is a zero: <b>wah0o</b>. Numbers standing in for letters are a staple of phishing." },
+  Twitter:   { difficulty: "medium", legit: "www.chirpy.com/login", fake: "www.chirppy.com/login",
+    technique: "Typosquat — doubled letter", lesson: "An extra “p”: <b>chirppy</b>. Doubled letters slip past quick reads — and the page is a perfect copy." },
+  Instagram: { difficulty: "medium", legit: "www.snapgram.com/accounts/login", fake: "www.snpagram.com/accounts/login",
+    technique: "Typosquat — transposition", lesson: "“ap” becomes “pa”: <b>snpagram</b>. The letters are all correct, just two of them are swapped." },
+  GitHub:    { difficulty: "medium", legit: "codehub.com/login", fake: "codehbu.com/login",
+    technique: "Typosquat — transposition", lesson: "“ub” becomes “bu”: <b>codehbu</b>. A flipped pair at the end is genuinely hard to catch." },
+  Spotify:   { difficulty: "hard", legit: "accounts.tunify.com/login", fake: "accounts.tunıfy.com/login",
     technique: "Homoglyph — dotless “ı”", lesson: "The “i” is a Turkish dotless <b>ı</b> (U+0131) — same shape, missing only the dot. " + HG },
 
-  // ─── Subdomain stuffing (real brand as a subdomain) — HARD ───
-  Chase:           { difficulty: "hard", legit: "secure.chase.com/web/auth/login", fake: "chase.com.login.verify-identity.net/auth",
-    technique: "Subdomain stuffing", lesson: "Read right-to-left: the real domain is <b>verify-identity.net</b>. “chase.com” is just a subdomain label glued on the front to fool a left-to-right reader." },
-  "Wells Fargo":   { difficulty: "hard", legit: "connect.secure.wellsfargo.com/auth/login", fake: "wellsfargo.com.secure.accounts.web-login.space/signon",
-    technique: "Subdomain stuffing", lesson: "The actual site is <b>web-login.space</b> — everything before it is attacker-chosen text, including a fake “wellsfargo.com”." },
-  "Bank of America": { difficulty: "hard", legit: "secure.bankofamerica.com/login/sign-in/signOn", fake: "bankofamerica.com.security.update-auth.info/login",
-    technique: "Subdomain stuffing", lesson: "The registrable domain is <b>update-auth.info</b>, not bankofamerica.com. The bank name is only a subdomain prefix." },
-  FedEx:           { difficulty: "hard", legit: "www.fedex.com/en-us/tracking/manage", fake: "fedex.com.package-tracking.shipment-delivery.top/track",
+  // ─── Subdomain stuffing ───
+  Chase:             { difficulty: "hard", legit: "secure.crestline.com/web/auth/login", fake: "crestline.com.login.verify-identity.net/auth",
+    technique: "Subdomain stuffing", lesson: "Read right-to-left: the real domain is <b>verify-identity.net</b>. “crestline.com” is just a subdomain label glued on the front to fool a left-to-right reader." },
+  "Wells Fargo":     { difficulty: "hard", legit: "connect.secure.summitbank.com/auth/login", fake: "summitbank.com.secure.accounts.web-login.space/signon",
+    technique: "Subdomain stuffing", lesson: "The actual site is <b>web-login.space</b> — everything before it is attacker-chosen text, including a fake “summitbank.com”." },
+  "Bank of America": { difficulty: "hard", legit: "secure.harborbank.com/login/sign-in/signOn", fake: "harborbank.com.security.update-auth.info/login",
+    technique: "Subdomain stuffing", lesson: "The registrable domain is <b>update-auth.info</b>, not harborbank.com. The bank name is only a subdomain prefix." },
+  FedEx:             { difficulty: "hard", legit: "www.shipfast.com/en-us/tracking/manage", fake: "shipfast.com.package-tracking.shipment-delivery.top/track",
     technique: "Subdomain stuffing", lesson: "The real domain is <b>shipment-delivery.top</b>. Delivery-themed subdomains make the long chain feel plausible." },
-  DHL:             { difficulty: "hard", legit: "www.dhl.com/en/express/tracking.html", fake: "dhl.com.alert.delivery-status.holding-facility.site/track",
-    technique: "Subdomain stuffing", lesson: "The site is actually <b>holding-facility.site</b>. “dhl.com” at the start is bait — the truth is always the last two labels." },
-  UPS:             { difficulty: "hard", legit: "www.ups.com/track/manage/mychoice", fake: "ups.com.mychoice.package.reschedule-portal.biz/track",
-    technique: "Subdomain stuffing", lesson: "The owner of this page is <b>reschedule-portal.biz</b>. UPS branding is stuffed into the subdomains to hide that." },
+  DHL:               { difficulty: "hard", legit: "www.ghx.com/en/express/tracking", fake: "ghx.com.alert.delivery-status.holding-facility.site/track",
+    technique: "Subdomain stuffing", lesson: "The site is actually <b>holding-facility.site</b>. “ghx.com” at the start is bait — the truth is always the last two labels." },
+  UPS:               { difficulty: "hard", legit: "www.upx.com/track/manage/mychoice", fake: "upx.com.mychoice.package.reschedule-portal.biz/track",
+    technique: "Subdomain stuffing", lesson: "The owner of this page is <b>reschedule-portal.biz</b>. The brand is stuffed into the subdomains to hide that." },
 
-  // ─── Look-alike top-level domains — MEDIUM ───
-  Zoom:    { difficulty: "medium", legit: "zoom.us/signin", fake: "zoom.download/signin",
-    technique: "Wrong TLD", lesson: "Correct name, wrong ending. Zoom is <b>zoom.us</b>; <b>zoom.download</b> is a cheap generic TLD owned by someone else." },
-  Discord: { difficulty: "medium", legit: "discord.com/login", fake: "discord.support/login",
-    technique: "Wrong TLD", lesson: "Discord lives on <b>discord.com</b>. The friendly-looking <b>discord.support</b> is a different registration entirely." },
-  Steam:   { difficulty: "medium", legit: "store.steampowered.com/login", fake: "store.steampowered.gl/login",
-    technique: "Wrong TLD", lesson: "Steam's store is <b>steampowered.com</b>. Swapping to <b>.gl</b> makes a brand-new domain that just looks official." },
-  Roblox:  { difficulty: "medium", legit: "www.roblox.com/login", fake: "www.roblox.login/account",
-    technique: "Wrong TLD", lesson: "<b>roblox.login</b> reads like a sign-in page, but “.login” is a TLD — the real site is <b>roblox.com</b>." },
-  Uber:    { difficulty: "medium", legit: "auth.uber.com/login", fake: "auth.uber.help/login",
-    technique: "Wrong TLD", lesson: "A support-looking <b>uber.help</b> is not Uber. The genuine domain is <b>uber.com</b>." },
-  Airbnb:  { difficulty: "medium", legit: "www.airbnb.com/login", fake: "www.airbnb.rentals/login",
-    technique: "Wrong TLD", lesson: "<b>airbnb.rentals</b> sounds on-brand, but it's a separate domain. Airbnb is <b>airbnb.com</b>." },
+  // ─── Look-alike TLDs ───
+  Zoom:    { difficulty: "medium", legit: "meetly.us/signin", fake: "meetly.download/signin",
+    technique: "Wrong TLD", lesson: "Correct name, wrong ending. Meetly is <b>meetly.us</b>; <b>meetly.download</b> is a cheap generic TLD owned by someone else." },
+  Discord: { difficulty: "medium", legit: "harmony.com/login", fake: "harmony.support/login",
+    technique: "Wrong TLD", lesson: "Harmony lives on <b>harmony.com</b>. The friendly-looking <b>harmony.support</b> is a different registration entirely." },
+  Steam:   { difficulty: "medium", legit: "store.vapor.com/login", fake: "store.vapor.gl/login",
+    technique: "Wrong TLD", lesson: "Vapor's store is <b>vapor.com</b>. Swapping to <b>.gl</b> makes a brand-new domain that just looks official." },
+  Roblox:  { difficulty: "medium", legit: "www.blockworld.com/login", fake: "www.blockworld.live/account",
+    technique: "Wrong TLD", lesson: "<b>.live</b> is a different top-level domain — the real site is <b>blockworld.com</b>." },
+  Uber:    { difficulty: "medium", legit: "auth.ryde.com/login", fake: "auth.ryde.help/login",
+    technique: "Wrong TLD", lesson: "A support-looking <b>ryde.help</b> is not Ryde. The genuine domain is <b>ryde.com</b>." },
+  Airbnb:  { difficulty: "medium", legit: "www.roomly.com/login", fake: "www.roomly.rentals/login",
+    technique: "Wrong TLD", lesson: "<b>roomly.rentals</b> sounds on-brand, but it's a separate domain. Roomly is <b>roomly.com</b>." },
 
-  // ─── Visual deception: blended Latin letters (comb-glyphs) — HARD ───
-  Walmart:    { difficulty: "hard", legit: "www.walmart.com/account/login", fake: "www.walrnart.com/account/login",
-    technique: "Comb-glyph (rn → m)", lesson: "There's no “m” — it's “r” + “n”: <b>walrnart</b>. Side by side, “rn” is nearly indistinguishable from “m”." },
-  Microsoft:  { difficulty: "hard", legit: "login.microsoft.com/account", fake: "login.rnicrosoft.com/account",
-    technique: "Comb-glyph (rn → m)", lesson: "That “m” is actually “rn”: <b>rnicrosoft</b>. The blended pair fakes a single letter." },
-  "Disney+":  { difficulty: "hard", legit: "www.disneyplus.com/login", fake: "www.disneypIus.com/login",
-    technique: "Comb-glyph (capital I → l)", lesson: "The “l” is a capital “I”: disneyp<b>I</b>us. In many fonts capital-I and lowercase-l are identical." },
-  Salesforce: { difficulty: "hard", legit: "login.salesforce.com/sign-in", fake: "login.saIesforce.com/sign-in",
-    technique: "Comb-glyph (capital I → l)", lesson: "“salesforce” uses a capital “I” for the “l”: sa<b>I</b>esforce. Same pixel shape, different character." },
-  Twitch:     { difficulty: "medium", legit: "www.twitch.tv/login", fake: "www.twltch.tv/login",
-    technique: "Comb-glyph (l → i)", lesson: "The “i” is really a lowercase “l”: tw<b>l</b>tch. The missing dot is the only clue." },
-  eBay:       { difficulty: "medium", legit: "signin.ebay.com/signin", fake: "signin.ebav.com/signin",
-    technique: "Comb-glyph (v → y)", lesson: "The “y” is a “v”: <b>ebav</b>. In some sans-serif fonts a “v” passes for a “y” at a glance." },
+  // ─── Comb-glyphs (blended letters) ───
+  Walmart:    { difficulty: "hard", legit: "www.valuemart.com/account/login", fake: "www.valuernart.com/account/login",
+    technique: "Comb-glyph (rn → m)", lesson: "There's no “m” — it's “r” + “n”: <b>valuernart</b>. Side by side, “rn” is nearly indistinguishable from “m”." },
+  Microsoft:  { difficulty: "hard", legit: "login.macrosoft.com/account", fake: "login.rnacrosoft.com/account",
+    technique: "Comb-glyph (rn → m)", lesson: "That “m” is actually “rn”: <b>rnacrosoft</b>. The blended pair fakes a single letter." },
+  "Disney+":  { difficulty: "hard", legit: "www.wonderplus.com/login", fake: "www.wonderpIus.com/login",
+    technique: "Comb-glyph (capital I → l)", lesson: "The “l” is a capital “I”: wonderp<b>I</b>us. In many fonts capital-I and lowercase-l are identical." },
+  Salesforce: { difficulty: "hard", legit: "login.cloudforce.com/sign-in", fake: "login.cIoudforce.com/sign-in",
+    technique: "Comb-glyph (capital I → l)", lesson: "“cloudforce” uses a capital “I” for the “l”: c<b>I</b>oudforce. Same pixel shape, different character." },
+  Twitch:     { difficulty: "medium", legit: "www.twixly.tv/login", fake: "www.twlxly.tv/login",
+    technique: "Comb-glyph (l → i)", lesson: "The “i” is really a lowercase “l”: tw<b>l</b>xly. The missing dot is the only clue." },
+  eBay:       { difficulty: "medium", legit: "signin.ebuy.com/signin", fake: "signin.ebuv.com/signin",
+    technique: "Comb-glyph (v → y)", lesson: "The “y” is a “v”: <b>ebuv</b>. In some sans-serif fonts a “v” passes for a “y” at a glance." },
 
-  // ─── Distinct extras (not in the core five) ───
-  PayPal:  { difficulty: "easy", fakeScheme: "http", legit: "www.paypal.com/signin", fake: "www.paypal-account.com/signin",
-    technique: "Not secure (http) + look-alike", lesson: "Two red flags: it's <b>http://</b> with no padlock, and the real domain is <b>paypal-account.com</b> — not paypal.com." },
-  Coinbase: { difficulty: "hard", legit: "www.coinbase.com/signin", fake: "www.cоinbase.com/signin",
+  // ─── Distinct extras ───
+  PayPal:  { difficulty: "easy", fakeScheme: "http", legit: "www.paypeer.com/signin", fake: "www.paypeer-account.com/signin",
+    technique: "Not secure (http) + look-alike", lesson: "Two red flags: it's <b>http://</b> with no padlock, and the real domain is <b>paypeer-account.com</b> — not paypeer.com." },
+  Coinbase: { difficulty: "hard", legit: "www.coinvault.com/signin", fake: "www.cоinvault.com/signin",
     technique: "Homoglyph (Cyrillic “о”)", lesson: "The first “o” is a Cyrillic <b>о</b>, not a Latin o — pixel-identical. " + HG },
-  Binance: { difficulty: "hard", legit: "accounts.binance.com/en/user/login", fake: "accounts.binance.com@secure-wallet.io/login",
-    technique: "The “@” trick", lesson: "Everything before the <b>@</b> is just a username and is ignored — the browser actually goes to <b>secure-wallet.io</b>. The “accounts.binance.com” is pure bait." },
-
-  // ─── New technique families ───
-  Apple:     { difficulty: "medium", legit: "appleid.apple.com/sign-in", fake: "apple-id-verify.com/sign-in",
-    technique: "Look-alike domain (combosquat)", lesson: "<b>apple-id-verify.com</b> bolts extra words onto the brand. Apple ID sign-in only happens on <b>apple.com</b> — the added words make a brand-new, unrelated domain." },
-  Netflix:   { difficulty: "hard", legit: "www.netflix.com/login", fake: "account-billing.net/netflix/login",
-    technique: "Brand hidden in the path", lesson: "The word “netflix” here is in the <b>path</b>, not the domain. The actual site is <b>account-billing.net</b> — what comes before the first single “/” is all that matters." },
-  USPS:      { difficulty: "hard", legit: "tools.usps.com/go/TrackConfirmAction", fake: "package-status.info/usps/redelivery",
-    technique: "Brand hidden in the path", lesson: "“usps” sits in the <b>path</b>; the real domain is <b>package-status.info</b>. A brand name after the first “/” means nothing." },
-  Pinterest: { difficulty: "medium", legit: "www.pinterest.com/login", fake: "wwwpinterest.com/login",
-    technique: "Run-together “www” (missing dot)", lesson: "There's no dot after “www”: <b>wwwpinterest.com</b> is a single label — a different domain from <b>www.pinterest.com</b>." },
-  WhatsApp:  { difficulty: "medium", legit: "web.whatsapp.com/", fake: "web.whatsapp.cm/",
+  Binance: { difficulty: "hard", legit: "accounts.tradr.com/en/user/login", fake: "accounts.tradr.com@secure-wallet.io/login",
+    technique: "The “@” trick", lesson: "Everything before the <b>@</b> is just a username and is ignored — the browser actually goes to <b>secure-wallet.io</b>. The “accounts.tradr.com” is pure bait." },
+  Apple:     { difficulty: "medium", legit: "id.pearl.com/sign-in", fake: "pearl-id-verify.com/sign-in",
+    technique: "Look-alike domain (combosquat)", lesson: "<b>pearl-id-verify.com</b> bolts extra words onto the brand. Pearl sign-in only happens on <b>pearl.com</b> — the added words make a brand-new, unrelated domain." },
+  Netflix:   { difficulty: "hard", legit: "www.streamly.com/login", fake: "account-billing.net/streamly/login",
+    technique: "Brand hidden in the path", lesson: "The word “streamly” here is in the <b>path</b>, not the domain. The actual site is <b>account-billing.net</b> — what comes before the first single “/” is all that matters." },
+  USPS:      { difficulty: "hard", legit: "track.postex.com/go/TrackConfirm", fake: "package-status.info/postex/redelivery",
+    technique: "Brand hidden in the path", lesson: "“postex” sits in the <b>path</b>; the real domain is <b>package-status.info</b>. A brand name after the first “/” means nothing." },
+  Pinterest: { difficulty: "medium", legit: "www.pinly.com/login", fake: "wwwpinly.com/login",
+    technique: "Run-together “www” (missing dot)", lesson: "There's no dot after “www”: <b>wwwpinly.com</b> is a single label — a different domain from <b>www.pinly.com</b>." },
+  WhatsApp:  { difficulty: "medium", legit: "web.chatbox.com/", fake: "web.chatbox.cm/",
     technique: "TLD typo (.cm vs .com)", lesson: "The ending is <b>.cm</b> (Cameroon), not <b>.com</b> — a one-letter TLD typo that catches fast fingers and fast eyes alike." },
-  Snapchat:  { difficulty: "easy", legit: "accounts.snapchat.com/login", fake: "accounts.snapch4t.com/login",
-    technique: "Typosquat — digit for letter", lesson: "The “a” is a <b>4</b>: snapch4t. Numbers swapped for letters are a classic, and easy to catch if you read it." },
+  Snapchat:  { difficulty: "easy", legit: "accounts.snapzy.com/login", fake: "accounts.sn4pzy.com/login",
+    technique: "Typosquat — digit for letter", lesson: "The “a” is a <b>4</b>: sn4pzy. Numbers swapped for letters are a classic, and easy to catch if you read it." },
 };
-BRANDS.forEach((b) => { if (PHISH[b.name]) Object.assign(b, PHISH[b.name]); });
+
+// Rename to FICTIONAL brands (no real trademarks): new display name +
+// a generic monogram logo + a generic hero by category. Keyed by the
+// original name; applied after PHISH so the techniques still line up.
+const RENAME = {
+  Google: { name: "Goozle", mono: "G" },
+  Amazon: { name: "Amazor", mono: "A" },
+  Facebook: { name: "Faceblock", mono: "F" },
+  LinkedIn: { name: "Linkup", mono: "Lu" },
+  Slack: { name: "Slacka", mono: "S" },
+  Adobe: { name: "Adobi", mono: "A" },
+  YouTube: { name: "Vidtube", mono: "V" },
+  Yahoo: { name: "Wahoo", mono: "W" },
+  Twitter: { name: "Chirpy", mono: "C" },
+  Instagram: { name: "Snapgram", mono: "Sg" },
+  GitHub: { name: "CodeHub", mono: "CH" },
+  Spotify: { name: "Tunify", mono: "T" },
+  Chase: { name: "Crestline Bank", mono: "Cb" },
+  "Wells Fargo": { name: "Summit Bank", mono: "Sb" },
+  "Bank of America": { name: "Harbor Bank", mono: "Hb" },
+  FedEx: { name: "ShipFast", mono: "Sf" },
+  DHL: { name: "GHX Express", mono: "GHX" },
+  UPS: { name: "UPX", mono: "UPX" },
+  Zoom: { name: "Meetly", mono: "M" },
+  Discord: { name: "Harmony", mono: "H" },
+  Steam: { name: "Vapor", mono: "V" },
+  Roblox: { name: "Blockworld", mono: "B" },
+  Uber: { name: "Ryde", mono: "R" },
+  Airbnb: { name: "Roomly", mono: "R" },
+  Walmart: { name: "Valuemart", mono: "V" },
+  Microsoft: { name: "Macrosoft", mono: "M" },
+  "Disney+": { name: "Wonder+", mono: "W+" },
+  Salesforce: { name: "Cloudforce", mono: "Cf" },
+  Twitch: { name: "Twixly", mono: "T" },
+  eBay: { name: "eBuy", mono: "e" },
+  PayPal: { name: "PayPeer", mono: "P" },
+  Coinbase: { name: "Coinvault", mono: "C" },
+  Binance: { name: "Tradr", mono: "T", monoFg: "#181a20" },
+  Apple: { name: "Pearl", mono: "P" },
+  Netflix: { name: "Streamly", mono: "S" },
+  USPS: { name: "PostEx", mono: "Px" },
+  Pinterest: { name: "Pinly", mono: "P" },
+  WhatsApp: { name: "ChatBox", mono: "C" },
+  Snapchat: { name: "Snapzy", mono: "S", monoFg: "#fffc00" },
+};
+
+// A generic homepage hero per category (uses the brand's fictional name).
+function genericHome(b) {
+  const n = b.name;
+  switch (b.kind) {
+    case "crypto": return heroChips({ h1: `Trade crypto on ${n}.`, sub: "Sign in to your wallet.", chips: [
+      "BTC <b style='color:#2fd27a'>▲ 1.8%</b>", "ETH <b style='color:#2fd27a'>▲ 0.9%</b>", "SOL <b style='color:#ff5d6c'>▼ 0.4%</b>"] });
+    case "wallet": return heroCenter({ h1: "Send money in seconds.", sub: `Sign in to your ${n} account.`, cta: "Log in" });
+    case "email": return heroCenter({ h1: `Welcome to ${n}.`, sub: "Sign in to your inbox.", cta: "Sign in" });
+    case "shopping": return heroCards({ h1: `Shop ${n}.`, sub: "Sign in to track your orders.", cards: ["Deals", "Electronics", "Home"] });
+    case "bank": return heroCards({ h1: `Welcome to ${n}.`, sub: "Sign in to manage your accounts and cards.", cards: ["Checking", "Savings", "Cards"] });
+    case "streaming": return heroCenter({ h1: "Unlimited shows & movies.", sub: `Sign in to ${n} to keep watching.`, cta: "Sign In" });
+    case "work": return heroCenter({ h1: `Welcome back to ${n}.`, sub: "Sign in to your workspace.", cta: "Sign in" });
+    case "social": return heroCenter({ h1: "See what your friends are up to.", sub: `Sign in to ${n}.`, cta: "Log in" });
+    case "gaming": return heroCenter({ h1: "Play. Connect. Compete.", sub: `Sign in to ${n}.`, cta: "Log In" });
+    case "dev": return heroCenter({ h1: "Where developers build.", sub: `Sign in to ${n}.`, cta: "Sign in" });
+    default: return heroCenter({ h1: `Welcome to ${n}.`, sub: "Sign in to continue.", cta: "Sign in" });
+  }
+}
+
+BRANDS.forEach((b) => {
+  if (PHISH[b.name]) Object.assign(b, PHISH[b.name]);
+  const r = RENAME[b.name];
+  if (r) {
+    const color = b.color, mono = r.mono, fg = r.monoFg || "#fff";
+    b.name = r.name;
+    b.nameHtml = "";          // plain fictional name in the nav
+    b.navExtra = "";          // drop brand-specific nav extras
+    b.mark = () => monogram(mono, color, fg);
+    b.home = () => genericHome(b);
+  }
+});
 
 // ---------- State --------------------------------------------------
 const state = {
@@ -1007,17 +1081,17 @@ function familyOf(tech) {
 
 // Friendly name + a real-world tip for each technique family (coaching).
 const FAMILY_INFO = {
-  omission: { label: "Missing letters", tip: "Read the brand name letter by letter — a dropped character (gogle, amzon) hides in plain sight." },
-  transposition: { label: "Swapped letters", tip: "Two flipped letters still ‘read’ right (yuotube, instargam). Slow down on the spelling." },
-  doubled: { label: "Doubled letters", tip: "An extra letter (twitterr) sneaks past a quick glance." },
-  substitution: { label: "Digit-for-letter", tip: "Watch for 0/o, 1/l, 4/a — numbers posing as letters (yaho0, snapch4t)." },
-  combosquat: { label: "Look-alike domains", tip: "Extra words or hyphens (apple-id-verify.com) make a brand-new domain. The brand name alone proves nothing." },
+  omission: { label: "Missing letters", tip: "Read the brand name letter by letter — a single dropped character hides in plain sight." },
+  transposition: { label: "Swapped letters", tip: "Two flipped letters still ‘read’ right. Slow down on the spelling." },
+  doubled: { label: "Doubled letters", tip: "An extra repeated letter sneaks past a quick glance." },
+  substitution: { label: "Digit-for-letter", tip: "Watch for 0/o, 1/l, 4/a — numbers posing as letters." },
+  combosquat: { label: "Look-alike domains", tip: "Extra words or hyphens make a brand-new domain. The brand name alone proves nothing." },
   subdomain: { label: "Subdomain stuffing", tip: "Read a URL right-to-left: the real site is the part just before the first ‘/’." },
   brandpath: { label: "Brand in the path", tip: "A brand after the first ‘/’ is meaningless — check the domain itself (the part before it)." },
-  wwwrunon: { label: "Run-together ‘www’", tip: "No dot after ‘www’ (wwwpaypal.com) makes one big fake label." },
+  wwwrunon: { label: "Run-together ‘www’", tip: "No dot after ‘www’ makes one big fake label, not the real site." },
   tldtypo: { label: "TLD typos", tip: "Watch the ending: .cm / .co are not .com." },
-  tld: { label: "Wrong endings (TLD)", tip: "Same name, different ending (zoom.download) = a different owner." },
-  "comb-rn": { label: "Blended letters (rn→m)", tip: "‘rn’ side by side looks just like ‘m’ (walrnart, rnicrosoft)." },
+  tld: { label: "Wrong endings (TLD)", tip: "Same name, different ending = a different owner." },
+  "comb-rn": { label: "Blended letters (rn→m)", tip: "‘rn’ side by side looks just like ‘m’. Look closely at every letter." },
   "comb-letter": { label: "Look-alike letters", tip: "Capital-I vs l, l vs i, v vs y — fonts make these nearly identical." },
   homoglyph: { label: "Hidden characters", tip: "Some letters are foreign look-alikes; a real browser unmasks them as a confusing ‘xn--’ address." },
   at: { label: "The ‘@’ trick", tip: "Everything before an ‘@’ in a URL is ignored — the browser goes to whatever follows it." },

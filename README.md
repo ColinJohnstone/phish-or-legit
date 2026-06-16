@@ -4,7 +4,9 @@ A small web game that shows, viscerally, why **device-bound passkeys** beat phis
 
 You're shown two **full brand homepages** for a company you know, each with a "Sign in"
 button. The set has **39 look-alike scenarios** spanning a dozen distinct phishing
-techniques. On the title screen you choose the **game length** (5 or 10 rounds) and a
+techniques. **All brands are fictional** (Goozle, PayPeer, Crestline Bank, Streamly, …) so
+there are no real trademarks — but the *techniques* are exactly the ones used against real
+brands. On the title screen you choose the **game length** (5 / 10 / 15 / 20 rounds) and a
 **difficulty** — *Mixed*, *Easy–Med*, *Med–Hard*, or *All Hard* — and each game draws a
 fresh set ordered **easy → hard**, with **no technique appearing more than twice** (and no
 brand repeats).
@@ -13,25 +15,25 @@ The two pages in a round look identical — the difference is in the address bar
 scenario shows a **difficulty pill**:
 
 - **Typosquatting — omission / transposition / substitution** *(easy–medium)* — a dropped,
-  swapped, doubled, or digit-for-letter character: `gogle.com`, `amzon.com`, `facebok.com`,
-  `yuotube.com` (ou→uo), `instargam.com` (ra→ar), `twitterr.com`, `yaho0.com`.
-- **Subdomain stuffing** *(hard)* — the real brand appears as a *subdomain* of the attacker's
-  domain: `chase.com.login.verify-identity.net`, `fedex.com…shipment-delivery.top`,
-  `ups.com…reschedule-portal.biz`. The true owner is the **last two labels**.
-- **Look-alike TLDs** *(medium)* — right name, wrong ending: `zoom.download` (real `zoom.us`),
-  `discord.support`, `steampowered.gl`, `roblox.login`, `uber.help`, `airbnb.rentals`.
-- **Comb-glyphs / blended letters** *(hard)* — `walrnart.com` and `rnicrosoft.com` (`rn`→`m`),
-  `disneypIus.com` and `saIesforce.com` (capital `I`→`l`), `twltch.tv` (`l`→`i`), `ebav.com`
+  swapped, doubled, or digit-for-letter character: `gozle.com`, `amzor.com`, `facblock.com`,
+  `vidtbue.com` (ub→bu), `snpagram.com` (ap→pa), `chirppy.com`, `wah0o.com`.
+- **Subdomain stuffing** *(hard)* — the brand appears as a *subdomain* of the attacker's
+  domain: `crestline.com.login.verify-identity.net`, `shipfast.com…shipment-delivery.top`,
+  `upx.com…reschedule-portal.biz`. The true owner is the **last two labels**.
+- **Look-alike TLDs** *(medium)* — right name, wrong ending: `meetly.download` (real
+  `meetly.us`), `harmony.support`, `vapor.gl`, `blockworld.live`, `ryde.help`, `roomly.rentals`.
+- **Comb-glyphs / blended letters** *(hard)* — `valuernart.com` and `rnacrosoft.com` (`rn`→`m`),
+  `wonderpIus.com` and `cIoudforce.com` (capital `I`→`l`), `twlxly.tv` (`l`→`i`), `ebuv.com`
   (`v`→`y`).
-- **IDN homoglyphs** *(hard)* — `cоinbase.com` (Cyrillic `о`), `spotıfy.com` (dotless `ı`).
-- **The `@` trick** *(hard)* — `accounts.binance.com@secure-wallet.io` actually loads
+- **IDN homoglyphs** *(hard)* — `cоinvault.com` (Cyrillic `о`), `tunıfy.com` (dotless `ı`).
+- **The `@` trick** *(hard)* — `accounts.tradr.com@secure-wallet.io` actually loads
   `secure-wallet.io` (everything before `@` is ignored).
-- **Brand hidden in the path** *(hard)* — `account-billing.net/netflix/login` — the real
+- **Brand hidden in the path** *(hard)* — `account-billing.net/streamly/login` — the real
   domain is `account-billing.net`; the brand after the first `/` is meaningless.
-- **Combosquat** *(medium)* — `apple-id-verify.com` (real brand + extra words).
-- **Run-together "www"** *(medium)* — `wwwpinterest.com` (no dot after `www`).
-- **TLD typo** *(medium)* — `whatsapp.cm` instead of `.com`.
-- **Not secure (http)** *(easy)* — `http://paypal-account.com`, no padlock.
+- **Combosquat** *(medium)* — `pearl-id-verify.com` (brand + extra words).
+- **Run-together "www"** *(medium)* — `wwwpinly.com` (no dot after `www`).
+- **TLD typo** *(medium)* — `chatbox.cm` instead of `.com`.
+- **Not secure (http)** *(easy)* — `http://paypeer-account.com`, no padlock.
 
 After each round the result **boxes the exact difference** in red — the swapped character, the
 appended root domain, or the invisible homoglyph — names the technique + difficulty, and for
