@@ -51,6 +51,39 @@ body::before {
 }
 @media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
 
+/* ── Light theme ─────────────────────────────
+   Overrides only the app shell variables. The mock browser windows use
+   their own fixed light colours plus per-brand hero/brand vars, so they
+   look identical in both themes (a fake website doesn't follow your OS theme). */
+html[data-theme="light"] {
+  --bg: #eef2f8;
+  --bg-soft: #e6ecf5;
+  --panel: #ffffff;
+  --panel-2: #f1f5fb;
+  --border: #d6dde9;
+  --text: #1a2233;
+  --muted: #5c6678;
+  --green: #15a34a;
+  --red: #dc2f3c;
+  --amber: #c77a16;
+  --shadow: 0 18px 50px rgba(28, 40, 72, 0.16);
+}
+html[data-theme="light"], html[data-theme="light"] body {
+  background: linear-gradient(165deg, #eef3fb 0%, #e6ecf6 52%, #dde4f0 100%);
+}
+html[data-theme="light"] body::before {
+  background:
+    radial-gradient(42% 40% at 16% 20%, rgba(212, 40, 61, 0.12), transparent 62%),
+    radial-gradient(38% 36% at 84% 14%, rgba(224, 167, 58, 0.12), transparent 60%),
+    radial-gradient(48% 44% at 78% 82%, rgba(110, 72, 214, 0.10), transparent 62%),
+    radial-gradient(42% 40% at 22% 88%, rgba(58, 112, 232, 0.10), transparent 60%);
+  filter: blur(26px) saturate(1.02);
+}
+/* Difficulty pills read low-contrast on light — give them darker ink */
+html[data-theme="light"] .diff-easy { color: #0f8f43; }
+html[data-theme="light"] .diff-medium { color: #b06f0d; }
+html[data-theme="light"] .diff-hard { color: #d12a3a; }
+
 #app { min-height: 100vh; }
 
 .muted { color: var(--muted); }
@@ -245,11 +278,10 @@ a:focus-visible,
 .site-footer a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
 .site-footer a:hover { text-decoration: underline; }
 
-/* ── Sound toggle + confetti ── */
-.sound-toggle {
+/* ── Sound + theme toggles + confetti ── */
+.sound-toggle, .theme-toggle {
   position: fixed;
   top: 14px;
-  right: 16px;
   z-index: 60;
   width: 40px;
   height: 40px;
@@ -260,8 +292,13 @@ a:focus-visible,
   font-size: 1.1rem;
   cursor: pointer;
   transition: transform 0.1s, background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.sound-toggle:hover { background: var(--panel-2); transform: scale(1.05); }
+.sound-toggle { right: 16px; }
+.theme-toggle { right: 64px; }
+.sound-toggle:hover, .theme-toggle:hover { background: var(--panel-2); transform: scale(1.05); }
 .confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 80; }
 
 /* ── Countdown timer ── */

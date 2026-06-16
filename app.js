@@ -1854,9 +1854,24 @@ function flashShare(msg) {
 // ============================================================
 //  Wiring
 // ============================================================
+// ---------- Theme (light / dark) -----------------------------------
+const THEME_KEY = "phishgame.theme";
+function currentTheme() {
+  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+}
+function applyTheme(t) {
+  if (t === "light") document.documentElement.setAttribute("data-theme", "light");
+  else document.documentElement.removeAttribute("data-theme");
+  const btn = document.getElementById("btn-theme");
+  // Show the icon for the theme you'd switch TO (the affordance).
+  if (btn) btn.textContent = t === "light" ? "🌙" : "☀️";
+  try { localStorage.setItem(THEME_KEY, t); } catch (_) { /* ignore */ }
+}
+
 function init() {
   loadStoredPasskey();
   renderLifetime();
+  applyTheme(currentTheme()); // sync the toggle icon to the theme set in <head>
 
   $("#btn-register").addEventListener("click", registerPasskey);
   $("#btn-test-passkey").addEventListener("click", testPasskey);
@@ -1920,6 +1935,10 @@ function init() {
   });
   // Unlock audio on the first user gesture (autoplay policy).
   document.addEventListener("pointerdown", () => Sound.resume(), { once: true });
+
+  $("#btn-theme").addEventListener("click", () => {
+    applyTheme(currentTheme() === "light" ? "dark" : "light");
+  });
   $("#btn-play-eyes").addEventListener("click", () => startGame("eyes"));
   $("#btn-play-passkey").addEventListener("click", () => {
     if (!state.passkey.registered) return;

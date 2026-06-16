@@ -13,10 +13,21 @@
   <meta property="og:description" content="Two near-identical login pages. One steals your password. Can your eyes tell them apart? (Spoiler: almost nobody can.) Then try a phishing-proof passkey." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
+  <!-- Apply saved/system theme before first paint (no flash of dark) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("phishgame.theme");
+        if (!t) t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        if (t === "light") document.documentElement.setAttribute("data-theme", "light");
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="app">
+    <button id="btn-theme" class="theme-toggle" title="Light / dark theme" aria-label="Toggle light or dark theme">🌙</button>
     <button id="btn-sound" class="sound-toggle" title="Sound on/off" aria-label="Toggle sound">🔊</button>
     <canvas id="confetti" class="confetti-canvas"></canvas>
     <!-- ───────────── TITLE SCREEN ───────────── -->
@@ -208,6 +219,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
