@@ -552,12 +552,23 @@ function getStats() {
   return {
     eyes: { rounds: 0, correct: 0, ...(s.eyes || {}) },
     passkey: { rounds: 0, correct: 0, ...(s.passkey || {}) },
+    fams: s.fams || {}, // per-technique-family accuracy (eyes mode)
   };
 }
 function addGameToStats(mode, rounds, correct) {
   const s = getStats();
   s[mode].rounds += rounds;
   s[mode].correct += correct;
+  // Per-family accuracy is only meaningful in eyes mode (passkey always wins).
+  if (mode === "eyes") {
+    state.results.forEach((r) => {
+      const f = r.family || "other";
+      const cur = s.fams[f] || { rounds: 0, correct: 0 };
+      cur.rounds++;
+      if (r.correct) cur.correct++;
+      s.fams[f] = cur;
+    });
+  }
   try { localStorage.setItem(STATS_KEY, JSON.stringify(s)); } catch (_) { /* ignore */ }
 }
 function renderLifetime() {
@@ -994,6 +1005,26 @@ function familyOf(tech) {
   return "other";
 }
 
+// Friendly name + a real-world tip for each technique family (coaching).
+const FAMILY_INFO = {
+  omission: { label: "Missing letters", tip: "Read the brand name letter by letter — a dropped character (gogle, amzon) hides in plain sight." },
+  transposition: { label: "Swapped letters", tip: "Two flipped letters still ‘read’ right (yuotube, instargam). Slow down on the spelling." },
+  doubled: { label: "Doubled letters", tip: "An extra letter (twitterr) sneaks past a quick glance." },
+  substitution: { label: "Digit-for-letter", tip: "Watch for 0/o, 1/l, 4/a — numbers posing as letters (yaho0, snapch4t)." },
+  combosquat: { label: "Look-alike domains", tip: "Extra words or hyphens (apple-id-verify.com) make a brand-new domain. The brand name alone proves nothing." },
+  subdomain: { label: "Subdomain stuffing", tip: "Read a URL right-to-left: the real site is the part just before the first ‘/’." },
+  brandpath: { label: "Brand in the path", tip: "A brand after the first ‘/’ is meaningless — check the domain itself (the part before it)." },
+  wwwrunon: { label: "Run-together ‘www’", tip: "No dot after ‘www’ (wwwpaypal.com) makes one big fake label." },
+  tldtypo: { label: "TLD typos", tip: "Watch the ending: .cm / .co are not .com." },
+  tld: { label: "Wrong endings (TLD)", tip: "Same name, different ending (zoom.download) = a different owner." },
+  "comb-rn": { label: "Blended letters (rn→m)", tip: "‘rn’ side by side looks just like ‘m’ (walrnart, rnicrosoft)." },
+  "comb-letter": { label: "Look-alike letters", tip: "Capital-I vs l, l vs i, v vs y — fonts make these nearly identical." },
+  homoglyph: { label: "Hidden characters", tip: "Some letters are foreign look-alikes; a real browser unmasks them as a confusing ‘xn--’ address." },
+  at: { label: "The ‘@’ trick", tip: "Everything before an ‘@’ in a URL is ignored — the browser goes to whatever follows it." },
+  http: { label: "Not secure (http)", tip: "No padlock means no encryption. Never type a password on an http page." },
+  other: { label: "Look-alike sites", tip: "Always verify the domain before you sign in." },
+};
+
 function allowedDifficulties(pref) {
   if (pref === "easymed") return new Set(["easy", "medium"]);
   if (pref === "medhard") return new Set(["medium", "hard"]);
@@ -1162,9 +1193,15 @@ function onSignIn(win, isReal, brand) {
   else onPasskeyAttempt(win, isReal, brand);
 }
 
-// Record a round outcome for the difficulty breakdown on the summary.
+// Record a round outcome for the difficulty + technique breakdown.
 function recordResult(brand, correct) {
-  state.results.push({ difficulty: brand.difficulty || "medium", correct: !!correct });
+  state.results.push({
+    difficulty: brand.difficulty || "medium",
+    family: familyOf(brand.technique),
+    technique: brand.technique,
+    name: brand.name,
+    correct: !!correct,
+  });
 }
 
 // ---------- Eyes mode: pure guess ----------------------------------
@@ -1436,6 +1473,7 @@ function showSummary() {
   renderBreakdown();
   addGameToStats(state.mode, T, s);
   renderLifetime();
+  renderCoaching();
 
   // End-of-game flourish
   const ratio = T ? s / T : 0;
@@ -1497,6 +1535,83 @@ function renderBreakdown() {
   const diffLabel = { mixed: "Mixed", easymed: "Easy–Med", medhard: "Med–Hard", hard: "All Hard" }[state.difficultyPref] || "Mixed";
   $("#summary-breakdown").innerHTML =
     `<div class="bd-title">${state.mode === "eyes" ? "By eye" : "With your passkey"} · ${diffLabel} · ${state.totalRounds} rounds — accuracy by difficulty</div>` + rows;
+}
+
+// Coaching: your weak technique + a real-world takeaway.
+function renderCoaching() {
+  const el = $("#summary-coaching");
+  if (!el) return;
+
+  if (state.mode === "passkey") {
+    el.innerHTML =
+      `<div class="coach-tip"><b>The takeaway:</b> a passkey makes “spot the phish” obsolete — ` +
+      `it simply won't work on a look-alike domain, so there's nothing left to get wrong.</div>`;
+    return;
+  }
+
+  let html = "";
+  // Lifetime weak spot (needs a little data); else this game's worst miss.
+  const stats = getStats();
+  let weak = null;
+  Object.keys(stats.fams).forEach((f) => {
+    const d = stats.fams[f];
+    if (d.rounds >= 2) {
+      const acc = d.correct / d.rounds;
+      if (!weak || acc < weak.acc) weak = { f, acc, ...d };
+    }
+  });
+  if (weak && weak.acc < 0.999) {
+    const info = FAMILY_INFO[weak.f] || FAMILY_INFO.other;
+    html +=
+      `<div class="coach-head">🎯 Your weak spot: <b>${info.label}</b> ` +
+      `<span class="muted">(${Math.round(weak.acc * 100)}% over ${weak.rounds})</span></div>` +
+      `<div class="coach-tip">${info.tip}</div>`;
+  } else {
+    const missed = {};
+    state.results.forEach((r) => { if (!r.correct) missed[r.family] = (missed[r.family] || 0) + 1; });
+    const keys = Object.keys(missed);
+    if (keys.length) {
+      const f = keys.sort((a, b) => missed[b] - missed[a])[0];
+      const info = FAMILY_INFO[f] || FAMILY_INFO.other;
+      html += `<div class="coach-head">🎯 Watch out for: <b>${info.label}</b></div><div class="coach-tip">${info.tip}</div>`;
+    }
+  }
+
+  html +=
+    `<div class="coach-tips"><b>In real life</b>` +
+    `<ul>` +
+    `<li>Don't trust how a page <em>looks</em> — copies are pixel-perfect.</li>` +
+    `<li>Read the domain right-to-left; the real site is just before the first “/”.</li>` +
+    `<li>Let a <b>passkey</b> (or password manager) decide — it won't autofill on a look-alike.</li>` +
+    `</ul></div>`;
+  el.innerHTML = html;
+}
+
+// Share / copy a result card to spread the word.
+async function shareResult() {
+  const T = state.totalRounds, s = state.score;
+  const url = location.href.split("?")[0].split("#")[0];
+  const line =
+    state.mode === "eyes"
+      ? `I caught ${s}/${T} phishing sites by eye ${s / T >= 0.6 ? "😎" : "😅"}`
+      : `My passkey blocked every phish — ${s}/${T} 🔑`;
+  const text = `🎣 Phish or Legit?\n${line}\nAlmost nobody spots them by eye — but a device-bound passkey catches them all. Can you beat me?\n${url}`;
+  try {
+    if (navigator.share) { await navigator.share({ title: "Phish or Legit?", text }); return; }
+  } catch (_) { /* user cancelled share */ return; }
+  try {
+    await navigator.clipboard.writeText(text);
+    flashShare("Copied to clipboard ✓");
+  } catch (_) {
+    flashShare("Press ⌘/Ctrl+C to copy");
+  }
+}
+function flashShare(msg) {
+  const b = $("#btn-share");
+  if (!b) return;
+  const prev = b.textContent;
+  b.textContent = msg;
+  setTimeout(() => { b.textContent = prev; }, 1900);
 }
 
 // ============================================================
@@ -1575,6 +1690,7 @@ function init() {
   });
   $("#btn-next").addEventListener("click", nextRound);
   $("#btn-quit").addEventListener("click", () => { stopTimer(); Sound.stopMusic(); closeOverlay("#result-overlay"); show("#screen-title"); });
+  $("#btn-share").addEventListener("click", shareResult);
   $("#btn-replay").addEventListener("click", () => startGame(state.mode));
   $("#btn-home").addEventListener("click", () => { Sound.stopMusic(); show("#screen-title"); });
 

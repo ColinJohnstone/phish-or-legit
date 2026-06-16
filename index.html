@@ -13,7 +13,7 @@
   <meta property="og:description" content="Two near-identical login pages. One steals your password. Can your eyes tell them apart? (Spoiler: almost nobody can.) Then try a phishing-proof passkey." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
   <div id="app">
@@ -147,8 +147,10 @@
           <span class="muted">rounds survived</span>
         </div>
         <div id="summary-breakdown" class="summary-breakdown"></div>
+        <div id="summary-coaching" class="summary-coaching"></div>
         <div id="summary-cta" class="summary-cta"></div>
         <div class="summary-actions">
+          <button id="btn-share" class="btn btn-ghost">📋 Share my score</button>
           <button id="btn-replay" class="btn btn-ghost">Play again</button>
           <button id="btn-home" class="btn btn-primary">Back to title</button>
         </div>
@@ -203,6 +205,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
