@@ -273,6 +273,66 @@ h1 .muted { font-weight: 400; }
 
 .result-demo-btn { display: block; margin: 0 auto 16px; }
 
+/* ── Compact one-viewport menu ─────────────── */
+#screen-title.screen { padding: 18px; }
+#screen-title .title-wrap {
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.menu-head .hero-badge { font-size: 40px; margin: 0; display: inline-block; filter: drop-shadow(0 6px 16px rgba(212,40,61,0.28)); }
+.menu-head h1 { font-size: clamp(1.9rem, 5vw, 2.9rem); margin: 2px 0 8px; }
+.menu-head .tagline { margin: 0 auto; max-width: 580px; font-size: 0.98rem; }
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+  text-align: left;
+}
+@media (max-width: 760px) {
+  .menu-grid { grid-template-columns: 1fr; }
+  #screen-title .title-wrap { gap: 12px; }
+  .menu-head .hero-badge { font-size: 32px; }
+  .menu-head h1 { font-size: 1.85rem; margin: 0 0 5px; }
+  .menu-head .tagline { font-size: 0.9rem; line-height: 1.45; }
+  .menu-grid .passkey-panel { padding: 14px; }
+  .menu-config { gap: 9px; }
+}
+.menu-grid .passkey-panel { margin: 0; padding: 16px; }
+.menu-grid .passkey-panel__head { margin-bottom: 12px; }
+.key-actions { flex-direction: row; gap: 8px; }
+.key-actions #btn-register { flex: 1; }
+.key-actions #btn-test-passkey { white-space: nowrap; }
+
+.menu-config { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.menu-config .rounds-select { margin: 0; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; }
+.menu-config .rounds-label { min-width: 70px; flex-shrink: 0; }
+.menu-config .seg { flex: 1; display: flex; }
+.menu-config .seg-btn { flex: 1; padding: 7px 6px; font-size: 0.8rem; text-align: center; }
+.menu-config .mode-buttons { margin: 6px 0 0; gap: 12px; }
+
+.menu-foot { text-align: center; }
+.menu-foot .lifetime-stats { margin: 0 0 6px; }
+.menu-links { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.menu-links a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.menu-links a:hover { text-decoration: underline; }
+
+/* Shrink the hero on short screens so the whole menu still fits */
+@media (max-height: 720px) {
+  #screen-title .title-wrap { gap: 12px; }
+  .menu-head .hero-badge { font-size: 32px; }
+  .menu-head h1 { font-size: 1.7rem; margin: 0 0 6px; }
+  .menu-head .tagline { font-size: 0.9rem; }
+  .menu-grid .passkey-panel { padding: 13px; }
+}
+@media (max-width: 560px) {
+  .menu-config .mode-buttons { grid-template-columns: 1fr; }
+  .key-actions { flex-direction: column; }
+}
+
 /* ── Round bar ───────────────────────────── */
 .round-bar {
   width: 100%;

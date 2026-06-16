@@ -22,110 +22,79 @@
     <!-- ───────────── TITLE SCREEN ───────────── -->
     <section id="screen-title" class="screen active">
       <div class="title-wrap">
-        <div class="hero-badge">🎣</div>
-        <h1>Phish <span class="muted">or</span> Legit?</h1>
-        <p class="tagline">
-          Two near-identical homepages for a brand you know. One is real, one steals your password.
-          Can your <em>eyes</em> tell them apart? <br />
-          <strong>(Spoiler: almost nobody can.)</strong>
-        </p>
+        <div class="menu-head">
+          <span class="hero-badge">🎣</span>
+          <h1>Phish <span class="muted">or</span> Legit?</h1>
+          <p class="tagline">Two identical-looking login pages — one steals your password. Can you tell? <strong>Almost nobody can.</strong></p>
+        </div>
 
-        <div class="passkey-panel">
-          <div class="passkey-panel__head">
-            <span class="key-glyph">🔑</span>
-            <div>
-              <h3>Device-bound passkey</h3>
-              <p class="muted small">
-                Register one and you'll <strong>never</strong> guess again — your passkey
-                refuses to work on the fake site, so the phish reveals itself.
-              </p>
+        <div class="menu-grid">
+          <!-- Left: passkey -->
+          <div class="passkey-panel">
+            <div class="passkey-panel__head">
+              <span class="key-glyph">🔑</span>
+              <div>
+                <h3>Device-bound passkey</h3>
+                <p class="muted small">Register one and your passkey refuses the fake site — so the phish reveals itself.</p>
+              </div>
+            </div>
+            <div class="key-actions">
+              <button id="btn-register" class="btn btn-key">Register a passkey</button>
+              <button id="btn-test-passkey" class="btn btn-ghost" style="display:none">🔐 Test it</button>
+            </div>
+            <p id="passkey-status" class="passkey-status"></p>
+          </div>
+
+          <!-- Right: settings + play -->
+          <div class="menu-config">
+            <div class="rounds-select">
+              <span class="rounds-label">Rounds</span>
+              <div class="seg" id="rounds-seg">
+                <button class="seg-btn active" data-rounds="5">5</button>
+                <button class="seg-btn" data-rounds="10">10</button>
+                <button class="seg-btn" data-rounds="15">15</button>
+                <button class="seg-btn" data-rounds="20">20</button>
+              </div>
+            </div>
+            <div class="rounds-select">
+              <span class="rounds-label">Difficulty</span>
+              <div class="seg" id="diff-seg">
+                <button class="seg-btn active" data-diff="mixed">Mixed</button>
+                <button class="seg-btn" data-diff="easymed">Easy–Med</button>
+                <button class="seg-btn" data-diff="medhard">Med–Hard</button>
+                <button class="seg-btn" data-diff="hard">Hard</button>
+              </div>
+            </div>
+            <div class="rounds-select">
+              <span class="rounds-label">Timer</span>
+              <div class="seg" id="timer-seg">
+                <button class="seg-btn" data-timer="0">Off</button>
+                <button class="seg-btn active" data-timer="25">Chill</button>
+                <button class="seg-btn" data-timer="15">Normal</button>
+                <button class="seg-btn" data-timer="8">Blitz ⚡</button>
+              </div>
+            </div>
+            <div class="mode-buttons">
+              <button id="btn-play-eyes" class="btn btn-ghost">
+                <span class="mode-label">Play with eyes 👀</span>
+                <span class="mode-sub">Guess the real site</span>
+              </button>
+              <button id="btn-play-passkey" class="btn btn-primary" disabled>
+                <span class="mode-label">Play with passkey 🔑</span>
+                <span class="mode-sub" id="passkey-mode-sub">Register first</span>
+              </button>
             </div>
           </div>
-          <div class="key-actions">
-            <button id="btn-register" class="btn btn-key">Register a passkey on this device</button>
-            <button id="btn-test-passkey" class="btn btn-ghost" style="display:none">🔐 Test your passkey</button>
-          </div>
-          <p id="passkey-status" class="passkey-status"></p>
         </div>
 
-        <div class="rounds-select">
-          <span class="rounds-label">Rounds:</span>
-          <div class="seg" id="rounds-seg">
-            <button class="seg-btn active" data-rounds="5">5</button>
-            <button class="seg-btn" data-rounds="10">10</button>
-            <button class="seg-btn" data-rounds="15">15</button>
-            <button class="seg-btn" data-rounds="20">20</button>
+        <div class="menu-foot">
+          <p id="lifetime-stats" class="lifetime-stats"></p>
+          <div class="menu-links">
+            <button id="btn-how" class="link-btn">How do passkeys stop phishing?</button>
+            <span class="dot">•</span>
+            <a href="https://github.com/ColinJohnstone/phish-or-legit" target="_blank" rel="noopener">GitHub</a>
           </div>
         </div>
-        <div class="rounds-select">
-          <span class="rounds-label">Difficulty:</span>
-          <div class="seg" id="diff-seg">
-            <button class="seg-btn active" data-diff="mixed">Mixed</button>
-            <button class="seg-btn" data-diff="easymed">Easy–Med</button>
-            <button class="seg-btn" data-diff="medhard">Med–Hard</button>
-            <button class="seg-btn" data-diff="hard">All Hard</button>
-          </div>
-        </div>
-        <div class="rounds-select">
-          <span class="rounds-label">Timer:</span>
-          <div class="seg" id="timer-seg">
-            <button class="seg-btn" data-timer="0">Off</button>
-            <button class="seg-btn active" data-timer="25">Chill</button>
-            <button class="seg-btn" data-timer="15">Normal</button>
-            <button class="seg-btn" data-timer="8">Blitz ⚡</button>
-          </div>
-        </div>
-        <p class="rounds-hint muted small" style="margin:0 0 16px">No technique appears more than twice per game.</p>
-
-        <div class="mode-buttons">
-          <button id="btn-play-eyes" class="btn btn-ghost">
-            <span class="mode-label">Play with your eyes 👀</span>
-            <span class="mode-sub">Guess the real site. Good luck.</span>
-          </button>
-          <button id="btn-play-passkey" class="btn btn-primary" disabled>
-            <span class="mode-label">Play with your passkey 🔑</span>
-            <span class="mode-sub" id="passkey-mode-sub">Register a passkey first</span>
-          </button>
-        </div>
-
-        <p id="lifetime-stats" class="lifetime-stats"></p>
-
-        <button id="btn-how" class="link-btn">How do passkeys stop phishing?</button>
-
-        <!-- How it works -->
-        <div class="how-steps">
-          <div class="how-step">
-            <span class="step-n">1</span>
-            <h4>Register a passkey</h4>
-            <p>Touch ID / Windows Hello creates a key bound to this exact site — then test it.</p>
-          </div>
-          <div class="how-step">
-            <span class="step-n">2</span>
-            <h4>Spot the phish</h4>
-            <p>Two identical-looking pages. Only the address bar differs — and barely.</p>
-          </div>
-          <div class="how-step">
-            <span class="step-n">3</span>
-            <h4>Let the passkey win</h4>
-            <p>It refuses the look-alike domain, so the phish reveals itself. Every time.</p>
-          </div>
-        </div>
-
-        <!-- Techniques covered -->
-        <div class="tech-showcase">
-          <p class="muted small">39 look-alikes across techniques like:</p>
-          <div class="tech-chips">
-            <span>Typosquatting</span><span>Homoglyphs</span><span>Subdomain stuffing</span>
-            <span>Wrong TLDs</span><span>Comb-glyphs</span><span>“@” tricks</span>
-            <span>Brand-in-path</span><span>Not-secure http</span>
-          </div>
-        </div>
-
-        <footer class="site-footer">
-          <a href="https://github.com/ColinJohnstone/phish-or-legit" target="_blank" rel="noopener">View on GitHub</a>
-          <span class="dot">•</span>
-          <span class="muted small">Educational anti-phishing demo. Brand names &amp; logos belong to their owners.</span>
-        </footer>
       </div>
     </section>
 
