@@ -558,22 +558,158 @@ const RENAME = {
   Snapchat: { name: "Snapzy", mono: "S", monoFg: "#fffc00" },
 };
 
-// A generic homepage hero per category (uses the brand's fictional name).
-function genericHome(b) {
-  const n = b.name;
+// Some fictional brands need a more specific category than their original.
+const KIND_OVERRIDE = {
+  ShipFast: "delivery", "GHX Express": "delivery", UPX: "delivery", PostEx: "delivery",
+  Roomly: "travel", Ryde: "rideshare",
+};
+
+// ── Inline imagery helpers (gradient "photos", avatars, charts) ──
+const PG_GRADS = [
+  ["#ff7a7a", "#c0392b"], ["#5b8cff", "#3f51b5"], ["#2fd27a", "#0f9d58"],
+  ["#e0a73a", "#b9770f"], ["#9b6bff", "#5a3fd0"], ["#ff8a65", "#e64a19"],
+  ["#26c6da", "#00838f"], ["#ec6aa0", "#ad1457"], ["#66bb6a", "#2e7d32"],
+  ["#42a5f5", "#1565c0"], ["#ffca5f", "#ef6c00"], ["#7e8cff", "#3949ab"],
+];
+function pgGrad(i) { const g = PG_GRADS[((i % PG_GRADS.length) + PG_GRADS.length) % PG_GRADS.length]; return `linear-gradient(135deg, ${g[0]}, ${g[1]})`; }
+function tile(i, label, h) { return `<div class="pg-thumb" style="background:${pgGrad(i)};height:${h || 92}px">${label ? `<span>${label}</span>` : ""}</div>`; }
+function avatar(txt, i, cls) { return `<span class="pg-av ${cls || ""}" style="background:${pgGrad(i)}">${txt}</span>`; }
+function initialsOf(n) { return (n.replace(/[^A-Za-z ]/g, "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase()) || "X"; }
+function sparkline(color) {
+  const pts = [7, 9, 8, 12, 10, 15, 13, 17, 15, 21, 19, 25, 24];
+  const w = 320, h = 76, max = 28, step = w / (pts.length - 1);
+  const line = pts.map((p, i) => `${(i * step).toFixed(0)},${(h - (p / max) * h).toFixed(0)}`).join(" ");
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="pg-spark"><polygon points="0,${h} ${line} ${w},${h}" fill="${color}" opacity="0.14"/><polyline points="${line}" fill="none" stroke="${color}" stroke-width="2.6"/></svg>`;
+}
+function mapBg(color) {
+  return `<svg viewBox="0 0 400 160" preserveAspectRatio="none" class="pg-mapsvg"><rect width="400" height="160" fill="#e8edf2"/>` +
+    `<path d="M0 50 H400 M0 110 H400 M90 0 V160 M250 0 V160" stroke="#d4dce5" stroke-width="6"/>` +
+    `<path d="M30 140 C120 120 160 70 250 60 S360 30 390 20" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>` +
+    `<circle cx="30" cy="140" r="7" fill="${color}"/><circle cx="390" cy="20" r="7" fill="#1a1f2b"/></svg>`;
+}
+
+const SAMPLE = {
+  products: [["Wireless headphones", 79], ["Smart watch", 149], ["4K webcam", 64], ["Mech keyboard", 99], ["Desk lamp", 32], ["USB-C hub", 45]],
+  games: ["Starfall", "Apex Drift", "Mythos", "Pixel Raid", "Velocity"],
+  places: ["Cabin in the pines", "Beachfront villa", "City loft", "Mountain chalet"],
+  coins: [["BTC", "Bitwave", "61,420", 2.4, true], ["ETH", "Ethon", "3,180", 1.1, true], ["SOL", "Solo", "148", -0.6, false], ["ADA", "Cardia", "0.62", 0.9, true]],
+  mails: [[1, "Billing Team", "Your invoice is ready", "9:14 AM"], [1, "Maya Chen", "Re: project kickoff", "8:02 AM"], [0, "Newsletter", "5 tips for the week", "Yesterday"], [0, "Security", "New sign-in to your account", "Mon"]],
+  tx: [["☕", "Corner Café", "Today", -4.5], ["💸", "From Jordan P.", "Yesterday", 25], ["🛒", "Greengrocer", "Yesterday", -38.2], ["⛽", "Shell Station", "Mon", -52]],
+  repos: [["web-client", "Frontend app", "TypeScript"], ["api-server", "Core API", "Go"], ["design-system", "UI components", "CSS"]],
+  steps: ["Picked up", "In transit", "Out for delivery", "Delivered"],
+};
+
+// ── Detailed, lifelike homepage per category ──
+function siteHome(b) {
+  const n = b.name, c = b.color;
   switch (b.kind) {
-    case "crypto": return heroChips({ h1: `Trade crypto on ${n}.`, sub: "Sign in to your wallet.", chips: [
-      "BTC <b style='color:#2fd27a'>▲ 1.8%</b>", "ETH <b style='color:#2fd27a'>▲ 0.9%</b>", "SOL <b style='color:#ff5d6c'>▼ 0.4%</b>"] });
-    case "wallet": return heroCenter({ h1: "Send money in seconds.", sub: `Sign in to your ${n} account.`, cta: "Log in" });
-    case "email": return heroCenter({ h1: `Welcome to ${n}.`, sub: "Sign in to your inbox.", cta: "Sign in" });
-    case "shopping": return heroCards({ h1: `Shop ${n}.`, sub: "Sign in to track your orders.", cards: ["Deals", "Electronics", "Home"] });
-    case "bank": return heroCards({ h1: `Welcome to ${n}.`, sub: "Sign in to manage your accounts and cards.", cards: ["Checking", "Savings", "Cards"] });
-    case "streaming": return heroCenter({ h1: "Unlimited shows & movies.", sub: `Sign in to ${n} to keep watching.`, cta: "Sign In" });
-    case "work": return heroCenter({ h1: `Welcome back to ${n}.`, sub: "Sign in to your workspace.", cta: "Sign in" });
-    case "social": return heroCenter({ h1: "See what your friends are up to.", sub: `Sign in to ${n}.`, cta: "Log in" });
-    case "gaming": return heroCenter({ h1: "Play. Connect. Compete.", sub: `Sign in to ${n}.`, cta: "Log In" });
-    case "dev": return heroCenter({ h1: "Where developers build.", sub: `Sign in to ${n}.`, cta: "Sign in" });
-    default: return heroCenter({ h1: `Welcome to ${n}.`, sub: "Sign in to continue.", cta: "Sign in" });
+    case "streaming": return `
+      <div class="pg">
+        <div class="pg-feature" style="--c:${c}">
+          <div class="pg-feature-bg"></div>
+          <div class="pg-feature-body">
+            <span class="pg-badge">${n} ORIGINAL</span>
+            <h2>The Last Signal</h2>
+            <p>A gripping new series — streaming now.</p>
+            <div class="pg-cta-row"><button class="pg-btn-fill">▶ Play</button><button class="pg-btn-ghost">＋ My List</button></div>
+          </div>
+        </div>
+        <div class="pg-sec"><h4>Trending now</h4><div class="pg-rowscroll">${[0, 1, 2, 3, 4, 5].map((i) => tile(i + 1, "", 110)).join("")}</div></div>
+        <div class="pg-sec"><h4>Continue watching</h4><div class="pg-rowscroll">${[6, 7, 8, 9].map((i) => tile(i, "", 110)).join("")}</div></div>
+      </div>`;
+
+    case "shopping": return `
+      <div class="pg">
+        <div class="pg-promo" style="--c:${c}"><div><div class="pg-badge light">DEALS OF THE DAY</div><h2>Up to 50% off</h2><button class="pg-btn-fill">Shop now</button></div><div class="pg-promo-img" style="background:${pgGrad(3)}"></div></div>
+        <h4 class="pg-h">Recommended for you</h4>
+        <div class="pg-grid">${SAMPLE.products.map((p, i) => `<div class="pg-card"><div class="pg-card-img" style="background:${pgGrad(i)}"></div><div class="pg-card-name">${p[0]}</div><div class="pg-price">$${p[1]}<span class="pg-rate">★ 4.${5 + (i % 4)}</span></div></div>`).join("")}</div>
+      </div>`;
+
+    case "delivery": return `
+      <div class="pg pg-pad">
+        <h2 class="pg-title">Track your shipment</h2>
+        <div class="pg-track"><input value="${n.toUpperCase().replace(/\s/g, "")}-8842-9173" /><button class="pg-btn-fill">Track</button></div>
+        <div class="pg-steps">${SAMPLE.steps.map((s, i) => `<div class="pg-step ${i <= 2 ? "done" : ""}"><span class="pg-step-dot"></span><span>${s}</span></div>`).join("")}</div>
+        <div class="pg-map">${mapBg(c)}</div>
+        <p class="pg-eta">📦 Estimated delivery: <b>Tomorrow by 8:00 PM</b></p>
+      </div>`;
+
+    case "bank": return `
+      <div class="pg pg-pad">
+        <h2 class="pg-title">Good afternoon, Taylor</h2>
+        <div class="pg-bankcards">
+          <div class="pg-acct" style="--c:${c}"><span class="pg-acct-t">Checking ••4821</span><b>$4,219.55</b><span class="pg-acct-s">Available balance</span></div>
+          <div class="pg-acct alt"><span class="pg-acct-t">Savings ••7730</span><b>$18,940.12</b><span class="pg-acct-s">+$120 interest</span></div>
+        </div>
+        <div class="pg-quick">${["Transfer", "Pay bills", "Deposit", "Cards"].map((a) => `<button class="pg-quick-b">${a}</button>`).join("")}</div>
+        <div class="pg-bankpromo" style="--c:${c}"><div><b>Earn 4.50% APY</b><p>Open a high-yield savings account in minutes.</p></div><span class="pg-bankpromo-i">%</span></div>
+      </div>`;
+
+    case "crypto": return `
+      <div class="pg pg-pad">
+        <div class="pg-cxtop"><div><span class="pg-mut">Portfolio value</span><h2>$12,847.20</h2><span class="pg-up">▲ 3.2% ($398) today</span></div><button class="pg-btn-fill">Buy / Sell</button></div>
+        <div class="pg-chart">${sparkline(c)}</div>
+        <div class="pg-list">${SAMPLE.coins.map((co, i) => `<div class="pg-li">${avatar(co[0], i, "sm")}<div class="pg-li-main"><b>${co[1]}</b><span class="pg-mut">${co[0]}</span></div><span class="pg-li-px">$${co[2]}</span><span class="${co[4] ? "pg-up" : "pg-down"}">${co[4] ? "▲" : "▼"} ${Math.abs(co[3])}%</span></div>`).join("")}</div>
+      </div>`;
+
+    case "wallet": return `
+      <div class="pg pg-pad">
+        <div class="pg-balcard" style="--c:${c}"><span>${n} balance</span><h2>$1,284.50</h2><div class="pg-cta-row"><button class="pg-btn-light">Send</button><button class="pg-btn-light">Request</button><button class="pg-btn-light">Add money</button></div></div>
+        <h4 class="pg-h">Recent activity</h4>
+        <div class="pg-list">${SAMPLE.tx.map((t, i) => `<div class="pg-li"><span class="pg-emoji">${t[0]}</span><div class="pg-li-main"><b>${t[1]}</b><span class="pg-mut">${t[2]}</span></div><span class="${t[3] < 0 ? "pg-down" : "pg-up"}">${t[3] < 0 ? "−" : "+"}$${Math.abs(t[3])}</span></div>`).join("")}</div>
+      </div>`;
+
+    case "email": return `
+      <div class="pg">
+        <div class="pg-emtop"><div class="pg-emsearch">🔍 Search mail</div>${avatar(initialsOf(n), 4, "sm")}</div>
+        <div class="pg-list flush">${SAMPLE.mails.map((m, i) => `<div class="pg-mail ${m[0] ? "unread" : ""}">${avatar(initialsOf(m[1]), i + 2, "sm")}<div class="pg-mail-main"><b>${m[1]}</b><span class="pg-mut">${m[2]}</span></div><span class="pg-mut sm">${m[3]}</span></div>`).join("")}</div>
+      </div>`;
+
+    case "social": return `
+      <div class="pg pg-pad">
+        <div class="pg-compose">${avatar("You", 2, "sm")}<div class="pg-cinput">What's on your mind?</div></div>
+        <div class="pg-post">
+          <div class="pg-post-head">${avatar("AM", 7, "sm")}<div><b>Alex Morgan</b><div class="pg-mut sm">2h · 🌍</div></div></div>
+          <p class="pg-post-text">Had the best weekend at the lake — already counting down to the next one 🌅🛶</p>
+          <div class="pg-post-photo" style="background:${pgGrad(6)}"></div>
+          <div class="pg-post-actions"><span>👍 Like</span><span>💬 Comment</span><span>↪ Share</span></div>
+        </div>
+      </div>`;
+
+    case "gaming": return `
+      <div class="pg">
+        <div class="pg-feature game" style="--c:${c}"><div class="pg-feature-bg" style="background:${pgGrad(5)}"></div><div class="pg-feature-body"><span class="pg-badge">SPECIAL OFFER · −50%</span><h2>Starfall: Odyssey</h2><p>The galaxy is yours to explore.</p><button class="pg-btn-fill">Add to cart — $29.99</button></div></div>
+        <div class="pg-sec"><h4>Popular on ${n}</h4><div class="pg-rowscroll">${SAMPLE.games.map((g, i) => `<div class="pg-thumb tall" style="background:${pgGrad(i)}"><span>${g}</span></div>`).join("")}</div></div>
+      </div>`;
+
+    case "travel": return `
+      <div class="pg pg-pad">
+        <div class="pg-travelbar">📍 Anywhere&nbsp;·&nbsp;Any week&nbsp;·&nbsp;Add guests<button class="pg-btn-fill sm">Search</button></div>
+        <div class="pg-grid">${SAMPLE.places.map((p, i) => `<div class="pg-card"><div class="pg-card-img tall" style="background:${pgGrad(i)}"></div><div class="pg-card-name">${p}</div><div class="pg-price">$${120 + i * 45}<span class="pg-mut"> /night</span><span class="pg-rate">★ 4.9</span></div></div>`).join("")}</div>
+      </div>`;
+
+    case "rideshare": return `
+      <div class="pg">
+        <div class="pg-ridemap">${mapBg(c)}</div>
+        <div class="pg-ridecard">
+          <div class="pg-ridewhere"><span>🟢 Current location</span><span>🏁 Where to?</span></div>
+          <div class="pg-rideopts">${[["🚗", "Economy", "$12", true], ["🚙", "Comfort", "$18", false], ["🚐", "XL", "$24", false]].map((o) => `<div class="pg-rideopt ${o[3] ? "sel" : ""}"><span class="pg-emoji">${o[0]}</span><span>${o[1]}</span><b>${o[2]}</b></div>`).join("")}</div>
+          <button class="pg-btn-fill wide">Request ${n}</button>
+        </div>
+      </div>`;
+
+    case "dev": return `
+      <div class="pg pg-pad">
+        <div class="pg-devtop">${avatar(initialsOf(n), 4, "sm")}<b>your-org</b><span class="pg-mut">/ repositories</span></div>
+        <div class="pg-list">${SAMPLE.repos.map((r, i) => `<div class="pg-repo"><div class="pg-repo-main"><b>${r[0]}</b><span class="pg-mut">${r[1]}</span></div><span class="pg-lang"><span class="pg-dot" style="background:${PG_GRADS[i][0]}"></span>${r[2]}</span></div>`).join("")}</div>
+      </div>`;
+
+    default: // work / SaaS
+      return `
+      <div class="pg">
+        <div class="pg-wkhero" style="--c:${c}"><div><h2>Welcome back to ${n}</h2><p>Your team's work, all in one place.</p><button class="pg-btn-fill">Open dashboard</button></div><div class="pg-wkillus">${sparkline(c)}</div></div>
+        <div class="pg-tiles">${[["📊", "Reports"], ["📁", "Files"], ["✅", "Tasks"], ["📅", "Calendar"], ["💬", "Messages"], ["⚙️", "Settings"]].map((t) => `<div class="pg-tile"><span class="pg-tile-i">${t[0]}</span><span>${t[1]}</span></div>`).join("")}</div>
+      </div>`;
   }
 }
 
@@ -583,10 +719,11 @@ BRANDS.forEach((b) => {
   if (r) {
     const color = b.color, mono = r.mono, fg = r.monoFg || "#fff";
     b.name = r.name;
+    if (KIND_OVERRIDE[r.name]) b.kind = KIND_OVERRIDE[r.name];
     b.nameHtml = "";          // plain fictional name in the nav
     b.navExtra = "";          // drop brand-specific nav extras
     b.mark = () => monogram(mono, color, fg);
-    b.home = () => genericHome(b);
+    b.home = () => siteHome(b);
   }
 });
 
