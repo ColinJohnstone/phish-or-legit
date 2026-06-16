@@ -13,7 +13,7 @@
   <meta property="og:description" content="Two near-identical login pages. One steals your password. Can your eyes tell them apart? (Spoiler: almost nobody can.) Then try a phishing-proof passkey." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <div id="app">
@@ -90,9 +90,8 @@
         <div class="menu-foot">
           <p id="lifetime-stats" class="lifetime-stats"></p>
           <div class="menu-links">
-            <button id="btn-how" class="link-btn">How do passkeys stop phishing?</button>
-            <span class="dot">•</span>
-            <a href="https://github.com/ColinJohnstone/phish-or-legit" target="_blank" rel="noopener">GitHub</a>
+            <button id="btn-how" class="btn btn-ghost btn-sm">🛡️ How do passkeys stop phishing?</button>
+            <a href="https://github.com/ColinJohnstone/phish-or-legit" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">GitHub ↗</a>
           </div>
         </div>
       </div>
@@ -101,7 +100,7 @@
     <!-- ───────────── ROUND SCREEN ───────────── -->
     <section id="screen-round" class="screen">
       <header class="round-bar">
-        <button id="btn-quit" class="link-btn">‹ Quit</button>
+        <button id="btn-quit" class="btn btn-ghost btn-sm btn-quit">‹ Quit</button>
         <div class="round-meta">
           <span id="round-counter">Round 1 / 5</span>
           <span class="dot">•</span>
@@ -131,7 +130,7 @@
         <h2 id="result-title"></h2>
         <p id="result-body"></p>
         <div class="reveal" id="result-reveal"></div>
-        <button id="btn-passkey-demo" class="link-btn result-demo-btn">🛡️ See what a passkey would do here</button>
+        <button id="btn-passkey-demo" class="btn btn-ghost result-demo-btn">🛡️ See what a passkey would do here</button>
         <button id="btn-next" class="btn btn-primary">Next round ›</button>
       </div>
     </div>
@@ -209,6 +208,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

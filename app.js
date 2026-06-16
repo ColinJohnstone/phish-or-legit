@@ -572,7 +572,32 @@ const PG_GRADS = [
   ["#42a5f5", "#1565c0"], ["#ffca5f", "#ef6c00"], ["#7e8cff", "#3949ab"],
 ];
 function pgGrad(i) { const g = PG_GRADS[((i % PG_GRADS.length) + PG_GRADS.length) % PG_GRADS.length]; return `linear-gradient(135deg, ${g[0]}, ${g[1]})`; }
-function tile(i, label, h) { return `<div class="pg-thumb" style="background:${pgGrad(i)};height:${h || 92}px">${label ? `<span>${label}</span>` : ""}</div>`; }
+function tile(i, label, h, ic) { return `<div class="pg-thumb" style="background:${pgGrad(i)};height:${h || 92}px"><span class="pg-photo-ic">${ic || "🎬"}</span>${label ? `<span class="pg-thumb-cap">${label}</span>` : ""}</div>`; }
+// A "photo" subject emoji centred on a gradient so image cells read as real pictures
+function photoIc(ic) { return `<span class="pg-photo-ic">${ic}</span>`; }
+// CSS/SVG sunset-over-water scene for the social post photo (looks like a real snapshot)
+function photoScene() {
+  return `<svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice" class="pg-scene" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="pgSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff8f5e"/><stop offset="0.42" stop-color="#ffd08a"/>
+        <stop offset="0.58" stop-color="#ffe9c4"/><stop offset="1" stop-color="#a9d4d8"/>
+      </linearGradient>
+      <linearGradient id="pgWater" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#cfe6e3"/><stop offset="1" stop-color="#3f7e8f"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="112" fill="url(#pgSky)"/>
+    <circle cx="200" cy="96" r="32" fill="#fff4d8"/>
+    <path d="M0 112 L70 78 L130 100 L200 64 L270 98 L340 80 L400 104 L400 112 Z" fill="#587486" opacity="0.55"/>
+    <rect y="112" width="400" height="68" fill="url(#pgWater)"/>
+    <ellipse cx="200" cy="124" rx="28" ry="6" fill="#fff4d8" opacity="0.7"/>
+    <g stroke="#ffffff" stroke-opacity="0.3" stroke-width="2" stroke-linecap="round">
+      <line x1="46" y1="134" x2="120" y2="134"/><line x1="252" y1="146" x2="346" y2="146"/>
+      <line x1="96" y1="162" x2="210" y2="162"/><line x1="280" y1="166" x2="356" y2="166"/>
+    </g>
+  </svg>`;
+}
 function avatar(txt, i, cls) { return `<span class="pg-av ${cls || ""}" style="background:${pgGrad(i)}">${txt}</span>`; }
 function initialsOf(n) { return (n.replace(/[^A-Za-z ]/g, "").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase()) || "X"; }
 function sparkline(color) {
@@ -589,9 +614,9 @@ function mapBg(color) {
 }
 
 const SAMPLE = {
-  products: [["Wireless headphones", 79], ["Smart watch", 149], ["4K webcam", 64], ["Mech keyboard", 99], ["Desk lamp", 32], ["USB-C hub", 45]],
-  games: ["Starfall", "Apex Drift", "Mythos", "Pixel Raid", "Velocity"],
-  places: ["Cabin in the pines", "Beachfront villa", "City loft", "Mountain chalet"],
+  products: [["Wireless headphones", 79, "🎧"], ["Smart watch", 149, "⌚"], ["4K webcam", 64, "📷"], ["Mech keyboard", 99, "⌨️"], ["Desk lamp", 32, "💡"], ["USB-C hub", 45, "🔌"]],
+  games: [["Starfall", "🚀"], ["Apex Drift", "🏎️"], ["Mythos", "🐉"], ["Pixel Raid", "👾"], ["Velocity", "⚡"]],
+  places: [["Cabin in the pines", "🌲"], ["Beachfront villa", "🏖️"], ["City loft", "🏙️"], ["Mountain chalet", "🏔️"]],
   coins: [["BTC", "Bitwave", "61,420", 2.4, true], ["ETH", "Ethon", "3,180", 1.1, true], ["SOL", "Solo", "148", -0.6, false], ["ADA", "Cardia", "0.62", 0.9, true]],
   mails: [[1, "Billing Team", "Your invoice is ready", "9:14 AM"], [1, "Maya Chen", "Re: project kickoff", "8:02 AM"], [0, "Newsletter", "5 tips for the week", "Yesterday"], [0, "Security", "New sign-in to your account", "Mon"]],
   tx: [["☕", "Corner Café", "Today", -4.5], ["💸", "From Jordan P.", "Yesterday", 25], ["🛒", "Greengrocer", "Yesterday", -38.2], ["⛽", "Shell Station", "Mon", -52]],
@@ -620,9 +645,9 @@ function siteHome(b) {
 
     case "shopping": return `
       <div class="pg">
-        <div class="pg-promo" style="--c:${c}"><div><div class="pg-badge light">DEALS OF THE DAY</div><h2>Up to 50% off</h2><button class="pg-btn-fill">Shop now</button></div><div class="pg-promo-img" style="background:${pgGrad(3)}"></div></div>
+        <div class="pg-promo" style="--c:${c}"><div><div class="pg-badge light">DEALS OF THE DAY</div><h2>Up to 50% off</h2><button class="pg-btn-fill">Shop now</button></div><div class="pg-promo-img" style="background:${pgGrad(3)}">${photoIc("🛍️")}</div></div>
         <h4 class="pg-h">Recommended for you</h4>
-        <div class="pg-grid">${SAMPLE.products.map((p, i) => `<div class="pg-card"><div class="pg-card-img" style="background:${pgGrad(i)}"></div><div class="pg-card-name">${p[0]}</div><div class="pg-price">$${p[1]}<span class="pg-rate">★ 4.${5 + (i % 4)}</span></div></div>`).join("")}</div>
+        <div class="pg-grid">${SAMPLE.products.map((p, i) => `<div class="pg-card"><div class="pg-card-img" style="background:${pgGrad(i)}">${photoIc(p[2])}</div><div class="pg-card-name">${p[0]}</div><div class="pg-price">$${p[1]}<span class="pg-rate">★ 4.${5 + (i % 4)}</span></div></div>`).join("")}</div>
       </div>`;
 
     case "delivery": return `
@@ -671,7 +696,7 @@ function siteHome(b) {
         <div class="pg-post">
           <div class="pg-post-head">${avatar("AM", 7, "sm")}<div><b>Alex Morgan</b><div class="pg-mut sm">2h · 🌍</div></div></div>
           <p class="pg-post-text">Had the best weekend at the lake — already counting down to the next one 🌅🛶</p>
-          <div class="pg-post-photo" style="background:${pgGrad(6)}"></div>
+          <div class="pg-post-photo">${photoScene()}</div>
           <div class="pg-post-actions"><span>👍 Like</span><span>💬 Comment</span><span>↪ Share</span></div>
         </div>
       </div>`;
@@ -679,13 +704,13 @@ function siteHome(b) {
     case "gaming": return `
       <div class="pg">
         <div class="pg-feature game" style="--c:${c}"><div class="pg-feature-bg" style="background:${pgGrad(5)}"></div><div class="pg-feature-body"><span class="pg-badge">SPECIAL OFFER · −50%</span><h2>Starfall: Odyssey</h2><p>The galaxy is yours to explore.</p><button class="pg-btn-fill">Add to cart — $29.99</button></div></div>
-        <div class="pg-sec"><h4>Popular on ${n}</h4><div class="pg-rowscroll">${SAMPLE.games.map((g, i) => `<div class="pg-thumb tall" style="background:${pgGrad(i)}"><span>${g}</span></div>`).join("")}</div></div>
+        <div class="pg-sec"><h4>Popular on ${n}</h4><div class="pg-rowscroll">${SAMPLE.games.map((g, i) => `<div class="pg-thumb tall" style="background:${pgGrad(i)}"><span class="pg-photo-ic">${g[1]}</span><span class="pg-thumb-cap">${g[0]}</span></div>`).join("")}</div></div>
       </div>`;
 
     case "travel": return `
       <div class="pg pg-pad">
         <div class="pg-travelbar">📍 Anywhere&nbsp;·&nbsp;Any week&nbsp;·&nbsp;Add guests<button class="pg-btn-fill sm">Search</button></div>
-        <div class="pg-grid">${SAMPLE.places.map((p, i) => `<div class="pg-card"><div class="pg-card-img tall" style="background:${pgGrad(i)}"></div><div class="pg-card-name">${p}</div><div class="pg-price">$${120 + i * 45}<span class="pg-mut"> /night</span><span class="pg-rate">★ 4.9</span></div></div>`).join("")}</div>
+        <div class="pg-grid">${SAMPLE.places.map((p, i) => `<div class="pg-card"><div class="pg-card-img tall" style="background:${pgGrad(i)}">${photoIc(p[1])}</div><div class="pg-card-name">${p[0]}</div><div class="pg-price">$${120 + i * 45}<span class="pg-mut"> /night</span><span class="pg-rate">★ 4.9</span></div></div>`).join("")}</div>
       </div>`;
 
     case "rideshare": return `
@@ -1368,6 +1393,7 @@ function buildWindow(brand, isReal) {
       <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
       <div class="urlbar" title="${scheme}${domain}">
         ${lock}
+        <span class="favicon">${brand.mark()}</span>
         <span class="urladdr"><span class="host">${scheme}${hostPart}</span><span class="urlpath">${pathPart}</span></span>
       </div>
     </div>
