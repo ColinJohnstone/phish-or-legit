@@ -528,6 +528,7 @@ const state = {
   deck: [],          // random subset of BRANDS for this game
   realIsLeft: true,  // which window is the real one this round
   resolved: false,   // round already decided?
+  busy: false,       // a passkey ceremony is in flight (block re-clicks)
   pickedReal: false, // did the player click the genuine site this round?
   streak: 0,         // consecutive correct answers
   results: [],       // per-round { difficulty, correct } for the summary
@@ -1034,7 +1035,6 @@ function startGame(mode) {
   state.deck = drawDeck(eligible, state.totalRounds)
     .sort((a, b) => (rank[a.difficulty] || 1) - (rank[b.difficulty] || 1));
   updateStreak();
-  Sound.startMusic();
   Sound.sfx("start");
   show("#screen-round");
   renderRound();
@@ -1042,6 +1042,7 @@ function startGame(mode) {
 
 function renderRound() {
   state.resolved = false;
+  state.busy = false;
   state.realIsLeft = Math.random() < 0.5;
   const brand = state.deck[state.round];
 
@@ -1141,17 +1142,21 @@ function buildWindow(brand, isReal) {
     </div>
   `;
 
-  win.querySelector('[data-act="signin"]').addEventListener("click", (e) => {
-    e.stopPropagation();
-    onSignIn(win, isReal, brand);
+  // Any button on the page — the nav "Sign in" OR the hero "Log in" /
+  // "Continue" / "Get Started" call-to-action — triggers the sign-in.
+  win.addEventListener("click", (e) => {
+    if (e.target.closest("button")) {
+      e.stopPropagation();
+      onSignIn(win, isReal, brand);
+    }
   });
 
   return win;
 }
 
-// Single entry point for the "Sign in" button in either mode.
+// Single entry point for any sign-in/login button, in either mode.
 function onSignIn(win, isReal, brand) {
-  if (state.resolved) return;
+  if (state.resolved || state.busy) return;
   Sound.sfx("pick");
   if (state.mode === "eyes") onEyesPick(win, isReal);
   else onPasskeyAttempt(win, isReal, brand);
@@ -1202,6 +1207,7 @@ function onEyesPick(win, isReal) {
 async function onPasskeyAttempt(win, isReal, brand) {
   if (state.resolved) return;
   stopTimer();
+  state.busy = true;
 
   if (!isReal) {
     // Actually ask the browser for a passkey. With a real authenticator
@@ -1251,6 +1257,7 @@ async function onPasskeyAttempt(win, isReal, brand) {
   btn.textContent = "🔑 Sign in";
   if (!ok) {
     // User cancelled the OS prompt — let them try again.
+    state.busy = false;
     return;
   }
   state.resolved = true;
