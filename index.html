@@ -16,7 +16,7 @@
   <!-- Apply saved/system theme before first paint (no flash of dark).
        External (not inline) so the CSP can stay strict: script-src 'self'. -->
   <script src="theme-init.js?v=10"></script>
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=19" />
 </head>
 <body>
   <div id="app">
@@ -99,6 +99,13 @@
           </div>
           <p class="credit">Created by <a href="https://github.com/ColinJohnstone" target="_blank" rel="noopener">Colin Johnstone</a></p>
         </div>
+
+        <section class="tech-deepdive" id="tech-deepdive">
+          <h2 class="tech-dd-title">The phishing playbook</h2>
+          <p class="tech-dd-sub">Every trick this game throws at you, and exactly how it fools the eye. Tap any one to expand.</p>
+          <div class="tech-dd-list" id="tech-dd-list"></div>
+          <p class="tech-dd-foot">The defence against all of them is the same: a <b>device-bound passkey</b> checks the real domain for you and refuses to sign in on a look-alike — so you never have to spot the trick yourself.</p>
+        </section>
       </div>
     </section>
 
@@ -213,6 +220,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

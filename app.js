@@ -1261,6 +1261,95 @@ const FAMILY_INFO = {
   other: { label: "Look-alike sites", tip: "Always verify the domain before you sign in." },
 };
 
+// In-depth guide to every technique the game features, rendered as an
+// accordion on the home screen. `fake` highlights the malicious part with
+// <span class="tdiff">…</span>.
+const TECH_GUIDE = [
+  { ic: "🔤", label: "Missing letter (omission)", tier: "easy",
+    how: "A single character is quietly dropped from the brand name. We recognise familiar words by their overall shape, not letter by letter, so your brain silently fills the gap back in and reads the genuine name.",
+    tell: "Spell the domain out one letter at a time.",
+    real: "linkup.com", fake: 'lin<span class="tdiff">·</span>up.com <span class="tnote">(no “k”)</span>' },
+  { ic: "🔁", label: "Swapped letters (transposition)", tier: "medium",
+    how: "Two neighbouring letters trade places. Every correct letter is still present, just reordered, so the word reads almost normally at speed.",
+    tell: "Check the order of letters in the middle of the name.",
+    real: "snapgram.com", fake: 'sn<span class="tdiff">pa</span>gram.com' },
+  { ic: "⏩", label: "Doubled letter", tier: "medium",
+    how: "An extra copy of a letter is slipped in. Repeated letters are hard to count at a glance, so the duplicate hides in plain sight.",
+    tell: "Watch for a letter that appears one too many times.",
+    real: "chirpy.com", fake: 'chir<span class="tdiff">p</span>py.com' },
+  { ic: "🔢", label: "Digit for a letter (substitution)", tier: "easy",
+    how: "A number stands in for a look-alike letter — 0 for o, 1 for l, 4 for a. Obvious when you read it, invisible when you skim.",
+    tell: "Numbers don’t belong in most brand names.",
+    real: "snapzy.com", fake: 'sn<span class="tdiff">4</span>pzy.com' },
+  { ic: "🌐", label: "Wrong ending (TLD)", tier: "medium",
+    how: "Same brand name, different ending — “harmony.support” instead of “harmony.com”. Every top-level domain is a separate registration anyone can buy, so the name alone guarantees nothing about who owns the site.",
+    tell: "Confirm the exact ending the brand really uses.",
+    real: "harmony.com", fake: 'harmony.<span class="tdiff">support</span>' },
+  { ic: "⌨️", label: "TLD typo (.cm / .co)", tier: "medium",
+    how: "The ending is off by one character — “.cm” (Cameroon) or “.co” instead of “.com”. A classic trap for fast fingers and fast eyes alike.",
+    tell: "Read the very end of the domain carefully.",
+    real: "brand.com", fake: 'brand.<span class="tdiff">cm</span>' },
+  { ic: "🧩", label: "Look-alike domain (combosquat)", tier: "medium",
+    how: "Extra words or hyphens are bolted onto the brand to build a brand-new domain — “pearl-id-verify.com”. Registering that is trivial; the brand appearing inside it says nothing about who runs the page.",
+    tell: "The registrable domain is just before the first single “/”. Added words make it a different owner.",
+    real: "pearl.com", fake: 'pearl<span class="tdiff">-id-verify</span>.com' },
+  { ic: "🔗", label: "Run-together “www” (missing dot)", tier: "medium",
+    how: "There’s no dot after “www”: “wwwpinly.com”. That fuses it into a single label — a completely different domain from “www.pinly.com”.",
+    tell: "Look for the dot right after “www”.",
+    real: "www.pinly.com", fake: 'www<span class="tdiff">●</span>pinly.com <span class="tnote">(no dot)</span>' },
+  { ic: "🪆", label: "Subdomain stuffing", tier: "hard",
+    how: "The brand is placed as a label in front of the attacker’s real domain: “harborbank.com.update-auth.info”. Only the two labels just before the first single “/” actually own the site.",
+    tell: "Read the domain right-to-left — the truth is the last two labels.",
+    real: "harborbank.com", fake: 'harborbank.com.<span class="tdiff">update-auth.info</span>' },
+  { ic: "🛣️", label: "Brand hidden in the path", tier: "hard",
+    how: "The brand appears after the first “/”, in the path: “account-billing.net/streamly/login”. Everything after the domain is chosen by whoever owns that domain, so a brand there means nothing.",
+    tell: "Only the part before the first single “/” identifies the site.",
+    real: "streamly.com", fake: '<span class="tdiff">account-billing.net</span>/streamly/login' },
+  { ic: "🎭", label: "The “@” trick", tier: "hard",
+    how: "Everything before an “@” in a URL is treated as a username and discarded. “accounts.tradr.com@secure-wallet.io” actually loads secure-wallet.io — the trusted-looking part is pure decoration.",
+    tell: "If there’s an “@” in the address, the real site is whatever follows it.",
+    real: "tradr.com", fake: 'accounts.tradr.com<span class="tdiff">@secure-wallet.io</span>' },
+  { ic: "🔬", label: "Blended letters (rn → m)", tier: "hard",
+    how: "Two letters sit side by side to impersonate a third: “rn” looks just like “m”. “valuernart” reads as “valuemart” at a glance.",
+    tell: "Zoom in on any “m” — is it really “r” + “n”?",
+    real: "valuemart.com", fake: 'value<span class="tdiff">rn</span>art.com' },
+  { ic: "🔎", label: "Look-alike letters (capital-I, l, v…)", tier: "hard",
+    how: "Different characters share a shape in common fonts — capital-I vs lowercase-l, l vs i, v vs y. “cIoudforce” uses a capital I where the “l” should be.",
+    tell: "Suspicious of a letter? Select the text or retype it to see its true form.",
+    real: "cloudforce.com", fake: 'c<span class="tdiff">I</span>oudforce.com' },
+  { ic: "🥷", label: "Hidden character (homoglyph)", tier: "hard",
+    how: "A letter is swapped for an identical-looking one from another alphabet — a Cyrillic “о” or Greek look-alike. To your eye it’s pixel-perfect; a real browser unmasks it as a confusing “xn--…” (Punycode) address in the bar.",
+    tell: "If a familiar name suddenly renders as “xn--”, it’s a fake.",
+    real: "brand.com", fake: 'br<span class="tdiff">а</span>nd.com <span class="tnote">(Cyrillic “а”)</span>' },
+  { ic: "🔓", label: "Not secure (http)", tier: "easy",
+    how: "The page loads over plain “http://” with no padlock, so anything you type travels unencrypted and readable. It’s often paired with a look-alike domain for a double hit.",
+    tell: "No padlock means never type a password.",
+    real: "https://paypeer.com", fake: '<span class="tdiff">http://</span>paypeer-account.com' },
+];
+
+function renderTechniques() {
+  const host = document.getElementById("tech-dd-list");
+  if (!host) return;
+  const tierLabel = { easy: "EASY", medium: "MEDIUM", hard: "HARD" };
+  host.innerHTML = TECH_GUIDE.map((t) => `
+    <details class="tech-item">
+      <summary>
+        <span class="tech-ic">${t.ic}</span>
+        <span class="tech-name">${t.label}</span>
+        <span class="tech-tier diff-${t.tier}">${tierLabel[t.tier]}</span>
+        <span class="tech-chev">⌄</span>
+      </summary>
+      <div class="tech-body">
+        <p class="tech-how">${t.how}</p>
+        <div class="tech-ex">
+          <div><span class="tech-ex-k">Real</span><code class="ok">${t.real}</code></div>
+          <div><span class="tech-ex-k">Fake</span><code class="bad">${t.fake}</code></div>
+        </div>
+        <p class="tech-tell"><b>Spot it:</b> ${t.tell}</p>
+      </div>
+    </details>`).join("");
+}
+
 function allowedDifficulties(pref) {
   if (pref === "easymed") return new Set(["easy", "medium"]);
   if (pref === "medhard") return new Set(["medium", "hard"]);
@@ -1349,7 +1438,13 @@ function renderRound() {
   $("#windows").appendChild(w2);
   startTimer();
 
-  const inspect = " <span class=\"muted\">(hover a URL for the full address · keys 1 / 2)</span>";
+  // Touch / mobile-width gets tap guidance; pointer devices get hover/keys.
+  // Width is included because the stacked mobile layout kicks in at ≤880px
+  // and pointer-type media queries aren't reliable under device emulation.
+  const touch = window.matchMedia("(hover: none), (pointer: coarse), (max-width: 880px)").matches;
+  const inspect = touch
+    ? " <span class=\"muted\">(tap a tab’s address bar to reveal the full link)</span>"
+    : " <span class=\"muted\">(hover a URL for the full address · keys 1 / 2)</span>";
   const eyesHint =
     brand.difficulty === "easy"
       ? "The pages are identical — the address bar is your only clue, and this one's catchable. Find the real " + brand.name + "."
@@ -1417,6 +1512,17 @@ function buildWindow(brand, isReal) {
       e.stopPropagation();
       onSignIn(win, isReal, brand);
     }
+  });
+
+  // Touch has no hover, so tapping the address bar reveals the full URL
+  // (it wraps instead of clipping). This is inspection only — it never
+  // counts as an answer; only the Sign-in button decides the round.
+  const urlbar = win.querySelector(".urlbar");
+  urlbar.setAttribute("role", "button");
+  urlbar.setAttribute("aria-label", "Reveal the full web address");
+  urlbar.addEventListener("click", (e) => {
+    e.stopPropagation();
+    urlbar.classList.toggle("revealed");
   });
 
   return win;
@@ -1871,6 +1977,7 @@ function applyTheme(t) {
 function init() {
   loadStoredPasskey();
   renderLifetime();
+  renderTechniques();
   applyTheme(currentTheme()); // sync the toggle icon to the theme set in <head>
 
   $("#btn-register").addEventListener("click", registerPasskey);

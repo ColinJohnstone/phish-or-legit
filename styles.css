@@ -23,8 +23,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(165deg, #141a2b 0%, #0f1320 52%, #0b0d15 100%);
-  background-attachment: fixed;
+  background-color: #0b0d15;   /* solid fallback so a tall scrolled page never shows a gap */
+  background-image: linear-gradient(165deg, #141a2b 0%, #0f1320 52%, #0b0d15 100%);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
@@ -69,7 +69,8 @@ html[data-theme="light"] {
   --shadow: 0 18px 50px rgba(28, 40, 72, 0.16);
 }
 html[data-theme="light"], html[data-theme="light"] body {
-  background: linear-gradient(165deg, #eef3fb 0%, #e6ecf6 52%, #dde4f0 100%);
+  background-color: #e6ecf6;      /* solid fallback (see base rule) */
+  background-image: linear-gradient(165deg, #eef3fb 0%, #e6ecf6 52%, #dde4f0 100%);
 }
 html[data-theme="light"] body::before {
   background:
@@ -413,6 +414,47 @@ a:focus-visible,
 .credit a { color: inherit; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--muted) 45%, transparent); }
 .credit a:hover { color: var(--text); opacity: 1; }
 
+/* The home screen now has content below the menu, so it scrolls top-aligned;
+   margin-block:auto keeps the menu centred when everything still fits. */
+#screen-title.active { justify-content: flex-start; }
+#screen-title .title-wrap { margin-block: auto; width: 100%; }
+
+/* ── Phishing techniques deep-dive (home screen) ── */
+.tech-deepdive { margin-top: 34px; padding-top: 28px; border-top: 1px solid var(--border); text-align: left; }
+.tech-dd-title { font-size: 1.45rem; margin: 0 0 4px; text-align: center; }
+.tech-dd-sub { color: var(--muted); margin: 0 auto 18px; max-width: 520px; text-align: center; font-size: 0.92rem; line-height: 1.5; }
+.tech-dd-list { display: flex; flex-direction: column; gap: 8px; }
+.tech-item { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.tech-item[open] { border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); }
+.tech-item summary {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+  cursor: pointer; list-style: none; user-select: none;
+}
+.tech-item summary::-webkit-details-marker { display: none; }
+.tech-item summary:hover { background: var(--panel-2); }
+.tech-ic { font-size: 1.2rem; flex-shrink: 0; }
+.tech-name { flex: 1; font-weight: 600; font-size: 0.96rem; line-height: 1.3; }
+.tech-tier { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; flex-shrink: 0; }
+.tech-chev { color: var(--muted); transition: transform 0.2s; flex-shrink: 0; font-size: 1.1rem; }
+.tech-item[open] .tech-chev { transform: rotate(180deg); }
+.tech-body { padding: 0 16px 16px; }
+.tech-how { margin: 0 0 12px; color: var(--muted); line-height: 1.55; font-size: 0.9rem; }
+.tech-ex {
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 9px;
+  padding: 10px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem; line-height: 1.85; display: grid; gap: 2px; overflow-x: auto;
+}
+.tech-ex-k { display: inline-block; width: 40px; color: var(--muted); }
+.tech-ex code { font-family: inherit; white-space: nowrap; }
+.tech-ex code.ok { color: var(--green); }
+.tech-ex code.bad { color: var(--red); }
+.tech-ex .tdiff { background: rgba(255, 93, 108, 0.28); border-radius: 3px; padding: 0 2px; }
+.tech-ex .tnote { color: var(--muted); }
+.tech-tell { margin: 12px 0 0; font-size: 0.88rem; line-height: 1.5; color: var(--muted); }
+.tech-tell b { color: var(--text); }
+.tech-dd-foot { margin: 20px auto 0; max-width: 560px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
+.tech-dd-foot b { color: var(--text); }
+
 /* Shrink the hero on short screens so the whole menu still fits */
 @media (max-height: 720px) {
   #screen-title .title-wrap { gap: 12px; }
@@ -559,6 +601,15 @@ a:focus-visible,
 @media (max-width: 820px) { .urlbar .urladdr { max-width: 56vw; } }
 .urlbar .host { white-space: nowrap; }
 .urlbar .urlpath { color: #9aa3b2; white-space: nowrap; }
+
+/* Tap (or click) the address bar to reveal the full URL — the touch-friendly
+   replacement for hovering. Both bars stay clipped by default so URL length
+   is never a tell; revealing one wraps its full address into view. */
+.urlbar { cursor: pointer; }
+.urlbar.revealed { background: #fff8dc; border-color: #e3c14e; }
+.urlbar.revealed .urladdr { max-width: none; white-space: normal; overflow: visible; word-break: break-all; }
+.urlbar.revealed .host,
+.urlbar.revealed .urlpath { white-space: normal; word-break: break-all; }
 /* Favicon in the address bar (brand monogram) */
 .urlbar .favicon {
   width: 16px;
@@ -598,7 +649,9 @@ a:focus-visible,
   }
   .scenario { font-size: 0.9rem; padding: 11px 14px; line-height: 1.4; margin: 0; }
   .timer-wrap { margin: 0; }
-  .hint { display: none; }   /* "hover a URL … · keys 1/2" is meaningless on touch */
+  /* Keep the hint on mobile — it now tells you to TAP the address bar
+     (the touch replacement for hover), which players genuinely need. */
+  .hint { font-size: 0.78rem; margin: 0; padding: 0 6px; line-height: 1.35; }
 
   .windows {
     display: flex;
