@@ -582,32 +582,45 @@ a:focus-visible,
 .pg-post:hover { border-color: rgba(127,127,127,0.32); }
 .pg-li:hover { background: rgba(127,127,127,0.04); }
 
-/* Mobile responsive layout — stack the two sites as two distinct windows.
-   The address bar (the only real tell) stays fully visible on each; the body
-   is capped so BOTH windows fit on screen for side-by-side-style comparison
-   instead of one giant scroll. */
+/* Mobile responsive layout — the WHOLE round fits one screen, no scrolling.
+   The round screen is a fixed-height (100dvh) flex column: the bar + scenario
+   take their natural height, then the two stacked windows flex to fill all the
+   remaining space. Each window keeps its address bar + nav pinned and clips the
+   site body to whatever room is left, so both URLs are always on screen. */
 @media (max-width: 880px) {
+  #screen-round.active {
+    height: 100vh;            /* fallback for browsers without dvh */
+    height: 100dvh;           /* excludes mobile browser chrome */
+    min-height: 0;
+    overflow: hidden;         /* hard guarantee: never scrolls */
+    padding: 10px 14px 12px;
+    gap: 8px;
+  }
+  .scenario { font-size: 0.9rem; padding: 11px 14px; line-height: 1.4; margin: 0; }
+  .timer-wrap { margin: 0; }
+  .hint { display: none; }   /* "hover a URL … · keys 1/2" is meaningless on touch */
+
   .windows {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 12px;
+    margin: 0;
   }
-  .window {
-    width: 100%;
-    max-width: 100%;
-  }
+  .window { width: 100%; max-width: 100%; flex: 1 1 0; min-height: 0; }
+  .win-chrome, .site-nav { flex-shrink: 0; }   /* address bar + nav never clip */
   .site-nav { font-size: 0.92rem; padding: 10px 12px; }
-  /* Cap the body and let the window shrink to fit it (drop the 330px floor)
-     so there's no empty band below the clipped content. Higher specificity
-     than the base `.site` rule, which is defined later in the file. */
-  .windows .site { min-height: 0; }
-  .site-hero { padding: 14px 14px 16px; max-height: 210px; overflow: hidden; }
+  .windows .site { min-height: 0; flex: 1 1 auto; overflow: hidden; }
+  .site-hero { padding: 14px 14px 16px; flex: 1 1 auto; min-height: 0; max-height: none; overflow: hidden; }
   .pg-grid { grid-template-columns: repeat(2, 1fr); }
   .pg-rowscroll { flex-wrap: wrap; }
 }
 
 @media (max-width: 480px) {
-  .site-hero { padding: 12px 12px 14px; max-height: 188px; }
+  #screen-round.active { padding: 8px 10px 10px; }
+  .scenario { font-size: 0.85rem; padding: 10px 12px; }
+  .site-hero { padding: 10px 12px; }
   .pg-grid { grid-template-columns: 1fr; }
   .pg-cards { grid-template-columns: 1fr; }
   .site-nav .nav-right { gap: 6px; font-size: 0.85rem; }
