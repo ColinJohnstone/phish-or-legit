@@ -414,10 +414,12 @@ a:focus-visible,
 .credit a { color: inherit; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--muted) 45%, transparent); }
 .credit a:hover { color: var(--text); opacity: 1; }
 
-/* The home screen now has content below the menu, so it scrolls top-aligned;
-   margin-block:auto keeps the menu centred when everything still fits. */
-#screen-title.active { justify-content: flex-start; }
-#screen-title .title-wrap { margin-block: auto; width: 100%; }
+/* The home screen now has content below the menu, so use normal block flow
+   (not flex centring, which clips the top of taller-than-viewport content).
+   margin:0 auto keeps the column horizontally centred; it scrolls from the
+   top. Overrides the flex `.screen.active` for the title only. */
+#screen-title.active { display: block; }
+#screen-title .title-wrap { margin: 0 auto; }
 
 /* ── Phishing techniques deep-dive (home screen) ── */
 .tech-deepdive { margin-top: 34px; padding-top: 28px; border-top: 1px solid var(--border); text-align: left; }
