@@ -377,34 +377,50 @@ a:focus-visible,
 .menu-head h1 { font-size: clamp(1.9rem, 5vw, 2.9rem); margin: 2px 0 8px; }
 .menu-head .tagline { margin: 0 auto; max-width: 580px; font-size: 0.98rem; }
 
-.menu-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: stretch;
+/* Single, narrow column: register → play → (optional) tweak settings.
+   One clear path top-to-bottom instead of a dense two-column control panel. */
+.menu-primary {
+  max-width: 440px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   text-align: left;
 }
 @media (max-width: 760px) {
-  .menu-grid { grid-template-columns: 1fr; }
   #screen-title .title-wrap { gap: 12px; }
   .menu-head .hero-badge { font-size: 32px; }
   .menu-head h1 { font-size: 1.85rem; margin: 0 0 5px; }
   .menu-head .tagline { font-size: 0.9rem; line-height: 1.45; }
-  .menu-grid .passkey-panel { padding: 14px; }
-  .menu-config { gap: 9px; }
+  .menu-primary .passkey-panel { padding: 14px; }
 }
-.menu-grid .passkey-panel { margin: 0; padding: 16px; }
-.menu-grid .passkey-panel__head { margin-bottom: 12px; }
+.menu-primary .passkey-panel { margin: 0; padding: 18px; }
+.menu-primary .passkey-panel__head { margin-bottom: 12px; }
 .key-actions { flex-direction: row; gap: 8px; }
 .key-actions #btn-register { flex: 1; }
 .key-actions #btn-test-passkey { white-space: nowrap; }
+@media (max-width: 420px) { .key-actions { flex-direction: column; } }
 
-.menu-config { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
-.menu-config .rounds-select { margin: 0; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; }
-.menu-config .rounds-label { min-width: 70px; flex-shrink: 0; }
-.menu-config .seg { flex: 1; display: flex; }
-.menu-config .seg-btn { flex: 1; padding: 7px 6px; font-size: 0.8rem; text-align: center; }
-.menu-config .mode-buttons { margin: 6px 0 0; gap: 12px; }
+/* Collapsed by default — rounds/difficulty/timer are secondary to the two
+   decisions that actually matter (get a passkey, then play). */
+.game-options { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.game-options[open] { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+.game-options summary {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  cursor: pointer; list-style: none; user-select: none; font-size: 0.9rem;
+}
+.game-options summary::-webkit-details-marker { display: none; }
+.game-options summary:hover { background: var(--panel-2); }
+.go-label { font-weight: 600; flex-shrink: 0; }
+.go-summary { color: var(--muted); font-size: 0.82rem; flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.go-chev { color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+.game-options[open] .go-chev { transform: rotate(180deg); }
+.go-body { padding: 2px 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.go-body .rounds-select { margin: 0; justify-content: flex-start; gap: 10px; flex-wrap: nowrap; }
+.go-body .rounds-label { min-width: 70px; flex-shrink: 0; }
+.go-body .seg { flex: 1; display: flex; }
+.go-body .seg-btn { flex: 1; padding: 7px 6px; font-size: 0.8rem; text-align: center; }
 
 .menu-foot { text-align: center; }
 .menu-foot .lifetime-stats { margin: 0 0 6px; }
@@ -425,26 +441,79 @@ a:focus-visible,
 .tech-deepdive { margin-top: 34px; padding-top: 28px; border-top: 1px solid var(--border); text-align: left; }
 .tech-dd-title { font-size: 1.45rem; margin: 0 0 4px; text-align: center; }
 .tech-dd-sub { color: var(--muted); margin: 0 auto 18px; max-width: 520px; text-align: center; font-size: 0.92rem; line-height: 1.5; }
-.tech-dd-list { display: flex; flex-direction: column; gap: 8px; }
-.tech-item { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.tech-item[open] { border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); }
-.tech-item summary {
-  display: flex; align-items: center; gap: 12px; padding: 13px 16px;
-  cursor: pointer; list-style: none; user-select: none;
+
+/* Grid of technique cards. Desktop: hover/focus previews the detail in a
+   floating popover, no click needed. Touch: tap pins the same detail open
+   in place (the .open class), since there's no hover to rely on. */
+.tech-dd-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 10px;
 }
-.tech-item summary::-webkit-details-marker { display: none; }
-.tech-item summary:hover { background: var(--panel-2); }
-.tech-ic { font-size: 1.2rem; flex-shrink: 0; }
-.tech-name { flex: 1; font-weight: 600; font-size: 0.96rem; line-height: 1.3; }
-.tech-tier { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; flex-shrink: 0; }
-.tech-chev { color: var(--muted); transition: transform 0.2s; flex-shrink: 0; font-size: 1.1rem; }
-.tech-item[open] .tech-chev { transform: rotate(180deg); }
-.tech-body { padding: 0 16px 16px; }
-.tech-how { margin: 0 0 12px; color: var(--muted); line-height: 1.55; font-size: 0.9rem; }
+.tech-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.tech-card:hover, .tech-card:focus-visible, .tech-card.open {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  outline: none;
+  z-index: 5;
+}
+.tech-card-face { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.tech-ic { font-size: 1.6rem; line-height: 1; }
+.tech-name { font-weight: 600; font-size: 0.86rem; line-height: 1.25; }
+.tech-tier { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; }
+
+.tech-detail {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  width: max(260px, 100%);
+  max-width: 320px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+  z-index: 20;
+}
+/* min-width matches the mobile breakpoint below exactly, so the two are
+   mutually exclusive by width — a real mouse on a narrowed desktop window
+   (not just a touch device) must NOT get this absolutely-positioned popover,
+   or its translateX(-50%) clips off-screen once the card goes full-width
+   on mobile. */
+/* Both the hover-preview AND the click-to-pin (.open) states use the
+   floating, horizontally-centred popover — but ONLY at desktop widths.
+   Gated by width (not just hover/pointer capability) because .open can be
+   set by a click on any device, including a mouse on a narrowed window;
+   without the width gate its translateX(-50%) would clip the mobile
+   in-place expansion (which uses position:static) off-screen. */
+@media (min-width: 641px) {
+  .tech-card.open .tech-detail {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 641px) {
+  .tech-card:hover .tech-detail, .tech-card:focus-visible .tech-detail {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
+  }
+}
+.tech-how { margin: 0 0 12px; color: var(--muted); line-height: 1.55; font-size: 0.88rem; }
 .tech-ex {
   background: var(--bg-soft); border: 1px solid var(--border); border-radius: 9px;
   padding: 10px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.82rem; line-height: 1.85; display: grid; gap: 2px; overflow-x: auto;
+  font-size: 0.8rem; line-height: 1.85; display: grid; gap: 2px; overflow-x: auto;
 }
 .tech-ex-k { display: inline-block; width: 40px; color: var(--muted); }
 .tech-ex code { font-family: inherit; white-space: nowrap; }
@@ -452,10 +521,26 @@ a:focus-visible,
 .tech-ex code.bad { color: var(--red); }
 .tech-ex .tdiff { background: rgba(255, 93, 108, 0.28); border-radius: 3px; padding: 0 2px; }
 .tech-ex .tnote { color: var(--muted); }
-.tech-tell { margin: 12px 0 0; font-size: 0.88rem; line-height: 1.5; color: var(--muted); }
+.tech-tell { margin: 12px 0 0; font-size: 0.86rem; line-height: 1.5; color: var(--muted); }
 .tech-tell b { color: var(--text); }
 .tech-dd-foot { margin: 20px auto 0; max-width: 560px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
 .tech-dd-foot b { color: var(--text); }
+
+/* No hover on touch: the popover becomes an in-place expansion instead,
+   so there's no risk of it overflowing off-screen near a grid edge. */
+@media (max-width: 640px) {
+  .tech-dd-list { grid-template-columns: repeat(2, 1fr); }
+  .tech-card-face { flex-direction: row; text-align: left; }
+  .tech-name { flex: 1; }
+  .tech-detail {
+    position: static; transform: none; width: auto; max-width: none;
+    margin-top: 10px; box-shadow: none; opacity: 1; visibility: visible;
+    pointer-events: auto; display: none;
+  }
+  .tech-card.open { grid-column: 1 / -1; }
+  .tech-card.open .tech-detail { display: block; }
+}
+@media (max-width: 420px) { .tech-dd-list { grid-template-columns: 1fr; } }
 
 /* Shrink the hero on short screens so the whole menu still fits */
 @media (max-height: 720px) {
@@ -463,11 +548,7 @@ a:focus-visible,
   .menu-head .hero-badge { font-size: 32px; }
   .menu-head h1 { font-size: 1.7rem; margin: 0 0 6px; }
   .menu-head .tagline { font-size: 0.9rem; }
-  .menu-grid .passkey-panel { padding: 13px; }
-}
-@media (max-width: 560px) {
-  .menu-config .mode-buttons { grid-template-columns: 1fr; }
-  .key-actions { flex-direction: column; }
+  .menu-primary .passkey-panel { padding: 13px; }
 }
 
 /* ── Round bar ───────────────────────────── */
@@ -506,8 +587,11 @@ a:focus-visible,
 .score-meta strong { color: var(--text); }
 
 /* On narrow screens, keep Quit + Score on the top row (clear of the fixed
-   sound toggle) and drop the round meta onto its own centered second row. */
-@media (max-width: 560px) {
+   sound toggle) and drop the round meta onto its own centered second row.
+   Matches the 880px breakpoint the windows stack at below — otherwise
+   there's a gap where the windows are already mobile-stacked but the score
+   still overlaps the theme/sound toggles. */
+@media (max-width: 880px) {
   .round-bar { flex-wrap: wrap; row-gap: 8px; }
   #btn-quit { order: 1; }
   /* Score shares row 1 with Quit; keep it clear of the two fixed top-right
@@ -612,6 +696,18 @@ a:focus-visible,
 .urlbar.revealed .urladdr { max-width: none; white-space: normal; overflow: visible; word-break: break-all; }
 .urlbar.revealed .host,
 .urlbar.revealed .urlpath { white-space: normal; word-break: break-all; }
+
+/* Once a round resolves, both address bars un-clip (no yellow wash — the
+   diffmark colours below are the signal) so the highlighted tell is always
+   visible without needing a manual tap. */
+.urlbar.solved .urladdr { max-width: none; overflow: visible; }
+.urlbar.solved .host,
+.urlbar.solved .urlpath { white-space: normal; word-break: break-all; }
+.urlbar .diffmark { border-radius: 3px; padding: 0 1px; font-weight: 700; }
+.urlbar .diffmark.bad { background: rgba(220, 38, 38, 0.22); outline: 1px solid rgba(220, 38, 38, 0.55); color: #a8121b; }
+.urlbar .diffmark.ok { background: rgba(21, 122, 69, 0.18); outline: 1px solid rgba(21, 122, 69, 0.5); color: #106a3a; }
+.urlbar .lock.mail { font-size: 0.9rem; }
+.urlbar .mail-label { color: #9aa3b2; font-size: 0.78rem; margin-right: 1px; }
 /* Favicon in the address bar (brand monogram) */
 .urlbar .favicon {
   width: 16px;
@@ -765,6 +861,13 @@ a:focus-visible,
 .win-verdict.real { background: rgba(47, 210, 122, 0.15); color: #157a45; }
 .win-verdict.fake { background: rgba(255, 93, 108, 0.15); color: #b3243a; }
 
+/* Phishmail red-flag spans (urgency, generic greeting, threats…) — plain
+   text until the round resolves, then coloured in place on the actual
+   email, same idea as the address-bar diffmark above. */
+.window .rf, .window .rfok { border-radius: 3px; padding: 0 2px; }
+.window.verdict-fake .rf { background: rgba(220, 38, 38, 0.2); outline: 1px solid rgba(220, 38, 38, 0.5); font-weight: 700; color: #a8121b; }
+.window.verdict-real .rfok { background: rgba(21, 122, 69, 0.16); outline: 1px solid rgba(21, 122, 69, 0.45); font-weight: 700; color: #106a3a; }
+
 .hint {
   text-align: center;
   color: var(--muted);
@@ -826,6 +929,13 @@ a:focus-visible,
 .site-hero { padding: 0; justify-content: flex-start; gap: 0; }
 .pg { width: 100%; color: var(--hero-fg); font-size: 0.9rem; }
 .pg-pad { padding: 18px 18px 22px; }
+
+/* Phishing-email round content (an opened email, not a website) */
+.pmail-subject { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; line-height: 1.35; }
+.pmail-greet { font-weight: 600; margin-bottom: 10px; }
+.pmail-body { line-height: 1.6; margin: 0 0 18px; opacity: 0.92; }
+.pmail-cta { margin-bottom: 16px; }
+.pmail-sign { opacity: 0.65; font-size: 0.86rem; margin: 0; }
 .pg h2, .pg h4 { margin: 0; color: var(--hero-fg); }
 .pg-title { font-size: 1.3rem; margin: 0 0 14px; }
 .pg-h { font-size: 0.95rem; margin: 18px 0 10px; }

@@ -411,12 +411,103 @@ const BRANDS = [
   },
 ];
 
+// ── Phishing-EMAIL scenarios (easy difficulty, no URL trick required) ──
+// Not every phish relies on a look-alike domain. These rounds show two
+// "emails" with the same subject line, but one uses the everyday tells of
+// a mass-phishing blast — invented urgency, a generic greeting, a threat,
+// sloppy grammar — while the real one is calm and personal. The sender
+// address still differs too (so the tap-to-reveal + passkey mechanics stay
+// consistent with every other round), but you shouldn't need to read it
+// closely to win one of these.
+function phishMailBody(c) {
+  return `
+    <div class="pg pg-pad pmail">
+      <div class="pmail-subject">${c.subject}</div>
+      <div class="pmail-greet">${c.greeting}</div>
+      <p class="pmail-body">${c.body}</p>
+      <button class="pg-btn-fill pmail-cta">${c.cta}</button>
+      <p class="pmail-sign">${c.sign}</p>
+    </div>`;
+}
+function phishMail(name, color, mono, legit, fake, technique, lesson, legitMail, fakeMail) {
+  return {
+    name, color, kind: "phishmail", difficulty: "easy",
+    navBg: "#f5f7fb", navFg: "#1a2233", heroBg: "#ffffff", heroFg: "#1a2233",
+    legit, fake, technique, lesson,
+    mark: () => monogram(mono, color),
+    home: (isReal) => phishMailBody(isReal ? legitMail : fakeMail),
+  };
+}
+BRANDS.push(
+  phishMail("NimbusPay", "#2e6bd6", "N",
+    "alerts@nimbuspay.com", "alerts@nimbuspay-secure.com",
+    "Email red flags — urgency & fear",
+    "Real companies don't threaten to freeze your account over email. The countdown, the threat, and the generic greeting are the tell — you don't need to squint at the sender address to catch this one.",
+    { subject: "Your March statement is ready", greeting: '<span class="rfok">Hi Jordan,</span>',
+      body: "Your monthly NimbusPay statement is now available. Nothing needs your attention — just keeping you in the loop, as always.",
+      cta: "View statement", sign: "— The NimbusPay Team" },
+    { subject: "⚠️ URGENT: Unauthorized transaction detected", greeting: '<span class="rf">Dear Valued Customer,</span>',
+      body: "We detected a suspicious transaction of $842.19 on your account. If this wasn't you, " +
+        '<span class="rf">you must verify your identity within 24 hours or your account will be permanently suspended.</span> ' +
+        "Please to confirm you're account informations immediately.",
+      cta: "Verify Now", sign: "— NimbusPay Security Team" }),
+  phishMail("Meridian Cloud", "#6d4fe0", "M",
+    "notifications@meridiancloud.com", "notifications@meridian-cloud-alerts.com",
+    "Email red flags — false deadline",
+    "A storage warning doesn't come with a countdown to permanent data loss. Manufactured urgency is designed to make you click before you think — that's the tell, not the sender address.",
+    { subject: "Your storage is 82% full", greeting: '<span class="rfok">Hi Jordan,</span>',
+      body: "Just a heads up — you're using 82% of your storage. No rush; upgrade anytime from your account settings if you'd like more room.",
+      cta: "Manage storage", sign: "— Meridian Cloud" },
+    { subject: "🚨 Your files will be PERMANENTLY DELETED in 24 hours", greeting: '<span class="rf">Dear Customer,</span>',
+      body: '<span class="rf">Your storage limit has been exceeded and all files will be deleted within 24 hours</span> unless you verify your account now. ' +
+        "This is you're final notice — act immediately to avoid permanent data loss.",
+      cta: "Save My Files", sign: "— Meridian Cloud Support" }),
+  phishMail("Beacon Rewards", "#e0a73a", "B",
+    "rewards@beaconrewards.com", "rewards@beacon-rewards-claim.net",
+    "Email red flags — too good to be true",
+    "You can't be “randomly selected” for a reward you never entered, and a real prize doesn't expire in two hours. If an email needs you to hurry before you think, that's the point of the email.",
+    { subject: "You've earned 150 points this month", greeting: '<span class="rfok">Hi Jordan,</span>',
+      body: "Nice work — you earned 150 Beacon points in March. Check your balance anytime; points never expire.",
+      cta: "View my points", sign: "— Beacon Rewards" },
+    { subject: "🎉 You've WON a $500 gift card!", greeting: '<span class="rf">Dear Valued Member,</span>',
+      body: '<span class="rf">Congratulations! You\'ve been randomly selected to receive a $500 gift card.</span> ' +
+        '<span class="rf">Claim within 2 hours or it will be forfeited to another member.</span> Click below now to claim you\'re prize.',
+      cta: "Claim My Prize", sign: "— Rewards Team" }),
+  phishMail("Fieldstone Insurance", "#2f8f5a", "F",
+    "billing@fieldstoneinsurance.com", "billing@fieldstone-insurance-billing.info",
+    "Email red flags — threats & poor grammar",
+    "“Please to update” and “you're payment information” aren't how a real insurer writes. Pair broken grammar with a cancellation threat and it's a mass-blasted fake — no look-alike domain needed to spot it.",
+    { subject: "Your April payment was received", greeting: '<span class="rfok">Hi Jordan,</span>',
+      body: "This confirms we received your April premium payment. Your policy is active and in good standing — no action needed.",
+      cta: "View my policy", sign: "— Fieldstone Insurance" },
+    { subject: "FINAL NOTICE: Policy will be CANCELLED", greeting: '<span class="rf">Dear Policyholder,</span>',
+      body: 'Your policy will be <span class="rf">cancelled within 24 hours</span> due to a billing issue. ' +
+        "Please to update you're payment information immediately to avoid a gap in you're coverage.",
+      cta: "Update Billing Now", sign: "— Billing Department" }),
+  phishMail("Lockbox Mail", "#3a70e8", "L",
+    "security@lockboxmail.com", "security@lockbox-mail-verify.com",
+    "Email red flags — fake security alert",
+    "A real security alert names the device, browser, and location and lets you shrug it off if it was you. A fake one skips the specifics and goes straight to a threat and a countdown.",
+    { subject: "New device signed in to your account", greeting: '<span class="rfok">Hi Jordan,</span>',
+      body: "We noticed a sign-in from a new device (Chrome on Mac, San Francisco) at 9:14 AM. If this was you, no action is needed.",
+      cta: "Review activity", sign: "— Lockbox Mail Security" },
+    { subject: "Unusual sign-in activity — verify immediately", greeting: '<span class="rf">Dear Account Holder,</span>',
+      body: '<span class="rf">We detected a sign-in attempt from Lagos, Nigeria.</span> If you do not verify you\'re identity ' +
+        '<span class="rf">within 24 hours, you\'re account will be permanently locked.</span>',
+      cta: "Verify Identity", sign: "— Security Team" })
+);
+
 // ── Phishing technique + difficulty per brand ─────────────────────
 // Layered on top of the homepage definitions above so the look-alike
 // domains span a real spread of tricks and difficulty levels:
-//   easy   — obvious once you look (typos, digits-for-letters, http)
-//   medium — correctly spelled but wrong domain (combosquat, wrong TLD)
-//   hard   — invisible or structural (homoglyph, subdomain trick, @-trick)
+//   easy   — obvious once you look (typos, digits-for-letters, http,
+//            plus the non-URL "phishmail" rounds below — urgency, generic
+//            greetings, threats: the everyday red flags in your inbox)
+//   medium — correctly spelled but wrong domain, or readable if you check
+//            carefully (combosquat, wrong TLD, subdomain stuffing, @-trick)
+//   hard   — genuinely invisible: homoglyphs and blended-letter tricks that
+//            are pixel-identical to the eye. This is the tier that makes the
+//            case for passkeys — there is no "looking closer" that helps.
 const HG = HOMOGLYPH_NOTE;
 // Every URL carries a realistic login subdomain + path, so the real and
 // fake are comparable in length and prefix — you can't win by "pick the
@@ -450,18 +541,19 @@ const PHISH = {
   Spotify:   { difficulty: "hard", legit: "accounts.tunify.com/login", fake: "accounts.tunıfy.com/login",
     technique: "Homoglyph — dotless “ı”", lesson: "The “i” is a Turkish dotless <b>ı</b> (U+0131) — same shape, missing only the dot. " + HG },
 
-  // ─── Subdomain stuffing ───
-  Chase:             { difficulty: "hard", legit: "secure.crestline.com/web/auth/login", fake: "crestline.com.login.verify-identity.net/auth",
+  // ─── Subdomain stuffing (readable if you check right-to-left — medium,
+  //     not hard: hard is reserved for tricks the eye truly cannot resolve) ───
+  Chase:             { difficulty: "medium", legit: "secure.crestline.com/web/auth/login", fake: "crestline.com.login.verify-identity.net/auth",
     technique: "Subdomain stuffing", lesson: "Read right-to-left: the real domain is <b>verify-identity.net</b>. “crestline.com” is just a subdomain label glued on the front to fool a left-to-right reader." },
-  "Wells Fargo":     { difficulty: "hard", legit: "connect.secure.summitbank.com/auth/login", fake: "summitbank.com.secure.accounts.web-login.space/signon",
+  "Wells Fargo":     { difficulty: "medium", legit: "connect.secure.summitbank.com/auth/login", fake: "summitbank.com.secure.accounts.web-login.space/signon",
     technique: "Subdomain stuffing", lesson: "The actual site is <b>web-login.space</b> — everything before it is attacker-chosen text, including a fake “summitbank.com”." },
-  "Bank of America": { difficulty: "hard", legit: "secure.harborbank.com/login/sign-in/signOn", fake: "harborbank.com.security.update-auth.info/login",
+  "Bank of America": { difficulty: "medium", legit: "secure.harborbank.com/login/sign-in/signOn", fake: "harborbank.com.security.update-auth.info/login",
     technique: "Subdomain stuffing", lesson: "The registrable domain is <b>update-auth.info</b>, not harborbank.com. The bank name is only a subdomain prefix." },
-  FedEx:             { difficulty: "hard", legit: "www.shipfast.com/en-us/tracking/manage", fake: "shipfast.com.package-tracking.shipment-delivery.top/track",
+  FedEx:             { difficulty: "medium", legit: "www.shipfast.com/en-us/tracking/manage", fake: "shipfast.com.package-tracking.shipment-delivery.top/track",
     technique: "Subdomain stuffing", lesson: "The real domain is <b>shipment-delivery.top</b>. Delivery-themed subdomains make the long chain feel plausible." },
-  DHL:               { difficulty: "hard", legit: "www.ghx.com/en/express/tracking", fake: "ghx.com.alert.delivery-status.holding-facility.site/track",
+  DHL:               { difficulty: "medium", legit: "www.ghx.com/en/express/tracking", fake: "ghx.com.alert.delivery-status.holding-facility.site/track",
     technique: "Subdomain stuffing", lesson: "The site is actually <b>holding-facility.site</b>. “ghx.com” at the start is bait — the truth is always the last two labels." },
-  UPS:               { difficulty: "hard", legit: "www.upx.com/track/manage/mychoice", fake: "upx.com.mychoice.package.reschedule-portal.biz/track",
+  UPS:               { difficulty: "medium", legit: "www.upx.com/track/manage/mychoice", fake: "upx.com.mychoice.package.reschedule-portal.biz/track",
     technique: "Subdomain stuffing", lesson: "The owner of this page is <b>reschedule-portal.biz</b>. The brand is stuffed into the subdomains to hide that." },
 
   // ─── Look-alike TLDs ───
@@ -487,9 +579,9 @@ const PHISH = {
     technique: "Comb-glyph (capital I → l)", lesson: "The “l” is a capital “I”: wonderp<b>I</b>us. In many fonts capital-I and lowercase-l are identical." },
   Salesforce: { difficulty: "hard", legit: "login.cloudforce.com/sign-in", fake: "login.cIoudforce.com/sign-in",
     technique: "Comb-glyph (capital I → l)", lesson: "“cloudforce” uses a capital “I” for the “l”: c<b>I</b>oudforce. Same pixel shape, different character." },
-  Twitch:     { difficulty: "medium", legit: "www.twixly.tv/login", fake: "www.twlxly.tv/login",
+  Twitch:     { difficulty: "hard", legit: "www.twixly.tv/login", fake: "www.twlxly.tv/login",
     technique: "Comb-glyph (l → i)", lesson: "The “i” is really a lowercase “l”: tw<b>l</b>xly. The missing dot is the only clue." },
-  eBay:       { difficulty: "medium", legit: "signin.ebuy.com/signin", fake: "signin.ebuv.com/signin",
+  eBay:       { difficulty: "hard", legit: "signin.ebuy.com/signin", fake: "signin.ebuv.com/signin",
     technique: "Comb-glyph (v → y)", lesson: "The “y” is a “v”: <b>ebuv</b>. In some sans-serif fonts a “v” passes for a “y” at a glance." },
 
   // ─── Distinct extras ───
@@ -497,13 +589,13 @@ const PHISH = {
     technique: "Not secure (http) + look-alike", lesson: "Two red flags: it's <b>http://</b> with no padlock, and the real domain is <b>paypeer-account.com</b> — not paypeer.com." },
   Coinbase: { difficulty: "hard", legit: "www.coinvault.com/signin", fake: "www.cоinvault.com/signin",
     technique: "Homoglyph (Cyrillic “о”)", lesson: "The first “o” is a Cyrillic <b>о</b>, not a Latin o — pixel-identical. " + HG },
-  Binance: { difficulty: "hard", legit: "accounts.tradr.com/en/user/login", fake: "accounts.tradr.com@secure-wallet.io/login",
+  Binance: { difficulty: "medium", legit: "accounts.tradr.com/en/user/login", fake: "accounts.tradr.com@secure-wallet.io/login",
     technique: "The “@” trick", lesson: "Everything before the <b>@</b> is just a username and is ignored — the browser actually goes to <b>secure-wallet.io</b>. The “accounts.tradr.com” is pure bait." },
   Apple:     { difficulty: "medium", legit: "id.pearl.com/sign-in", fake: "pearl-id-verify.com/sign-in",
     technique: "Look-alike domain (combosquat)", lesson: "<b>pearl-id-verify.com</b> bolts extra words onto the brand. Pearl sign-in only happens on <b>pearl.com</b> — the added words make a brand-new, unrelated domain." },
-  Netflix:   { difficulty: "hard", legit: "www.streamly.com/login", fake: "account-billing.net/streamly/login",
+  Netflix:   { difficulty: "medium", legit: "www.streamly.com/login", fake: "account-billing.net/streamly/login",
     technique: "Brand hidden in the path", lesson: "The word “streamly” here is in the <b>path</b>, not the domain. The actual site is <b>account-billing.net</b> — what comes before the first single “/” is all that matters." },
-  USPS:      { difficulty: "hard", legit: "track.postex.com/go/TrackConfirm", fake: "package-status.info/postex/redelivery",
+  USPS:      { difficulty: "medium", legit: "track.postex.com/go/TrackConfirm", fake: "package-status.info/postex/redelivery",
     technique: "Brand hidden in the path", lesson: "“postex” sits in the <b>path</b>; the real domain is <b>package-status.info</b>. A brand name after the first “/” means nothing." },
   Pinterest: { difficulty: "medium", legit: "www.pinly.com/login", fake: "wwwpinly.com/login",
     technique: "Run-together “www” (missing dot)", lesson: "There's no dot after “www”: <b>wwwpinly.com</b> is a single label — a different domain from <b>www.pinly.com</b>." },
@@ -1223,6 +1315,7 @@ function bumpScore() {
 // often a family appears in one game.
 function familyOf(tech) {
   const t = (tech || "").toLowerCase();
+  if (t.includes("red flag")) return "redflags";
   if (t.includes("omission")) return "omission";
   if (t.includes("transposition")) return "transposition";
   if (t.includes("doubled")) return "doubled";
@@ -1243,6 +1336,7 @@ function familyOf(tech) {
 
 // Friendly name + a real-world tip for each technique family (coaching).
 const FAMILY_INFO = {
+  redflags: { label: "Email red flags", tip: "Urgency, threats, generic greetings, and sloppy grammar are the tell — not just the sender address." },
   omission: { label: "Missing letters", tip: "Read the brand name letter by letter — a single dropped character hides in plain sight." },
   transposition: { label: "Swapped letters", tip: "Two flipped letters still ‘read’ right. Slow down on the spelling." },
   doubled: { label: "Doubled letters", tip: "An extra repeated letter sneaks past a quick glance." },
@@ -1297,15 +1391,15 @@ const TECH_GUIDE = [
     how: "There’s no dot after “www”: “wwwpinly.com”. That fuses it into a single label — a completely different domain from “www.pinly.com”.",
     tell: "Look for the dot right after “www”.",
     real: "www.pinly.com", fake: 'www<span class="tdiff">●</span>pinly.com <span class="tnote">(no dot)</span>' },
-  { ic: "🪆", label: "Subdomain stuffing", tier: "hard",
+  { ic: "🪆", label: "Subdomain stuffing", tier: "medium",
     how: "The brand is placed as a label in front of the attacker’s real domain: “harborbank.com.update-auth.info”. Only the two labels just before the first single “/” actually own the site.",
     tell: "Read the domain right-to-left — the truth is the last two labels.",
     real: "harborbank.com", fake: 'harborbank.com.<span class="tdiff">update-auth.info</span>' },
-  { ic: "🛣️", label: "Brand hidden in the path", tier: "hard",
+  { ic: "🛣️", label: "Brand hidden in the path", tier: "medium",
     how: "The brand appears after the first “/”, in the path: “account-billing.net/streamly/login”. Everything after the domain is chosen by whoever owns that domain, so a brand there means nothing.",
     tell: "Only the part before the first single “/” identifies the site.",
     real: "streamly.com", fake: '<span class="tdiff">account-billing.net</span>/streamly/login' },
-  { ic: "🎭", label: "The “@” trick", tier: "hard",
+  { ic: "🎭", label: "The “@” trick", tier: "medium",
     how: "Everything before an “@” in a URL is treated as a username and discarded. “accounts.tradr.com@secure-wallet.io” actually loads secure-wallet.io — the trusted-looking part is pure decoration.",
     tell: "If there’s an “@” in the address, the real site is whatever follows it.",
     real: "tradr.com", fake: 'accounts.tradr.com<span class="tdiff">@secure-wallet.io</span>' },
@@ -1325,21 +1419,29 @@ const TECH_GUIDE = [
     how: "The page loads over plain “http://” with no padlock, so anything you type travels unencrypted and readable. It’s often paired with a look-alike domain for a double hit.",
     tell: "No padlock means never type a password.",
     real: "https://paypeer.com", fake: '<span class="tdiff">http://</span>paypeer-account.com' },
+  { ic: "📧", label: "Common email red flags", tier: "easy",
+    how: "Not every phish relies on a look-alike domain. Urgent countdowns, threats of account closure, generic “Dear Customer” greetings, too-good-to-be-true prizes, and sloppy grammar are the classic tells of a mass-blasted phishing email — no domain trick required at all.",
+    tell: "Slow down and ask: would the real company actually threaten me by email?",
+    real: "Hi Jordan — your statement is ready, no action needed.",
+    fake: '<span class="tdiff">Dear Valued Customer</span> — verify <span class="tdiff">within 24 hours</span> or your account will be <span class="tdiff">suspended</span>.' },
 ];
 
+// Grid of technique cards. On a mouse/trackpad, hovering (or focusing) a
+// card previews its detail in a small popover — no click needed. On touch,
+// where hover doesn't exist, tapping a card pins the same detail open
+// in-place instead (handled by the .open class + CSS below).
 function renderTechniques() {
   const host = document.getElementById("tech-dd-list");
   if (!host) return;
   const tierLabel = { easy: "EASY", medium: "MEDIUM", hard: "HARD" };
-  host.innerHTML = TECH_GUIDE.map((t) => `
-    <details class="tech-item">
-      <summary>
+  host.innerHTML = TECH_GUIDE.map((t, i) => `
+    <div class="tech-card" tabindex="0" role="button" aria-expanded="false" data-i="${i}">
+      <div class="tech-card-face">
         <span class="tech-ic">${t.ic}</span>
         <span class="tech-name">${t.label}</span>
         <span class="tech-tier diff-${t.tier}">${tierLabel[t.tier]}</span>
-        <span class="tech-chev">⌄</span>
-      </summary>
-      <div class="tech-body">
+      </div>
+      <div class="tech-detail">
         <p class="tech-how">${t.how}</p>
         <div class="tech-ex">
           <div><span class="tech-ex-k">Real</span><code class="ok">${t.real}</code></div>
@@ -1347,7 +1449,23 @@ function renderTechniques() {
         </div>
         <p class="tech-tell"><b>Spot it:</b> ${t.tell}</p>
       </div>
-    </details>`).join("");
+    </div>`).join("");
+
+  const cards = host.querySelectorAll(".tech-card");
+  const setOpen = (card, open) => {
+    card.classList.toggle("open", open);
+    card.setAttribute("aria-expanded", String(open));
+  };
+  cards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const willOpen = !card.classList.contains("open");
+      cards.forEach((c) => { if (c !== card) setOpen(c, false); });
+      setOpen(card, willOpen);
+    });
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); card.click(); }
+    });
+  });
 }
 
 function allowedDifficulties(pref) {
@@ -1411,22 +1529,31 @@ function renderRound() {
   diffEl.className = "diff-pill diff-" + diff;
 
   // Scenario line
-  const channel =
-    brand.kind === "bank" ? "a text message" :
-    brand.kind === "wallet" ? "a payment alert" :
-    brand.kind === "crypto" ? "a withdrawal alert" :
-    brand.kind === "work" ? "an email from IT" :
-    brand.kind === "streaming" ? "a “payment declined” email" :
-    brand.kind === "shopping" ? "an order-problem email" :
-    brand.kind === "gaming" ? "a “new login” security alert" :
-    brand.kind === "dev" ? "a security alert" :
-    "an email";
-  $("#scenario").innerHTML =
-    `You clicked a link in ${channel} about your <strong>${brand.name}</strong> account. ` +
-    `Two tabs opened — both look exactly like ${brand.name}'s real homepage. ` +
-    (state.mode === "eyes"
-      ? `<strong>Hit “Sign in” on the genuine one.</strong>`
-      : `<strong>Hit “Sign in” — your passkey only works on the genuine one.</strong>`);
+  const isMail = brand.kind === "phishmail";
+  if (isMail) {
+    $("#scenario").innerHTML =
+      `Two emails claiming to be from <strong>${brand.name}</strong> just landed in your inbox. ` +
+      (state.mode === "eyes"
+        ? `<strong>Click through on the real one.</strong>`
+        : `<strong>Click through — your passkey only works on the genuine one.</strong>`);
+  } else {
+    const channel =
+      brand.kind === "bank" ? "a text message" :
+      brand.kind === "wallet" ? "a payment alert" :
+      brand.kind === "crypto" ? "a withdrawal alert" :
+      brand.kind === "work" ? "an email from IT" :
+      brand.kind === "streaming" ? "a “payment declined” email" :
+      brand.kind === "shopping" ? "an order-problem email" :
+      brand.kind === "gaming" ? "a “new login” security alert" :
+      brand.kind === "dev" ? "a security alert" :
+      "an email";
+    $("#scenario").innerHTML =
+      `You clicked a link in ${channel} about your <strong>${brand.name}</strong> account. ` +
+      `Two tabs opened — both look exactly like ${brand.name}'s real homepage. ` +
+      (state.mode === "eyes"
+        ? `<strong>Hit “Sign in” on the genuine one.</strong>`
+        : `<strong>Hit “Sign in” — your passkey only works on the genuine one.</strong>`);
+  }
 
   // Build the two windows (each is a full brand homepage)
   const leftReal = state.realIsLeft;
@@ -1445,8 +1572,9 @@ function renderRound() {
   const inspect = touch
     ? " <span class=\"muted\">(tap a tab’s address bar to reveal the full link)</span>"
     : " <span class=\"muted\">(hover a URL for the full address · keys 1 / 2)</span>";
-  const eyesHint =
-    brand.difficulty === "easy"
+  const eyesHint = isMail
+    ? "Read the tone, not just the sender — one of these is trying to rush you into a mistake."
+    : brand.difficulty === "easy"
       ? "The pages are identical — the address bar is your only clue, and this one's catchable. Find the real " + brand.name + "."
       : brand.difficulty === "hard"
       ? "Identical pages, and the address bar barely helps. Which domain really belongs to " + brand.name + "? Good luck."
@@ -1459,8 +1587,9 @@ function renderRound() {
 
 function buildWindow(brand, isReal) {
   const domain = isReal ? brand.legit : brand.fake;
+  const isMail = brand.kind === "phishmail";
   const win = document.createElement("div");
-  win.className = "window";
+  win.className = "window" + (isMail ? " window-mail" : "");
   win.style.setProperty("--brand", brand.color);
   win.dataset.real = String(isReal);
   win.dataset.domain = domain;
@@ -1469,9 +1598,12 @@ function buildWindow(brand, isReal) {
 
   // Most phishing sites have valid https certs too — so a padlock alone
   // proves nothing. A few easy rounds drop to http to teach that signal.
-  const insecure = !isReal && brand.fakeScheme === "http";
-  const scheme = insecure ? "http://" : "https://";
-  const lock = insecure
+  // Email addresses have no scheme/padlock at all — show an envelope instead.
+  const insecure = !isMail && !isReal && brand.fakeScheme === "http";
+  const scheme = isMail ? "" : insecure ? "http://" : "https://";
+  const lock = isMail
+    ? `<span class="lock mail">✉️</span>`
+    : insecure
     ? `<span class="lock insecure">⚠</span><span class="notsecure">Not secure</span>`
     : `<span class="lock secure">🔒</span>`;
 
@@ -1481,15 +1613,17 @@ function buildWindow(brand, isReal) {
   const hostPart = slash === -1 ? domain : domain.slice(0, slash);
   const pathPart = slash === -1 ? "" : domain.slice(slash);
 
-  // Each window is a full, unique brand homepage. The ONLY real
-  // difference is the host (and sometimes the scheme) in the address bar.
+  // Each window is a full, unique brand homepage/email. The ONLY real
+  // difference is the host (and sometimes the scheme) in the address bar —
+  // except phishmail rounds, where the two windows' CONTENT differs too
+  // (tone, greeting, urgency), because that's the thing being taught there.
   win.innerHTML = `
     <div class="win-chrome">
       <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
       <div class="urlbar" title="${scheme}${domain}">
         ${lock}
         <span class="favicon">${brand.mark()}</span>
-        <span class="urladdr"><span class="host">${scheme}${hostPart}</span><span class="urlpath">${pathPart}</span></span>
+        <span class="urladdr">${isMail ? '<span class="mail-label">From&nbsp;</span>' : ""}<span class="host">${scheme}${hostPart}</span><span class="urlpath">${pathPart}</span></span>
       </div>
     </div>
     <div class="site" style="--nav-bg:${brand.navBg};--nav-fg:${brand.navFg};--hero-bg:${brand.heroBg};--hero-fg:${brand.heroFg}">
@@ -1497,11 +1631,12 @@ function buildWindow(brand, isReal) {
         <div class="nav-brand"><span class="nav-mark">${brand.mark()}</span>${brand.nameHtml || `<span class="nav-name">${brand.name}</span>`}</div>
         ${brand.navExtra || ""}
         <div class="nav-right">
-          <span class="nav-link">Help</span>
-          <button class="signin-btn" data-act="signin">${signLabel}</button>
+          ${isMail
+            ? `<span class="nav-link">Reply</span><button class="signin-btn" data-act="signin">Open</button>`
+            : `<span class="nav-link">Help</span><button class="signin-btn" data-act="signin">${signLabel}</button>`}
         </div>
       </nav>
-      <div class="site-hero">${brand.home()}</div>
+      <div class="site-hero">${brand.home(isReal)}</div>
     </div>
   `;
 
@@ -1696,7 +1831,84 @@ function showPasskeySheet(success, domain, onClose, immediate) {
   }
 }
 
+// ---------- Inline "where's the tell" highlighting on the windows --------
+// After a round resolves, the two side-by-side windows themselves get the
+// highlight — not just the separate result panel — so you can see exactly
+// which characters differ right where you were just looking.
+function escHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Character-level diff: the shortest span that, if swapped, turns `fake`
+// into `legit` (common prefix trimmed, common suffix trimmed). Works for
+// typos, digit-substitution, comb-glyphs, and homoglyphs alike — anywhere
+// the two strings are mostly identical.
+function diffCharRange(legit, fake) {
+  let p = 0;
+  const maxP = Math.min(legit.length, fake.length);
+  while (p < maxP && legit[p] === fake[p]) p++;
+  let s = 0;
+  while (s < maxP - p && legit[legit.length - 1 - s] === fake[fake.length - 1 - s]) s++;
+  return { start: p, end: Math.max(p, fake.length - s) };
+}
+
+// The true registrable domain hiding in a structurally-deceptive fake URL
+// (subdomain stuffing, the @ trick, brand-in-path) — the last two labels
+// of the host, after any "username@" prefix is stripped.
+function computeRootRange(fake) {
+  const atIdx = fake.lastIndexOf("@");
+  const from = atIdx >= 0 ? atIdx + 1 : 0;
+  const host = fake.slice(from).split("/")[0];
+  const parts = host.split(".");
+  if (parts.length < 2) return null;
+  const root = parts.slice(-2).join(".");
+  const i = fake.indexOf(root, from);
+  return i < 0 ? null : { start: i, end: i + root.length };
+}
+
+// Picks the cleanest highlight for a legit/fake pair. Char-diff is tried
+// first (it's precise); if the differing span would cover most of the
+// host — meaning the two domains are structurally unrelated, e.g.
+// subdomain-stuffing or brand-in-the-path — fall back to highlighting the
+// fake's true registrable root instead, and the fake's whole host on legit.
+function computeHighlight(legit, fake) {
+  const hostLen = (s) => { const i = s.indexOf("/"); return i === -1 ? s.length : i; };
+  const fakeHostLen = hostLen(fake), legitHostLen = hostLen(legit);
+  const range = diffCharRange(legit, fake);
+  const covered = Math.max(0, Math.min(range.end, fakeHostLen) - Math.max(range.start, 0));
+  const ratio = fakeHostLen > 0 ? covered / fakeHostLen : 1;
+  if (ratio > 0.55) {
+    const root = computeRootRange(fake);
+    return { fakeRange: root || range, legitRange: { start: 0, end: legitHostLen } };
+  }
+  return { fakeRange: range, legitRange: { start: range.start, end: legit.length - (fake.length - range.end) } };
+}
+
+// Rewrites a window's address-bar host/path spans with the differing
+// substring wrapped in a highlight class, splitting the range across the
+// same host/path boundary buildWindow used, so nothing double-escapes.
+function markDomainSpans(win, domain, range, cls) {
+  if (!range) return;
+  const urlbar = win.querySelector(".urlbar");
+  const hostEl = urlbar.querySelector(".host");
+  const pathEl = urlbar.querySelector(".urlpath");
+  const scheme = (hostEl.textContent.match(/^https?:\/\//) || [""])[0];
+  const slash = domain.indexOf("/");
+  const hostPart = slash === -1 ? domain : domain.slice(0, slash);
+  const pathPart = slash === -1 ? "" : domain.slice(slash);
+  const build = (part, base) => {
+    const s = Math.max(0, Math.min(range.start - base, part.length));
+    const e = Math.max(0, Math.min(range.end - base, part.length));
+    if (e <= s) return escHtml(part);
+    return escHtml(part.slice(0, s)) + `<span class="${cls}">${escHtml(part.slice(s, e))}</span>` + escHtml(part.slice(e));
+  };
+  hostEl.innerHTML = escHtml(scheme) + build(hostPart, 0);
+  if (pathPart) pathEl.innerHTML = build(pathPart, hostPart.length);
+  urlbar.classList.add("solved"); // un-clip so the highlight is guaranteed visible
+}
+
 function markWindows(brand, clickedWin, clickedVerdict) {
+  const hl = computeHighlight(brand.legit, brand.fake);
   document.querySelectorAll("#windows .window").forEach((w) => {
     const real = w.dataset.real === "true";
     const verdict = real ? "real" : "fake";
@@ -1708,6 +1920,7 @@ function markWindows(brand, clickedWin, clickedVerdict) {
       ? `✓ REAL — ${brand.legit}`
       : `✕ FAKE — ${w.dataset.domain}`;
     w.insertBefore(tag, w.firstChild);
+    markDomainSpans(w, real ? brand.legit : brand.fake, real ? hl.legitRange : hl.fakeRange, real ? "diffmark ok" : "diffmark bad");
   });
 }
 
@@ -1960,6 +2173,17 @@ function flashShare(msg) {
 // ============================================================
 //  Wiring
 // ============================================================
+// Live one-line summary shown on the collapsed "Game options" disclosure,
+// so the current settings are still visible without the panel taking up
+// space by default.
+function updateGameOptionsSummary() {
+  const el = document.getElementById("go-summary");
+  if (!el) return;
+  const diffLabel = { mixed: "Mixed", easymed: "Easy–Med", medhard: "Med–Hard", hard: "All hard" }[state.difficultyPref] || "Mixed";
+  const timerLabel = { 0: "no timer", 25: "Chill timer", 15: "Normal timer", 8: "Blitz timer" }[state.timerSeconds] ?? "Chill timer";
+  el.textContent = `${state.roundsChoice} rounds · ${diffLabel} · ${timerLabel}`;
+}
+
 // ---------- Theme (light / dark) -----------------------------------
 const THEME_KEY = "phishgame.theme";
 function currentTheme() {
@@ -2013,6 +2237,7 @@ function init() {
       state.roundsChoice = parseInt(btn.dataset.rounds, 10);
       $("#rounds-seg").querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      updateGameOptionsSummary();
     });
   });
   // Difficulty selector
@@ -2021,6 +2246,7 @@ function init() {
       state.difficultyPref = btn.dataset.diff;
       $("#diff-seg").querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      updateGameOptionsSummary();
     });
   });
   // Timer selector
@@ -2029,8 +2255,10 @@ function init() {
       state.timerSeconds = parseInt(btn.dataset.timer, 10);
       $("#timer-seg").querySelectorAll(".seg-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      updateGameOptionsSummary();
     });
   });
+  updateGameOptionsSummary();
   // Sound
   Sound.load();
   const soundBtn = $("#btn-sound");
