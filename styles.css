@@ -766,6 +766,13 @@ a:focus-visible,
   .site-hero { padding: 14px 14px 16px; flex: 1 1 auto; min-height: 0; max-height: none; overflow: hidden; }
   .pg-grid { grid-template-columns: repeat(2, 1fr); }
   .pg-rowscroll { flex-wrap: wrap; }
+
+  /* The windows stack vertically on mobile, so a tall result card would
+     bury the second window entirely. Keep it short enough that at least
+     the top (verdict banner + highlighted address bar) of both windows
+     stays visible above/below it. */
+  #result-overlay .result-card { max-height: 42vh; padding: 18px 20px; }
+  #result-overlay .result-card p { font-size: 0.88rem; }
 }
 
 @media (max-width: 480px) {
@@ -1141,6 +1148,24 @@ a:focus-visible,
   z-index: 50;
 }
 .overlay.active { display: flex; }
+
+/* The result card must NOT fully cover the two comparison windows behind
+   it — the actual highlighted tell now lives ON them (the diffmark/rf spans
+   above), so hiding them behind a full dark backdrop would defeat the
+   point. Dock the card to the bottom edge with no backdrop dimming, so the
+   windows — REAL/FAKE banners, highlighted address bars, everything —
+   stay fully visible and legible above it. (#how-overlay is unaffected;
+   it has nothing behind it that needs to stay visible.) */
+#result-overlay {
+  align-items: flex-end;
+  background: transparent;
+  backdrop-filter: none;
+}
+#result-overlay .result-card {
+  max-height: min(58vh, 520px);
+  overflow-y: auto;
+  box-shadow: 0 -16px 44px rgba(0, 0, 0, 0.5);
+}
 
 .result-card, .how-card {
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
