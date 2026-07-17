@@ -282,7 +282,7 @@ a:focus-visible,
 .site-footer a:hover { text-decoration: underline; }
 
 /* ── Sound + theme toggles + confetti ── */
-.sound-toggle, .theme-toggle {
+.sound-toggle, .theme-toggle, .audience-toggle {
   position: fixed;
   top: 14px;
   z-index: 60;
@@ -301,7 +301,10 @@ a:focus-visible,
 }
 .sound-toggle { right: 16px; }
 .theme-toggle { right: 64px; }
-.sound-toggle:hover, .theme-toggle:hover { background: var(--panel-2); transform: scale(1.05); }
+.audience-toggle { right: 112px; }
+/* Hide the switcher while you're ON the chooser — nothing to switch back to */
+body:has(#screen-audience.active) .audience-toggle { display: none; }
+.sound-toggle:hover, .theme-toggle:hover, .audience-toggle:hover { background: var(--panel-2); transform: scale(1.05); }
 .confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 80; }
 
 /* ── Countdown timer ── */
@@ -395,9 +398,58 @@ a:focus-visible,
   .menu-head .tagline { font-size: 0.9rem; line-height: 1.45; }
   .menu-primary .passkey-panel { padding: 14px; }
 }
-/* Personal vs Enterprise picker — the first decision on the page */
-.seg-audience { display: flex; width: 100%; }
-.seg-audience .seg-btn { flex: 1; padding: 10px 8px; font-size: 0.92rem; font-weight: 600; }
+/* ── First-load chooser: Personal | Enterprise ──
+   One decision, split down the middle. Fills the viewport. */
+#screen-audience.active { padding: 0; }
+.aud-split {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: stretch;
+}
+.aud-half {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 8%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text);
+  text-align: center;
+  transition: background 0.15s;
+}
+.aud-half:hover, .aud-half:focus-visible {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  outline: none;
+}
+.aud-ic { font-size: 64px; line-height: 1; filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.3)); }
+.aud-half h2 { margin: 0; font-size: 2rem; letter-spacing: -0.01em; }
+.aud-half p { margin: 0; color: var(--muted); line-height: 1.6; max-width: 380px; font-size: 0.98rem; }
+.aud-cta {
+  margin-top: 10px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 13px 26px;
+  box-shadow: 0 8px 24px rgba(200, 16, 46, 0.35);
+}
+.aud-divider { width: 1px; background: var(--border); flex-shrink: 0; }
+/* Stack vertically on narrow screens: line becomes horizontal */
+@media (max-width: 700px) {
+  .aud-split { flex-direction: column; }
+  .aud-divider { width: auto; height: 1px; }
+  .aud-half { padding: 28px 24px; }
+  .aud-ic { font-size: 48px; }
+  .aud-half h2 { font-size: 1.6rem; }
+  .aud-half p { font-size: 0.9rem; }
+}
 
 /* Enterprise explainer: one Entra ID account + SSO + QR cross-device */
 .enterprise-note {
@@ -486,11 +538,15 @@ a:focus-visible,
 .tech-name { font-weight: 600; font-size: 0.86rem; line-height: 1.25; }
 .tech-tier { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; }
 
+/* Hidden via display:none, NOT visibility/opacity: an invisible absolutely-
+   positioned popover still extends the page's scrollable overflow area, so
+   the last row of cards let you scroll ~300px past the end of the page. */
 .tech-detail {
+  display: none;
   position: absolute;
   top: calc(100% + 8px);
   left: 50%;
-  transform: translateX(-50%) translateY(-6px);
+  transform: translateX(-50%);
   width: max(260px, 100%);
   max-width: 320px;
   background: var(--panel-2);
@@ -499,32 +555,20 @@ a:focus-visible,
   padding: 14px 16px;
   text-align: left;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
   z-index: 20;
 }
-/* min-width matches the mobile breakpoint below exactly, so the two are
-   mutually exclusive by width — a real mouse on a narrowed desktop window
-   (not just a touch device) must NOT get this absolutely-positioned popover,
-   or its translateX(-50%) clips off-screen once the card goes full-width
-   on mobile. */
 /* Both the hover-preview AND the click-to-pin (.open) states use the
    floating, horizontally-centred popover — but ONLY at desktop widths.
    Gated by width (not just hover/pointer capability) because .open can be
    set by a click on any device, including a mouse on a narrowed window;
    without the width gate its translateX(-50%) would clip the mobile
-   in-place expansion (which uses position:static) off-screen. */
+   in-place expansion (which uses position:static) off-screen. The 701px
+   min-width matches the mobile block's 700px max-width exactly. */
 @media (min-width: 701px) {
-  .tech-card.open .tech-detail {
-    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
-  }
+  .tech-card.open .tech-detail { display: block; }
 }
 @media (hover: hover) and (pointer: fine) and (min-width: 701px) {
-  .tech-card:hover .tech-detail, .tech-card:focus-visible .tech-detail {
-    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
-  }
+  .tech-card:hover .tech-detail, .tech-card:focus-visible .tech-detail { display: block; }
 }
 .tech-how { margin: 0 0 12px; color: var(--muted); line-height: 1.55; font-size: 0.88rem; }
 .tech-ex {
@@ -558,8 +602,7 @@ a:focus-visible,
   .tech-tier { flex-shrink: 0; }
   .tech-detail {
     position: static; transform: none; width: auto; max-width: none;
-    margin-top: 10px; box-shadow: none; opacity: 1; visibility: visible;
-    pointer-events: auto; display: none;
+    margin-top: 10px; box-shadow: none;
   }
   .tech-card.open .tech-detail { display: block; }
 }
@@ -616,9 +659,9 @@ a:focus-visible,
 @media (max-width: 880px) {
   .round-bar { flex-wrap: wrap; row-gap: 8px; }
   #btn-quit { order: 1; }
-  /* Score shares row 1 with Quit; keep it clear of the two fixed top-right
-     toggle buttons (theme + sound occupy ~104px from the right edge). */
-  .score-meta { order: 2; margin-right: 112px; }
+  /* Score shares row 1 with Quit; keep it clear of the THREE fixed top-right
+     toggle buttons (audience + theme + sound occupy ~152px from the right). */
+  .score-meta { order: 2; margin-right: 160px; }
   .round-meta { order: 3; width: 100%; justify-content: center; font-size: 0.82rem; gap: 7px; }
 }
 

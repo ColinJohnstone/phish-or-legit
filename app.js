@@ -2249,9 +2249,10 @@ function flashShare(msg) {
 function applyAudience(aud) {
   state.audience = aud === "enterprise" ? "enterprise" : "personal";
   try { localStorage.setItem(AUD_KEY, state.audience); } catch (_) { /* ignore */ }
-  document.querySelectorAll("#audience-seg .seg-btn").forEach((b) =>
-    b.classList.toggle("active", b.dataset.aud === state.audience));
   const ent = state.audience === "enterprise";
+  // The small fixed toggle shows which mode you're in (and returns to the chooser).
+  const audBtn = $("#btn-audience");
+  if (audBtn) audBtn.textContent = ent ? "🏢" : "👤";
   $("#pk-panel-glyph").textContent = ent ? "🏢" : "🔑";
   $("#pk-panel-title").textContent = ent
     ? "Work passkey — Entra ID, one account for everything"
@@ -2298,12 +2299,29 @@ function init() {
   renderTechniques();
   applyTheme(currentTheme()); // sync the toggle icon to the theme set in <head>
 
-  // Personal vs Enterprise (restores the last choice)
-  let savedAud = "personal";
-  try { savedAud = localStorage.getItem(AUD_KEY) || "personal"; } catch (_) { /* ignore */ }
-  applyAudience(savedAud);
-  document.querySelectorAll("#audience-seg .seg-btn").forEach((btn) => {
-    btn.addEventListener("click", () => applyAudience(btn.dataset.aud));
+  // Personal vs Enterprise. First visit lands on the split chooser (the
+  // HTML's default active screen); a returning player skips straight to the
+  // title with their saved choice. The small 👤/🏢 toggle is the only way
+  // back to the chooser.
+  let savedAud = null;
+  try { savedAud = localStorage.getItem(AUD_KEY); } catch (_) { /* ignore */ }
+  if (savedAud) {
+    applyAudience(savedAud);
+    show("#screen-title");
+  }
+  document.querySelectorAll(".aud-half").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      applyAudience(btn.dataset.aud);
+      Sound.sfx("pick");
+      show("#screen-title");
+    });
+  });
+  $("#btn-audience").addEventListener("click", () => {
+    stopTimer();
+    Sound.stopMusic();
+    closeOverlay("#result-overlay");
+    window.scrollTo(0, 0);
+    show("#screen-audience");
   });
 
   $("#btn-register").addEventListener("click", registerPasskey);

@@ -16,15 +16,39 @@
   <!-- Apply saved/system theme before first paint (no flash of dark).
        External (not inline) so the CSP can stay strict: script-src 'self'. -->
   <script src="theme-init.js?v=10"></script>
-  <link rel="stylesheet" href="styles.css?v=28" />
+  <link rel="stylesheet" href="styles.css?v=29" />
 </head>
 <body>
   <div id="app">
+    <button id="btn-audience" class="audience-toggle" title="Switch between Personal and Enterprise" aria-label="Switch between Personal and Enterprise">👤</button>
     <button id="btn-theme" class="theme-toggle" title="Light / dark theme" aria-label="Toggle light or dark theme">🌙</button>
     <button id="btn-sound" class="sound-toggle" title="Sound on/off" aria-label="Toggle sound">🔊</button>
     <canvas id="confetti" class="confetti-canvas"></canvas>
+
+    <!-- ───────────── CHOOSE: PERSONAL or ENTERPRISE ─────────────
+         First-load screen: one simple choice, split down the middle.
+         The choice persists; the small 👤/🏢 toggle (top right) is the
+         only way back here. -->
+    <section id="screen-audience" class="screen active">
+      <div class="aud-split">
+        <button class="aud-half" data-aud="personal">
+          <span class="aud-ic">👤</span>
+          <h2>Personal</h2>
+          <p>Play as yourself. Your passkey is created right on this device — Face&nbsp;ID, Touch&nbsp;ID, or Windows&nbsp;Hello.</p>
+          <span class="aud-cta">Play as Personal ›</span>
+        </button>
+        <div class="aud-divider" aria-hidden="true"></div>
+        <button class="aud-half" data-aud="enterprise">
+          <span class="aud-ic">🏢</span>
+          <h2>Enterprise</h2>
+          <p>One work account for everything — Microsoft Entra&nbsp;ID with SSO. On a computer, your passkey is created on your phone via QR&nbsp;code.</p>
+          <span class="aud-cta">Play as Enterprise ›</span>
+        </button>
+      </div>
+    </section>
+
     <!-- ───────────── TITLE SCREEN ───────────── -->
-    <section id="screen-title" class="screen active">
+    <section id="screen-title" class="screen">
       <div class="title-wrap">
         <div class="menu-head">
           <span class="hero-badge">🎣</span>
@@ -33,14 +57,6 @@
         </div>
 
         <div class="menu-primary">
-          <!-- Who are you playing as? Personal keeps the classic flow;
-               Enterprise demos the work-account story: one Entra ID identity
-               with SSO, protected by a cross-device (QR-code) passkey. -->
-          <div class="seg seg-audience" id="audience-seg" role="group" aria-label="Choose player type">
-            <button class="seg-btn active" data-aud="personal">👤 Personal</button>
-            <button class="seg-btn" data-aud="enterprise">🏢 Enterprise</button>
-          </div>
-
           <div class="passkey-panel">
             <div class="passkey-panel__head">
               <span class="key-glyph" id="pk-panel-glyph">🔑</span>
@@ -243,6 +259,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=17"></script>
+  <script src="app.js?v=18"></script>
 </body>
 </html>
