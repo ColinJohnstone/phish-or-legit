@@ -395,6 +395,23 @@ a:focus-visible,
   .menu-head .tagline { font-size: 0.9rem; line-height: 1.45; }
   .menu-primary .passkey-panel { padding: 14px; }
 }
+/* Personal vs Enterprise picker — the first decision on the page */
+.seg-audience { display: flex; width: 100%; }
+.seg-audience .seg-btn { flex: 1; padding: 10px 8px; font-size: 0.92rem; font-weight: 600; }
+
+/* Enterprise explainer: one Entra ID account + SSO + QR cross-device */
+.enterprise-note {
+  background: color-mix(in srgb, #3a76d6 10%, transparent);
+  border: 1px solid color-mix(in srgb, #3a76d6 35%, var(--border));
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.enterprise-note b { color: var(--text); }
+
 .menu-primary .passkey-panel { margin: 0; padding: 18px; }
 .menu-primary .passkey-panel__head { margin-bottom: 12px; }
 .key-actions { flex-direction: row; gap: 8px; }

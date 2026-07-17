@@ -16,7 +16,7 @@
   <!-- Apply saved/system theme before first paint (no flash of dark).
        External (not inline) so the CSP can stay strict: script-src 'self'. -->
   <script src="theme-init.js?v=10"></script>
-  <link rel="stylesheet" href="styles.css?v=27" />
+  <link rel="stylesheet" href="styles.css?v=28" />
 </head>
 <body>
   <div id="app">
@@ -33,13 +33,28 @@
         </div>
 
         <div class="menu-primary">
+          <!-- Who are you playing as? Personal keeps the classic flow;
+               Enterprise demos the work-account story: one Entra ID identity
+               with SSO, protected by a cross-device (QR-code) passkey. -->
+          <div class="seg seg-audience" id="audience-seg" role="group" aria-label="Choose player type">
+            <button class="seg-btn active" data-aud="personal">👤 Personal</button>
+            <button class="seg-btn" data-aud="enterprise">🏢 Enterprise</button>
+          </div>
+
           <div class="passkey-panel">
             <div class="passkey-panel__head">
-              <span class="key-glyph">🔑</span>
+              <span class="key-glyph" id="pk-panel-glyph">🔑</span>
               <div>
-                <h3>Device-bound passkey</h3>
-                <p class="muted small">Register one and your passkey refuses the fake site — so the phish reveals itself.</p>
+                <h3 id="pk-panel-title">Device-bound passkey</h3>
+                <p class="muted small" id="pk-panel-sub">Register one and your passkey refuses the fake site — so the phish reveals itself.</p>
               </div>
+            </div>
+            <div class="enterprise-note" id="enterprise-note" style="display:none">
+              <b>One account, everywhere.</b> Your org signs you in with <b>Microsoft Entra ID</b> —
+              single sign-on means that one work account opens every app, so there's exactly one
+              identity to protect, and one passkey that protects it. On a computer, registering
+              shows a <b>QR code</b>: scan it with your phone and the passkey is created there,
+              bound to the real domain <i>and</i> to your phone (cross-device sign-in).
             </div>
             <div class="key-actions">
               <button id="btn-register" class="btn btn-key">Register a passkey</button>
@@ -228,6 +243,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

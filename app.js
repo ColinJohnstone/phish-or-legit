@@ -860,15 +860,18 @@ const state = {
   pickedReal: false, // did the player click the genuine site this round?
   streak: 0,         // consecutive correct answers
   results: [],       // per-round { difficulty, correct } for the summary
+  audience: "personal", // 'personal' | 'enterprise' (Entra ID SSO + QR cross-device)
   passkey: {
     registered: false,
     credentialId: null,
+    kind: "platform", // 'platform' (this device) | 'hybrid' (phone via QR)
     boundDomains: [], // legit domains the passkey "works" on
   },
 };
 
 const PK_STORE_KEY = "phishgame.passkey";
 const STATS_KEY = "phishgame.stats";
+const AUD_KEY = "phishgame.audience";
 
 // ---------- Element helpers ----------------------------------------
 const $ = (sel) => document.querySelector(sel);
@@ -928,6 +931,17 @@ function shuffle(arr) {
 // ============================================================
 //  Passkey registration (real WebAuthn where available)
 // ============================================================
+// True on phones/tablets — used to pick device-appropriate prompt copy and
+// to skip the QR cross-device flow when the player is ALREADY on the phone.
+function isTouchDevice() {
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+}
+// What the OS prompt is called on this device, so the copy never tells a
+// phone user to look for Windows Hello.
+function verifierName() {
+  return isTouchDevice() ? "Face ID / fingerprint" : "Touch ID / Windows Hello";
+}
+
 function loadStoredPasskey() {
   try {
     const raw = localStorage.getItem(PK_STORE_KEY);
@@ -935,6 +949,7 @@ function loadStoredPasskey() {
     const data = JSON.parse(raw);
     state.passkey.registered = true;
     state.passkey.credentialId = data.credentialId || null;
+    state.passkey.kind = data.kind || "platform"; // 'platform' | 'hybrid'
     state.passkey.boundDomains = BRANDS.map((b) => b.legit);
     reflectPasskeyState();
   } catch (_) { /* ignore */ }
@@ -945,7 +960,10 @@ function reflectPasskeyState() {
   const playBtn = $("#btn-play-passkey");
   const subEl = $("#passkey-mode-sub");
   if (state.passkey.registered) {
-    statusEl.textContent = "✓ Passkey registered on this device.";
+    statusEl.textContent =
+      state.passkey.kind === "hybrid"
+        ? "✓ Work passkey registered on your phone (Entra ID · one account, SSO everywhere)."
+        : "✓ Passkey registered on this device.";
     statusEl.className = "passkey-status ok";
     playBtn.disabled = false;
     subEl.textContent = "You'll spot every phish";
@@ -956,10 +974,17 @@ function reflectPasskeyState() {
 
 async function registerPasskey() {
   const statusEl = $("#passkey-status");
+  // Enterprise on a computer = cross-device: the browser shows a QR code and
+  // the passkey is created on the player's phone. Enterprise on a phone (or
+  // any personal play) creates the passkey right on this device — the phone
+  // IS the device, no QR needed.
+  const crossDevice = state.audience === "enterprise" && !isTouchDevice();
   statusEl.className = "passkey-status info";
-  statusEl.textContent = "Waiting for your device (Touch ID / Windows Hello)…";
+  statusEl.textContent = crossDevice
+    ? "In the browser dialog, choose “iPhone, iPad, or Android device” and scan the QR code with your phone…"
+    : `Waiting for your device (${verifierName()})…`;
 
-  // The honest path: a real platform passkey via WebAuthn.
+  // The honest path: a real passkey via WebAuthn.
   // Requires a secure context (https or localhost). Falls back
   // to a simulated passkey otherwise so the demo still works.
   const canWebAuthn =
@@ -973,26 +998,38 @@ async function registerPasskey() {
         publicKey: {
           challenge: randomBytes(32),
           rp: { name: "Phish or Legit?" }, // RP ID defaults to current origin
-          user: {
-            id: randomBytes(16),
-            name: "player@phishgame.demo",
-            displayName: "Phish Game Player",
-          },
+          user: state.audience === "enterprise"
+            ? {
+                id: randomBytes(16),
+                name: "jordan@contoso-demo.com",
+                displayName: "Jordan Lee (Contoso · Entra ID)",
+              }
+            : {
+                id: randomBytes(16),
+                name: "player@phishgame.demo",
+                displayName: "Phish Game Player",
+              },
           pubKeyCredParams: [
             { type: "public-key", alg: -7 },   // ES256
             { type: "public-key", alg: -257 }, // RS256
           ],
           authenticatorSelection: {
-            authenticatorAttachment: "platform",
+            // cross-platform = exclude this computer's own authenticator, so
+            // the browser offers the QR/cross-device path; platform = the
+            // local Face ID / Touch ID / Windows Hello prompt.
+            authenticatorAttachment: crossDevice ? "cross-platform" : "platform",
             residentKey: "preferred",
             userVerification: "preferred",
           },
-          timeout: 60000,
+          // Newer browsers use hints to put the QR option first; unknown
+          // dictionary members are ignored elsewhere, so this is safe.
+          ...(crossDevice ? { hints: ["hybrid"] } : {}),
+          timeout: 120000,
           attestation: "none",
         },
       });
       const id = bufToBase64Url(cred.rawId);
-      finalizeRegistration(id, true);
+      finalizeRegistration(id, true, crossDevice ? "hybrid" : "platform");
       return;
     } catch (err) {
       if (err && err.name === "NotAllowedError") {
@@ -1002,32 +1039,36 @@ async function registerPasskey() {
       }
       // Any other failure → fall back to simulated passkey.
       console.warn("WebAuthn unavailable, simulating:", err);
-      finalizeRegistration("simulated-" + Date.now(), false);
+      finalizeRegistration("simulated-" + Date.now(), false, "platform");
       return;
     }
   }
 
   // No secure context (e.g. opened as a file://) → simulate.
-  finalizeRegistration("simulated-" + Date.now(), false);
+  finalizeRegistration("simulated-" + Date.now(), false, "platform");
   $("#passkey-status").className = "passkey-status info";
   $("#passkey-status").textContent =
-    "✓ Passkey registered (simulated — serve over https or localhost for a real Touch ID prompt).";
+    "✓ Passkey registered (simulated — serve over https or localhost for a real passkey prompt).";
 }
 
-function finalizeRegistration(credentialId, real) {
+function finalizeRegistration(credentialId, real, kind) {
   state.passkey.registered = true;
   state.passkey.credentialId = credentialId;
+  state.passkey.kind = kind || "platform";
   state.passkey.boundDomains = BRANDS.map((b) => b.legit);
   try {
     localStorage.setItem(
       PK_STORE_KEY,
-      JSON.stringify({ credentialId, real, at: Date.now() })
+      JSON.stringify({ credentialId, real, kind: state.passkey.kind, at: Date.now() })
     );
   } catch (_) { /* ignore */ }
   reflectPasskeyState();
   if (real) {
     $("#passkey-status").className = "passkey-status ok";
-    $("#passkey-status").textContent = "✓ Device-bound passkey created with Touch ID / Windows Hello.";
+    $("#passkey-status").textContent =
+      state.passkey.kind === "hybrid"
+        ? "✓ Work passkey created on your phone via the QR code — one Entra ID account, one passkey, SSO everywhere."
+        : `✓ Device-bound passkey created with ${verifierName()}.`;
   }
 }
 
@@ -1054,9 +1095,16 @@ function realPasskeyAvailable() {
 // fall back to the simulated illustration).
 async function attemptPasskey(kind) {
   if (!realPasskeyAvailable()) return { sim: true };
+  // A cross-device ('hybrid') passkey lives on the player's phone, so the
+  // real sign-in must offer the hybrid transport — the browser shows the
+  // QR / "use your phone" flow again, exactly like a real Entra ID SSO
+  // sign-in at a workstation. The fake attempt stays internal-only so the
+  // browser fails fast with its native "no passkey" UI.
+  const realTransports =
+    state.passkey.kind === "hybrid" ? ["hybrid", "internal"] : ["internal"];
   const allowCredentials =
     kind === "real"
-      ? [{ type: "public-key", id: base64UrlToBuf(state.passkey.credentialId), transports: ["internal"] }]
+      ? [{ type: "public-key", id: base64UrlToBuf(state.passkey.credentialId), transports: realTransports }]
       : [{ type: "public-key", id: randomBytes(32), transports: ["internal"] }];
   try {
     await navigator.credentials.get({
@@ -1085,7 +1133,10 @@ async function testPasskey() {
     return;
   }
   status.className = "passkey-status info";
-  status.textContent = "Waiting for Face ID / Touch ID…";
+  status.textContent =
+    state.passkey.kind === "hybrid"
+      ? "Follow the browser dialog — confirm with your phone…"
+      : `Waiting for ${verifierName()}…`;
   const r = await attemptPasskey("real");
   if (r.sim) {
     status.className = "passkey-status info";
@@ -2190,6 +2241,32 @@ function flashShare(msg) {
 // ============================================================
 //  Wiring
 // ============================================================
+// ---------- Audience: Personal vs Enterprise ------------------------
+// Personal is the classic experience: a passkey created on THIS device.
+// Enterprise tells the work-account story: one Microsoft Entra ID identity
+// with SSO across every app, protected by a passkey created on your phone
+// via the browser's QR cross-device flow (when playing at a computer).
+function applyAudience(aud) {
+  state.audience = aud === "enterprise" ? "enterprise" : "personal";
+  try { localStorage.setItem(AUD_KEY, state.audience); } catch (_) { /* ignore */ }
+  document.querySelectorAll("#audience-seg .seg-btn").forEach((b) =>
+    b.classList.toggle("active", b.dataset.aud === state.audience));
+  const ent = state.audience === "enterprise";
+  $("#pk-panel-glyph").textContent = ent ? "🏢" : "🔑";
+  $("#pk-panel-title").textContent = ent
+    ? "Work passkey — Entra ID, one account for everything"
+    : "Device-bound passkey";
+  $("#pk-panel-sub").textContent = ent
+    ? "Your admin requires a phishing-resistant sign-in for your single SSO identity. On a computer, registration hands you off to your phone with a QR code."
+    : "Register one and your passkey refuses the fake site — so the phish reveals itself.";
+  $("#enterprise-note").style.display = ent ? "" : "none";
+  $("#btn-register").textContent = ent
+    ? (isTouchDevice() ? "Register work passkey on this phone" : "Register work passkey (QR → phone)")
+    : "Register a passkey";
+  // Status line may reference the audience — refresh it if already registered.
+  if (state.passkey.registered) reflectPasskeyState();
+}
+
 // Live one-line summary shown on the collapsed "Game options" disclosure,
 // so the current settings are still visible without the panel taking up
 // space by default.
@@ -2220,6 +2297,14 @@ function init() {
   renderLifetime();
   renderTechniques();
   applyTheme(currentTheme()); // sync the toggle icon to the theme set in <head>
+
+  // Personal vs Enterprise (restores the last choice)
+  let savedAud = "personal";
+  try { savedAud = localStorage.getItem(AUD_KEY) || "personal"; } catch (_) { /* ignore */ }
+  applyAudience(savedAud);
+  document.querySelectorAll("#audience-seg .seg-btn").forEach((btn) => {
+    btn.addEventListener("click", () => applyAudience(btn.dataset.aud));
+  });
 
   $("#btn-register").addEventListener("click", registerPasskey);
   $("#btn-test-passkey").addEventListener("click", testPasskey);
