@@ -16,7 +16,7 @@
   <!-- Apply saved/system theme before first paint (no flash of dark).
        External (not inline) so the CSP can stay strict: script-src 'self'. -->
   <script src="theme-init.js?v=10"></script>
-  <link rel="stylesheet" href="styles.css?v=26" />
+  <link rel="stylesheet" href="styles.css?v=27" />
 </head>
 <body>
   <div id="app">
@@ -138,20 +138,22 @@
 
       <div class="windows" id="windows"></div>
 
+      <!-- Result panel: lives in normal page flow right after the windows
+           (NOT a covering modal) so it can never overlap them — see the
+           #result-overlay CSS notes for why. -->
+      <div id="result-overlay" class="overlay">
+        <div class="result-card" id="result-card">
+          <div class="result-icon" id="result-icon"></div>
+          <h2 id="result-title"></h2>
+          <p id="result-body"></p>
+          <div class="reveal" id="result-reveal"></div>
+          <button id="btn-passkey-demo" class="btn btn-ghost result-demo-btn">🛡️ See what a passkey would do here</button>
+          <button id="btn-next" class="btn btn-primary">Next round ›</button>
+        </div>
+      </div>
+
       <p class="hint" id="round-hint"></p>
     </section>
-
-    <!-- ───────────── RESULT OVERLAY ───────────── -->
-    <div id="result-overlay" class="overlay">
-      <div class="result-card" id="result-card">
-        <div class="result-icon" id="result-icon"></div>
-        <h2 id="result-title"></h2>
-        <p id="result-body"></p>
-        <div class="reveal" id="result-reveal"></div>
-        <button id="btn-passkey-demo" class="btn btn-ghost result-demo-btn">🛡️ See what a passkey would do here</button>
-        <button id="btn-next" class="btn btn-primary">Next round ›</button>
-      </div>
-    </div>
 
     <!-- ───────────── SUMMARY SCREEN ───────────── -->
     <section id="screen-summary" class="screen">

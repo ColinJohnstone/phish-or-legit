@@ -499,12 +499,12 @@ a:focus-visible,
    set by a click on any device, including a mouse on a narrowed window;
    without the width gate its translateX(-50%) would clip the mobile
    in-place expansion (which uses position:static) off-screen. */
-@media (min-width: 641px) {
+@media (min-width: 701px) {
   .tech-card.open .tech-detail {
     opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
   }
 }
-@media (hover: hover) and (pointer: fine) and (min-width: 641px) {
+@media (hover: hover) and (pointer: fine) and (min-width: 701px) {
   .tech-card:hover .tech-detail, .tech-card:focus-visible .tech-detail {
     opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto;
   }
@@ -526,21 +526,26 @@ a:focus-visible,
 .tech-dd-foot { margin: 20px auto 0; max-width: 560px; text-align: center; color: var(--muted); font-size: 0.9rem; line-height: 1.55; }
 .tech-dd-foot b { color: var(--text); }
 
-/* No hover on touch: the popover becomes an in-place expansion instead,
-   so there's no risk of it overflowing off-screen near a grid edge. */
-@media (max-width: 640px) {
-  .tech-dd-list { grid-template-columns: repeat(2, 1fr); }
+/* No hover on touch: the popover becomes an in-place expansion instead.
+   Single column ONLY (no 2-up grid) — a 2-up grid needs the tapped card to
+   grid-column-span to full width when it opens, which forces CSS Grid to
+   reflow every sibling on that row (an abrupt jump, not a clean "expand in
+   place", and easy to misjudge without a real touch device to test on).
+   One column means every card is already full width, so opening one is
+   just a plain block appearing below it — nothing else on the page moves. */
+@media (max-width: 700px) {
+  .tech-dd-list { grid-template-columns: 1fr; }
   .tech-card-face { flex-direction: row; text-align: left; }
+  .tech-ic { flex-shrink: 0; }
   .tech-name { flex: 1; }
+  .tech-tier { flex-shrink: 0; }
   .tech-detail {
     position: static; transform: none; width: auto; max-width: none;
     margin-top: 10px; box-shadow: none; opacity: 1; visibility: visible;
     pointer-events: auto; display: none;
   }
-  .tech-card.open { grid-column: 1 / -1; }
   .tech-card.open .tech-detail { display: block; }
 }
-@media (max-width: 420px) { .tech-dd-list { grid-template-columns: 1fr; } }
 
 /* Shrink the hero on short screens so the whole menu still fits */
 @media (max-height: 720px) {
@@ -741,9 +746,19 @@ a:focus-visible,
     height: 100vh;            /* fallback for browsers without dvh */
     height: 100dvh;           /* excludes mobile browser chrome */
     min-height: 0;
-    overflow: hidden;         /* hard guarantee: never scrolls */
+    overflow: hidden;         /* hard guarantee: never scrolls DURING a round */
     padding: 10px 14px 12px;
     gap: 8px;
+  }
+  /* Once a round resolves, the in-flow result panel below .windows adds
+     real height — let the page grow and scroll to it instead of forcing
+     everything back into one fixed 100dvh (which would squash the windows
+     to make room). Comparing is over; reading the explanation is what
+     matters now, and scrolling a little for that is normal and fine. */
+  #screen-round.active:has(#result-overlay.active) {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
   }
   .scenario { font-size: 0.9rem; padding: 11px 14px; line-height: 1.4; margin: 0; }
   .timer-wrap { margin: 0; }
@@ -767,12 +782,17 @@ a:focus-visible,
   .pg-grid { grid-template-columns: repeat(2, 1fr); }
   .pg-rowscroll { flex-wrap: wrap; }
 
-  /* The windows stack vertically on mobile, so a tall result card would
-     bury the second window entirely. Keep it short enough that at least
-     the top (verdict banner + highlighted address bar) of both windows
-     stays visible above/below it. */
-  #result-overlay .result-card { max-height: 42vh; padding: 18px 20px; }
-  #result-overlay .result-card p { font-size: 0.88rem; }
+  /* With the round screen now free to grow (see :has() above), each window
+     should size to its own content instead of being force-fit/clipped to a
+     shrinking share of a fixed viewport — the whole point was to reveal
+     the full comparison once resolved, not clip it further. */
+  #screen-round.active:has(#result-overlay.active) .window,
+  #screen-round.active:has(#result-overlay.active) .windows .site,
+  #screen-round.active:has(#result-overlay.active) .site-hero {
+    flex: none;
+    max-height: none;
+    overflow: visible;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1149,23 +1169,25 @@ a:focus-visible,
 }
 .overlay.active { display: flex; }
 
-/* The result card must NOT fully cover the two comparison windows behind
-   it — the actual highlighted tell now lives ON them (the diffmark/rf spans
-   above), so hiding them behind a full dark backdrop would defeat the
-   point. Dock the card to the bottom edge with no backdrop dimming, so the
-   windows — REAL/FAKE banners, highlighted address bars, everything —
-   stay fully visible and legible above it. (#how-overlay is unaffected;
-   it has nothing behind it that needs to stay visible.) */
+/* The result card must NEVER cover the two comparison windows — the actual
+   highlighted tell now lives ON them (the diffmark/rf spans above). A
+   floating/docked panel can only ever get this right by guessing at
+   percentages, and guesses break on window heights and viewports we didn't
+   test. So instead of floating over the windows, the result panel is part
+   of NORMAL PAGE FLOW, nested right after .windows in the HTML — it simply
+   appears below them. If it doesn't fit in the viewport, the page scrolls
+   to it, exactly like any other block of content; it can't overlap
+   anything by construction. (#how-overlay is untouched — a real modal is
+   correct there, since it has nothing behind it that needs to stay visible.) */
 #result-overlay {
-  align-items: flex-end;
+  position: static;
+  inset: auto;
   background: transparent;
   backdrop-filter: none;
+  padding: 18px 0 0;
+  z-index: auto;
 }
-#result-overlay .result-card {
-  max-height: min(58vh, 520px);
-  overflow-y: auto;
-  box-shadow: 0 -16px 44px rgba(0, 0, 0, 0.5);
-}
+#result-overlay .result-card { box-shadow: var(--shadow); }
 
 .result-card, .how-card {
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
