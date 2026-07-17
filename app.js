@@ -2004,12 +2004,29 @@ function showResult(title, body, brand) {
     ? "🔑 See your passkey sign in here"
     : "🛡️ See how a passkey would've blocked this";
   openOverlay("#result-overlay");
+
+  // The result panel lives in page flow below the windows, which on mobile
+  // usually puts it below the fold — nobody knows to scroll for it. So
+  // scroll for them. Mobile brings the card to the top of the screen (the
+  // verdict + Next button are the thing you need right after answering,
+  // and the highlighted windows are one flick up). Desktop scrolls the
+  // minimum needed — usually nothing, since the panel mostly fits.
+  // Called synchronously (no rAF): DOM changes above are already applied
+  // and layout is computed on demand, while rAF silently never fires in a
+  // hidden tab, which would skip the scroll entirely.
+  const card = $("#result-card");
+  const mobile = window.matchMedia("(max-width: 880px)").matches;
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  card.scrollIntoView({ behavior, block: mobile ? "start" : "nearest" });
 }
 function resultOk(title, body, brand) { showResult(title, body, brand); }
 function resultBad(title, body, brand) { showResult(title, body, brand); }
 
 function nextRound() {
   closeOverlay("#result-overlay");
+  // The result view may have scrolled the page (see showResult); the new
+  // round expects to start from the top.
+  window.scrollTo(0, 0);
   state.round++;
   if (state.round >= state.totalRounds) {
     showSummary();
@@ -2280,7 +2297,7 @@ function init() {
     startGame("passkey");
   });
   $("#btn-next").addEventListener("click", nextRound);
-  $("#btn-quit").addEventListener("click", () => { stopTimer(); Sound.stopMusic(); closeOverlay("#result-overlay"); show("#screen-title"); });
+  $("#btn-quit").addEventListener("click", () => { stopTimer(); Sound.stopMusic(); closeOverlay("#result-overlay"); window.scrollTo(0, 0); show("#screen-title"); });
   $("#btn-share").addEventListener("click", shareResult);
   $("#btn-replay").addEventListener("click", () => startGame(state.mode));
   $("#btn-home").addEventListener("click", () => { Sound.stopMusic(); show("#screen-title"); });
