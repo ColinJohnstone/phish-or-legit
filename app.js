@@ -24,393 +24,52 @@ const HOMOGLYPH_NOTE =
   "A real browser would unmask it as a confusing “xn--…” address — but the fake site " +
   "controls what the bar shows, and most people never look that closely. Your eyes can't win this one.";
 
+// All brands here are FICTIONAL — invented names, generic monogram logos, and
+// generic per-category homepages (see siteHome). No real company names, logos,
+// domains, or page designs appear anywhere in the game. Each entry carries only
+// its theme (colour + category + nav/hero colours) and monogram; the look-alike
+// phishing URLs + lessons are layered on from PHISH below.
 const BRANDS = [
-  {
-    name: "Coinbase",
-    color: "#1652f0",
-    kind: "crypto",
-    navBg: "#0a0b0d", navFg: "#ffffff", heroBg: "#0a0b0d", heroFg: "#ffffff",
-    legit: "www.coinbase.com",
-    // the first "o" in coinbase is a Cyrillic о (U+043E)
-    fake: "www.cоinbase.com",
-    technique: "Homoglyph (Cyrillic “о”)",
-    lesson:
-      "The two addresses are pixel-identical, but in the fake the first “o” is a Cyrillic <b>о</b>, not a Latin “o”. " +
-      HOMOGLYPH_NOTE,
-    mark: logoCoinbase,
-    nameHtml: `<span style="color:#fff;font-weight:700">Coinbase</span>`,
-    home: () => `
-      <p class="eyebrow" style="color:#5b8cff">Coinbase</p>
-      <h1>Jumpstart your<br>crypto portfolio.</h1>
-      <p class="lede">Coinbase is the easiest place to buy and sell cryptocurrency.</p>
-      <div class="cb-ticker">
-        <span>BTC <b style="color:#2fd27a">▲ 2.4%</b></span>
-        <span>ETH <b style="color:#2fd27a">▲ 1.1%</b></span>
-        <span>SOL <b style="color:#ff5d6c">▼ 0.6%</b></span>
-      </div>`,
-  },
-  {
-    name: "PayPal",
-    color: "#0070ba",
-    kind: "wallet",
-    navBg: "#ffffff", navFg: "#2c2e2f", heroBg: "linear-gradient(160deg,#f5f7fa,#e8eefc)", heroFg: "#0a1f44",
-    legit: "www.paypal.com",
-    // the second character is a Cyrillic а (U+0430)
-    fake: "www.pаypal.com",
-    technique: "Homoglyph (Cyrillic “а”)",
-    lesson:
-      "Look as hard as you like — the “a” in the fake is a Cyrillic <b>а</b>, not a Latin “a”. " +
-      HOMOGLYPH_NOTE,
-    mark: logoPaypal,
-    nameHtml: `<span style="font-weight:800;font-size:1.15rem"><span style="color:#003087">Pay</span><span style="color:#0070ba">Pal</span></span>`,
-    home: () => `
-      <h1>Pay it your way.</h1>
-      <p class="lede">Send money, get paid, and check out faster across millions of stores.</p>
-      <div class="pp-card">
-        <div class="pp-row"><span>Balance</span><b>$2,480.19</b></div>
-        <div class="pp-row"><span>Send</span><span>Request</span></div>
-      </div>`,
-  },
-  {
-    name: "Google",
-    color: "#1a73e8",
-    kind: "email",
-    navBg: "#ffffff", navFg: "#5f6368", heroBg: "#ffffff", heroFg: "#202124",
-    legit: "accounts.google.com",
-    // both "o"s are Cyrillic о (U+043E)
-    fake: "accоunts.gооgle.com",
-    technique: "Homoglyph (Cyrillic “о”)",
-    lesson:
-      "Three of the letters you read as “o” are Cyrillic <b>о</b>. The word looks exactly like “accounts.google.com”. " +
-      HOMOGLYPH_NOTE,
-    mark: logoGoogle,
-    nameHtml: googleWordmark(),
-    home: () => `
-      <div class="g-center">
-        <div class="g-big">${googleWordmark(34)}</div>
-        <div class="g-search"><span>🔍</span> Search Google or type a URL</div>
-        <div class="g-btns"><span>Google Search</span><span>I'm Feeling Lucky</span></div>
-      </div>`,
-  },
-  {
-    name: "Amazon",
-    color: "#ff9900",
-    kind: "shopping",
-    navBg: "#131921", navFg: "#ffffff", heroBg: "#eaeded", heroFg: "#0f1111",
-    legit: "www.amazon.com",
-    // the "o" is a Cyrillic о (U+043E)
-    fake: "www.amazоn.com",
-    technique: "Homoglyph (Cyrillic “о”)",
-    lesson:
-      "The “o” in amazon is a Cyrillic <b>о</b> in the fake. Same width, same shape, different character. " +
-      HOMOGLYPH_NOTE,
-    mark: logoAmazon,
-    nameHtml: `<span style="color:#fff;font-weight:700;font-size:1.05rem">amazon</span>`,
-    navExtra: `<div class="az-search"><input placeholder="Search Amazon" /><span class="az-go">🔍</span></div>`,
-    home: () => `
-      <div class="az-banner">Today's Deals · up to 50% off</div>
-      <div class="az-grid">
-        <div><div class="az-thumb" style="background:#f0c14b"></div>Electronics</div>
-        <div><div class="az-thumb" style="background:#a0d8ef"></div>Home</div>
-        <div><div class="az-thumb" style="background:#f7b7c2"></div>Fashion</div>
-        <div><div class="az-thumb" style="background:#bfe3c0"></div>Books</div>
-      </div>`,
-  },
-  {
-    name: "Chase",
-    color: "#117aca",
-    kind: "bank",
-    navBg: "#117aca", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#0a0a0a",
-    legit: "secure05ea.chase.com",
-    fake: "www.chase-secure.com",
-    technique: "Look-alike domain (clean fake, unfamiliar real)",
-    lesson:
-      "The reassuring <b>chase-secure.com</b> is the phish. Chase's real login lives on ugly subdomains of " +
-      "<b>chase.com</b> like secure05ea.chase.com. “Looks official” is not a security signal — clean-but-fake beats ugly-but-real.",
-    mark: logoChase,
-    nameHtml: `<span style="color:#fff;font-weight:700;letter-spacing:.5px">CHASE</span>`,
-    home: () => `
-      <h1 style="color:#117aca">Welcome to Chase</h1>
-      <p class="lede">Banking, credit cards, and mortgages — all in one place.</p>
-      <div class="ch-cards">
-        <div>Checking</div><div>Credit&nbsp;Cards</div><div>Mortgage</div>
-      </div>`,
-  },
-  {
-    name: "Microsoft",
-    color: "#0067b8",
-    kind: "work",
-    navBg: "#ffffff", navFg: "#3b3b3b", heroBg: "#f3f2f1", heroFg: "#1b1a19",
-    legit: "login.microsoftonline.com",
-    // the "o" in micro(o)soft is a Cyrillic о (U+043E)
-    fake: "login.micrоsoftonline.com",
-    technique: "Homoglyph (Cyrillic “о”)",
-    lesson:
-      "The “o” in “microsoft” is a Cyrillic <b>о</b> in the fake — pixel-identical to the genuine address. " +
-      HOMOGLYPH_NOTE,
-    mark: logoMicrosoft,
-    nameHtml: `<span style="color:#5e5e5e;font-weight:600;font-size:1.02rem">Microsoft</span>`,
-    home: () => `
-      <h1 style="font-weight:600">Microsoft 365</h1>
-      <p class="lede">The apps you know, now with Copilot AI to help you create.</p>
-      <div class="ms-tiles">
-        <span style="background:#2b579a">W</span>
-        <span style="background:#217346">X</span>
-        <span style="background:#d24726">P</span>
-        <span style="background:#0078d4">O</span>
-        <span style="background:#6264a7">T</span>
-      </div>`,
-  },
-
-  // ── 17 more look-alike scenarios (25 total). These use shared hero +
-  //    monogram helpers to stay compact. Most are invisible homoglyphs;
-  //    a few use wrong-TLD / combosquat for teaching variety. ──────────
-  {
-    name: "Facebook", color: "#1877f2", kind: "social",
-    navBg: "#ffffff", navFg: "#1c1e21", heroBg: "#f0f2f5", heroFg: "#1c1e21",
-    legit: "www.facebook.com", fake: "www.facebоok.com", // Cyrillic о
-    technique: "Homoglyph (Cyrillic “о”)", lesson: homoglyphLesson("Cyrillic “о” (U+043E)"),
-    mark: () => monogram("f", "#1877f2"),
-    home: () => heroCenter({ h1: "Connect with friends and the world around you.", sub: "Log in to see photos and updates from people you know.", cta: "Create new account" }),
-  },
-  {
-    name: "Instagram", color: "#e1306c", kind: "social",
-    navBg: "#ffffff", navFg: "#262626", heroBg: "#fafafa", heroFg: "#262626",
-    legit: "www.instagram.com", fake: "www.instаgram.com", // Cyrillic а
-    technique: "Homoglyph (Cyrillic “а”)", lesson: homoglyphLesson("Cyrillic “а” (U+0430)"),
-    mark: () => monogram("Ig", "#e1306c"),
-    home: () => heroCenter({ h1: "See photos and videos from your friends.", sub: "Sign up to share your moments with the world.", cta: "Log in" }),
-  },
-  {
-    name: "LinkedIn", color: "#0a66c2", kind: "work",
-    navBg: "#ffffff", navFg: "#000000", heroBg: "#f4f2ee", heroFg: "#1d1d1d",
-    legit: "www.linkedin.com", fake: "www.linkedіn.com", // Cyrillic і
-    technique: "Homoglyph (Cyrillic “і”)", lesson: homoglyphLesson("Cyrillic “і” (U+0456)"),
-    mark: () => monogram("in", "#0a66c2"),
-    home: () => heroCenter({ h1: "Welcome to your professional community.", sub: "Sign in to your network of 1B+ professionals.", cta: "Sign in with email" }),
-  },
-  {
-    name: "Twitter", color: "#1d9bf0", kind: "social",
-    navBg: "#000000", navFg: "#ffffff", heroBg: "#000000", heroFg: "#ffffff",
-    legit: "twitter.com", fake: "twіtter.com", // Cyrillic і
-    technique: "Homoglyph (Cyrillic “і”)", lesson: homoglyphLesson("Cyrillic “і” (U+0456)"),
-    mark: () => monogram("t", "#1d9bf0"),
-    home: () => heroCenter({ eyebrow: "Happening now", h1: "Join today.", sub: "Sign in to see what's happening in the world right now.", cta: "Sign in" }),
-  },
-  {
-    name: "Spotify", color: "#1db954", kind: "streaming",
-    navBg: "#000000", navFg: "#ffffff", heroBg: "#121212", heroFg: "#ffffff",
-    legit: "www.spotify.com", fake: "www.spоtify.com", // Cyrillic о
-    technique: "Homoglyph (Cyrillic “о”)", lesson: homoglyphLesson("Cyrillic “о” (U+043E)"),
-    mark: () => monogram("S", "#1db954"),
-    home: () => heroCenter({ h1: "Music for everyone.", sub: "Millions of songs. No credit card needed.", cta: "Log in" }),
-  },
-  {
-    name: "Slack", color: "#611f69", kind: "work",
-    navBg: "#ffffff", navFg: "#1d1c1d", heroBg: "#f8f4f9", heroFg: "#1d1c1d",
-    legit: "app.slack.com", fake: "www.slаck.com", // Cyrillic а
-    technique: "Homoglyph (Cyrillic “а”)", lesson: homoglyphLesson("Cyrillic “а” (U+0430)"),
-    mark: () => monogram("S", "#611f69"),
-    home: () => heroCenter({ h1: "Where work happens.", sub: "Sign in to your workspace to keep the team moving.", cta: "Sign in" }),
-  },
-  {
-    name: "GitHub", color: "#238636", kind: "dev",
-    navBg: "#161b22", navFg: "#ffffff", heroBg: "#0d1117", heroFg: "#e6edf3",
-    legit: "github.com", fake: "gіthub.com", // Cyrillic і
-    technique: "Homoglyph (Cyrillic “і”)", lesson: homoglyphLesson("Cyrillic “і” (U+0456)"),
-    mark: () => monogram("GH", "#238636"),
-    home: () => heroCenter({ h1: "Where the world builds software.", sub: "Sign in to access your repositories and pull requests.", cta: "Sign in" }),
-  },
-  {
-    name: "Discord", color: "#5865f2", kind: "social",
-    navBg: "#5865f2", navFg: "#ffffff", heroBg: "#404eed", heroFg: "#ffffff",
-    legit: "discord.com", fake: "discоrd.com", // Cyrillic о
-    technique: "Homoglyph (Cyrillic “о”)", lesson: homoglyphLesson("Cyrillic “о” (U+043E)"),
-    mark: () => monogram("D", "#5865f2", "#fff"),
-    home: () => heroCenter({ h1: "Imagine a place to hang out.", sub: "Log in to talk, video chat, and stay close with your communities.", cta: "Open Discord" }),
-  },
-  {
-    name: "Steam", color: "#1999ff", kind: "gaming",
-    navBg: "#171a21", navFg: "#ffffff", heroBg: "#1b2838", heroFg: "#ffffff",
-    legit: "store.steampowered.com", fake: "store.steаmpowered.com", // Cyrillic а
-    technique: "Homoglyph (Cyrillic “а”)", lesson: homoglyphLesson("Cyrillic “а” (U+0430)"),
-    mark: () => monogram("S", "#1999ff"),
-    home: () => heroCenter({ h1: "Welcome to Steam.", sub: "Sign in to your library of over 50,000 games.", cta: "Sign in" }),
-  },
-  {
-    name: "Twitch", color: "#9146ff", kind: "streaming",
-    navBg: "#18181b", navFg: "#ffffff", heroBg: "#0e0e10", heroFg: "#efeff1",
-    legit: "www.twitch.tv", fake: "www.twitch.com", // wrong TLD
-    technique: "Wrong TLD (.com vs .tv)",
-    lesson:
-      "Same name, different ending: Twitch streams live on <b>twitch.tv</b>, and <b>twitch.com</b> is a different " +
-      "registration. The brand name being spelled correctly tells you nothing about who owns the domain.",
-    mark: () => monogram("T", "#9146ff"),
-    home: () => heroCenter({ h1: "Watch live. Chat live.", sub: "Sign in to follow your favourite streamers.", cta: "Log In" }),
-  },
-  {
-    name: "Adobe", color: "#fa0f00", kind: "work",
-    navBg: "#ffffff", navFg: "#2c2c2c", heroBg: "#fafafa", heroFg: "#2c2c2c",
-    legit: "account.adobe.com", fake: "account.adоbe.com", // Cyrillic о
-    technique: "Homoglyph (Cyrillic “о”)", lesson: homoglyphLesson("Cyrillic “о” (U+043E)"),
-    mark: () => monogram("A", "#fa0f00"),
-    home: () => heroTiles({ h1: "Creativity for all.", sub: "Sign in to your Adobe account and Creative Cloud apps.", tiles: [
-      { label: "Ps", bg: "#31a8ff" }, { label: "Ai", bg: "#ff9a00" }, { label: "Pr", bg: "#9999ff" }, { label: "Ae", bg: "#9999ff" } ] }),
-  },
-  {
-    name: "Binance", color: "#f0b90b", kind: "crypto",
-    navBg: "#181a20", navFg: "#ffffff", heroBg: "#0b0e11", heroFg: "#ffffff",
-    legit: "accounts.binance.com", fake: "accounts.binаnce.com", // Cyrillic а
-    technique: "Homoglyph (Cyrillic “а”)", lesson: homoglyphLesson("Cyrillic “а” (U+0430)"),
-    mark: () => monogram("B", "#f0b90b", "#181a20"),
-    home: () => heroChips({ h1: "Buy, trade, and hold crypto.", sub: "Sign in to the world's largest exchange.", chips: [
-      "BTC <b style='color:#2fd27a'>▲ 1.8%</b>", "ETH <b style='color:#2fd27a'>▲ 0.9%</b>", "BNB <b style='color:#ff5d6c'>▼ 0.4%</b>" ] }),
-  },
-  {
-    name: "Wells Fargo", color: "#d71e28", kind: "bank",
-    navBg: "#b31b1b", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a",
-    legit: "connect.secure.wellsfargo.com", fake: "www.wellsfargo-online.com", // combosquat
-    technique: "Look-alike domain (combosquat)",
-    lesson:
-      "Wells Fargo's real banking lives on subdomains of <b>wellsfargo.com</b> (e.g. connect.secure.wellsfargo.com). " +
-      "<b>wellsfargo-online.com</b> just borrows the name — it's a separate registration with no typo to give it away.",
-    mark: () => monogram("WF", "#d71e28"),
-    home: () => heroCards({ h1: "Welcome to Wells Fargo", sub: "Sign on to manage your accounts and cards.", cards: ["Checking", "Savings", "Credit Cards"] }),
-  },
-  {
-    name: "Bank of America", color: "#012169", kind: "bank",
-    navBg: "#012169", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a",
-    legit: "secure.bankofamerica.com", fake: "secure.bankofamerіca.com", // Cyrillic і
-    technique: "Homoglyph (Cyrillic “і”)", lesson: homoglyphLesson("Cyrillic “і” (U+0456)"),
-    mark: () => monogram("B", "#e31837", "#fff"),
-    home: () => heroCards({ h1: "Welcome to Bank of America", sub: "Sign in to Online Banking to continue.", cards: ["Accounts", "Transfers", "Bill Pay"] }),
-  },
-  {
-    name: "eBay", color: "#0064d2", kind: "shopping",
-    navBg: "#ffffff", navFg: "#1a1a1a", heroBg: "#f7f7f7", heroFg: "#1a1a1a",
-    legit: "signin.ebay.com", fake: "www.ebay-signin.com", // combosquat
-    technique: "Look-alike domain (combosquat)",
-    lesson:
-      "eBay's real sign-in is a subdomain of <b>ebay.com</b> (signin.ebay.com). <b>ebay-signin.com</b> is a wholly " +
-      "separate domain that just contains the word “ebay” — convincing, correctly spelled, and not eBay.",
-    mark: () => monogram("e", "#0064d2"),
-    home: () => heroCards({ h1: "Shop by category.", sub: "Sign in to bid, buy, and track your orders.", cards: ["Electronics", "Motors", "Fashion"] }),
-  },
-
-  // ── 12 more brands to span every technique family (phishing data in
-  //    the PHISH table below). ─────────────────────────────────────────
-  {
-    name: "YouTube", color: "#ff0000", kind: "streaming",
-    navBg: "#ffffff", navFg: "#0f0f0f", heroBg: "#ffffff", heroFg: "#0f0f0f", legit: "www.youtube.com",
-    mark: () => monogram("▶", "#ff0000"),
-    home: () => heroCenter({ h1: "Enjoy the videos and music you love.", sub: "Sign in to like, comment, and subscribe.", cta: "Sign in" }),
-  },
-  {
-    name: "Yahoo", color: "#6001d2", kind: "email",
-    navBg: "#ffffff", navFg: "#1d2228", heroBg: "#f0e6ff", heroFg: "#1d2228", legit: "www.yahoo.com",
-    mark: () => monogram("Y!", "#6001d2"),
-    home: () => heroCenter({ h1: "Yahoo Mail", sub: "Sign in to your inbox, news, and finance.", cta: "Sign in" }),
-  },
-  {
-    name: "FedEx", color: "#4d148c", kind: "shopping",
-    navBg: "#4d148c", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#2c2c2c", legit: "www.fedex.com",
-    mark: () => monogram("Fx", "#4d148c"),
-    home: () => heroCards({ h1: "Track your package.", sub: "Sign in to manage shipments and deliveries.", cards: ["Track", "Ship", "Manage"] }),
-  },
-  {
-    name: "DHL", color: "#d40511", kind: "shopping",
-    navBg: "#ffcc00", navFg: "#d40511", heroBg: "#ffffff", heroFg: "#1a1a1a", legit: "www.dhl.com",
-    mark: () => monogram("DHL", "#ffcc00", "#d40511"),
-    home: () => heroCards({ h1: "Your parcel is on its way.", sub: "Sign in to track and reschedule deliveries.", cards: ["Track", "Redeliver", "Locations"] }),
-  },
-  {
-    name: "UPS", color: "#351c15", kind: "shopping",
-    navBg: "#351c15", navFg: "#ffb500", heroBg: "#ffffff", heroFg: "#351c15", legit: "www.ups.com",
-    mark: () => monogram("UPS", "#ffb500", "#351c15"),
-    home: () => heroCards({ h1: "Track. Ship. Deliver.", sub: "Sign in to UPS My Choice to manage packages.", cards: ["Tracking", "Shipping", "My Choice"] }),
-  },
-  {
-    name: "Zoom", color: "#2d8cff", kind: "work",
-    navBg: "#ffffff", navFg: "#232333", heroBg: "#f7faff", heroFg: "#232333", legit: "zoom.us",
-    mark: () => monogram("Z", "#2d8cff"),
-    home: () => heroCenter({ h1: "Meet happy.", sub: "Sign in to start or join a meeting.", cta: "Sign in" }),
-  },
-  {
-    name: "Roblox", color: "#e2231a", kind: "gaming",
-    navBg: "#ffffff", navFg: "#393b3d", heroBg: "#f2f4f5", heroFg: "#393b3d", legit: "www.roblox.com",
-    mark: () => monogram("R", "#e2231a"),
-    home: () => heroCenter({ h1: "Powering imagination.", sub: "Log in to play millions of experiences.", cta: "Log In" }),
-  },
-  {
-    name: "Uber", color: "#000000", kind: "shopping",
-    navBg: "#000000", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#000000", legit: "www.uber.com",
-    mark: () => monogram("U", "#000000"),
-    home: () => heroCenter({ h1: "Go anywhere with Uber.", sub: "Sign in to request a ride in minutes.", cta: "Sign in" }),
-  },
-  {
-    name: "Airbnb", color: "#ff385c", kind: "shopping",
-    navBg: "#ffffff", navFg: "#222222", heroBg: "#ffffff", heroFg: "#222222", legit: "www.airbnb.com",
-    mark: () => monogram("A", "#ff385c"),
-    home: () => heroCenter({ h1: "Find your next stay.", sub: "Log in to book homes and experiences.", cta: "Continue" }),
-  },
-  {
-    name: "Walmart", color: "#0071dc", kind: "shopping",
-    navBg: "#0071dc", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", legit: "www.walmart.com",
-    mark: () => monogram("W", "#0071dc"),
-    home: () => heroCards({ h1: "Save money. Live better.", sub: "Sign in to track orders and reorder faster.", cards: ["Grocery", "Electronics", "Home"] }),
-  },
-  {
-    name: "Disney+", color: "#0e47d6", kind: "streaming",
-    navBg: "#0e1631", navFg: "#ffffff", heroBg: "#0a0e23", heroFg: "#ffffff", legit: "www.disneyplus.com",
-    mark: () => monogram("D+", "#0e47d6", "#fff"),
-    home: () => heroCenter({ h1: "The best stories, all in one place.", sub: "Sign in to stream Disney, Pixar, Marvel & more.", cta: "Log In" }),
-  },
-  {
-    name: "Salesforce", color: "#00a1e0", kind: "work",
-    navBg: "#ffffff", navFg: "#032d60", heroBg: "#f3f6fb", heroFg: "#032d60", legit: "login.salesforce.com",
-    mark: () => monogram("SF", "#00a1e0"),
-    home: () => heroCards({ h1: "Welcome back to Salesforce.", sub: "Log in to your CRM dashboard.", cards: ["Sales", "Service", "Marketing"] }),
-  },
-
-  // ── 6 more brands, each introducing a fresh technique family ──
-  {
-    name: "Apple", color: "#0071e3", kind: "email",
-    navBg: "#161617", navFg: "#f5f5f7", heroBg: "#000000", heroFg: "#f5f5f7", legit: "appleid.apple.com",
-    mark: logoApple, nameHtml: ``,
-    home: () => `<div class="ap-hero"><p class="eyebrow" style="color:#f5f5f7;opacity:.7">Apple Account</p><h1 style="font-size:2.1rem">Sign in.</h1><p class="lede">One account for everything Apple.</p></div>`,
-  },
-  {
-    name: "Netflix", color: "#e50914", kind: "streaming",
-    navBg: "transparent", navFg: "#ffffff", heroBg: "#000000", heroFg: "#ffffff", legit: "www.netflix.com",
-    mark: logoNetflix, nameHtml: `<span style="color:#e50914;font-weight:800;letter-spacing:1px;font-size:1.05rem">NETFLIX</span>`,
-    home: () => heroCenter({ h1: "Unlimited movies, TV shows, and more.", sub: "Sign in to continue watching.", cta: "Sign In" }),
-  },
-  {
-    name: "USPS", color: "#004b87", kind: "shopping",
-    navBg: "#004b87", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", legit: "www.usps.com",
-    mark: () => monogram("US", "#004b87", "#fff"),
-    home: () => heroCards({ h1: "Track & Manage your mail.", sub: "Sign in to schedule redelivery and holds.", cards: ["Track", "Redelivery", "Hold Mail"] }),
-  },
-  {
-    name: "Pinterest", color: "#e60023", kind: "social",
-    navBg: "#ffffff", navFg: "#111111", heroBg: "#fff8f8", heroFg: "#111111", legit: "www.pinterest.com",
-    mark: () => monogram("P", "#e60023"),
-    home: () => heroCenter({ h1: "Get your next great idea.", sub: "Log in to see ideas made for you.", cta: "Log in" }),
-  },
-  {
-    name: "WhatsApp", color: "#25d366", kind: "social",
-    navBg: "#075e54", navFg: "#ffffff", heroBg: "#ece5dd", heroFg: "#111111", legit: "web.whatsapp.com",
-    mark: () => monogram("W", "#25d366"),
-    home: () => heroCenter({ h1: "Message privately.", sub: "Scan the code or sign in to use WhatsApp Web.", cta: "Sign in" }),
-  },
-  {
-    name: "Snapchat", color: "#111111", kind: "social",
-    navBg: "#fffc00", navFg: "#111111", heroBg: "#fffc00", heroFg: "#111111", legit: "accounts.snapchat.com",
-    mark: () => monogram("S", "#111111", "#fffc00"),
-    home: () => heroCenter({ h1: "Open Snapchat on the web.", sub: "Log in to chat with friends.", cta: "Log in" }),
-  },
+  { name: "Coinvault", color: "#1652f0", kind: "crypto", navBg: "#0a0b0d", navFg: "#ffffff", heroBg: "#0a0b0d", heroFg: "#ffffff", mono: "C" },
+  { name: "PayPeer", color: "#0070ba", kind: "wallet", navBg: "#ffffff", navFg: "#2c2e2f", heroBg: "linear-gradient(160deg,#f5f7fa,#e8eefc)", heroFg: "#0a1f44", mono: "P" },
+  { name: "Goozle", color: "#1a73e8", kind: "email", navBg: "#ffffff", navFg: "#5f6368", heroBg: "#ffffff", heroFg: "#202124", mono: "G" },
+  { name: "Amazor", color: "#ff9900", kind: "shopping", navBg: "#131921", navFg: "#ffffff", heroBg: "#eaeded", heroFg: "#0f1111", mono: "A" },
+  { name: "Crestline Bank", color: "#117aca", kind: "bank", navBg: "#117aca", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#0a0a0a", mono: "Cb" },
+  { name: "Macrosoft", color: "#0067b8", kind: "work", navBg: "#ffffff", navFg: "#3b3b3b", heroBg: "#f3f2f1", heroFg: "#1b1a19", mono: "M" },
+  { name: "Faceblock", color: "#1877f2", kind: "social", navBg: "#ffffff", navFg: "#1c1e21", heroBg: "#f0f2f5", heroFg: "#1c1e21", mono: "F" },
+  { name: "Snapgram", color: "#e1306c", kind: "social", navBg: "#ffffff", navFg: "#262626", heroBg: "#fafafa", heroFg: "#262626", mono: "Sg" },
+  { name: "Linkup", color: "#0a66c2", kind: "work", navBg: "#ffffff", navFg: "#000000", heroBg: "#f4f2ee", heroFg: "#1d1d1d", mono: "Lu" },
+  { name: "Chirpy", color: "#1d9bf0", kind: "social", navBg: "#000000", navFg: "#ffffff", heroBg: "#000000", heroFg: "#ffffff", mono: "C" },
+  { name: "Tunify", color: "#1db954", kind: "streaming", navBg: "#000000", navFg: "#ffffff", heroBg: "#121212", heroFg: "#ffffff", mono: "T" },
+  { name: "Slacka", color: "#611f69", kind: "work", navBg: "#ffffff", navFg: "#1d1c1d", heroBg: "#f8f4f9", heroFg: "#1d1c1d", mono: "S" },
+  { name: "CodeHub", color: "#238636", kind: "dev", navBg: "#161b22", navFg: "#ffffff", heroBg: "#0d1117", heroFg: "#e6edf3", mono: "CH" },
+  { name: "Harmony", color: "#5865f2", kind: "social", navBg: "#5865f2", navFg: "#ffffff", heroBg: "#404eed", heroFg: "#ffffff", mono: "H" },
+  { name: "Vapor", color: "#1999ff", kind: "gaming", navBg: "#171a21", navFg: "#ffffff", heroBg: "#1b2838", heroFg: "#ffffff", mono: "V" },
+  { name: "Twixly", color: "#9146ff", kind: "streaming", navBg: "#18181b", navFg: "#ffffff", heroBg: "#0e0e10", heroFg: "#efeff1", mono: "T" },
+  { name: "Adobi", color: "#fa0f00", kind: "work", navBg: "#ffffff", navFg: "#2c2c2c", heroBg: "#fafafa", heroFg: "#2c2c2c", mono: "A" },
+  { name: "Tradr", color: "#f0b90b", kind: "crypto", navBg: "#181a20", navFg: "#ffffff", heroBg: "#0b0e11", heroFg: "#ffffff", mono: "T", monoFg: "#181a20" },
+  { name: "Summit Bank", color: "#d71e28", kind: "bank", navBg: "#b31b1b", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", mono: "Sb" },
+  { name: "Harbor Bank", color: "#012169", kind: "bank", navBg: "#012169", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", mono: "Hb" },
+  { name: "eBuy", color: "#0064d2", kind: "shopping", navBg: "#ffffff", navFg: "#1a1a1a", heroBg: "#f7f7f7", heroFg: "#1a1a1a", mono: "e" },
+  { name: "Vidtube", color: "#ff0000", kind: "streaming", navBg: "#ffffff", navFg: "#0f0f0f", heroBg: "#ffffff", heroFg: "#0f0f0f", mono: "V" },
+  { name: "Wahoo", color: "#6001d2", kind: "email", navBg: "#ffffff", navFg: "#1d2228", heroBg: "#f0e6ff", heroFg: "#1d2228", mono: "W" },
+  { name: "ShipFast", color: "#4d148c", kind: "delivery", navBg: "#4d148c", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#2c2c2c", mono: "Sf" },
+  { name: "GHX Express", color: "#d40511", kind: "delivery", navBg: "#ffcc00", navFg: "#d40511", heroBg: "#ffffff", heroFg: "#1a1a1a", mono: "GHX", monoFg: "#d40511" },
+  { name: "UPX", color: "#351c15", kind: "delivery", navBg: "#351c15", navFg: "#ffb500", heroBg: "#ffffff", heroFg: "#351c15", mono: "UPX", monoFg: "#351c15" },
+  { name: "Meetly", color: "#2d8cff", kind: "work", navBg: "#ffffff", navFg: "#232333", heroBg: "#f7faff", heroFg: "#232333", mono: "M" },
+  { name: "Blockworld", color: "#e2231a", kind: "gaming", navBg: "#ffffff", navFg: "#393b3d", heroBg: "#f2f4f5", heroFg: "#393b3d", mono: "B" },
+  { name: "Ryde", color: "#000000", kind: "rideshare", navBg: "#000000", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#000000", mono: "R" },
+  { name: "Roomly", color: "#ff385c", kind: "travel", navBg: "#ffffff", navFg: "#222222", heroBg: "#ffffff", heroFg: "#222222", mono: "R" },
+  { name: "Valuemart", color: "#0071dc", kind: "shopping", navBg: "#0071dc", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", mono: "V" },
+  { name: "Wonder+", color: "#0e47d6", kind: "streaming", navBg: "#0e1631", navFg: "#ffffff", heroBg: "#0a0e23", heroFg: "#ffffff", mono: "W+" },
+  { name: "Cloudforce", color: "#00a1e0", kind: "work", navBg: "#ffffff", navFg: "#032d60", heroBg: "#f3f6fb", heroFg: "#032d60", mono: "Cf" },
+  { name: "Pearl", color: "#0071e3", kind: "email", navBg: "#161617", navFg: "#f5f5f7", heroBg: "#000000", heroFg: "#f5f5f7", mono: "P" },
+  { name: "Streamly", color: "#e50914", kind: "streaming", navBg: "transparent", navFg: "#ffffff", heroBg: "#000000", heroFg: "#ffffff", mono: "S" },
+  { name: "PostEx", color: "#004b87", kind: "delivery", navBg: "#004b87", navFg: "#ffffff", heroBg: "#ffffff", heroFg: "#1a1a1a", mono: "Px" },
+  { name: "Pinly", color: "#e60023", kind: "social", navBg: "#ffffff", navFg: "#111111", heroBg: "#fff8f8", heroFg: "#111111", mono: "P" },
+  { name: "ChatBox", color: "#25d366", kind: "social", navBg: "#075e54", navFg: "#ffffff", heroBg: "#ece5dd", heroFg: "#111111", mono: "C" },
+  { name: "Snapzy", color: "#111111", kind: "social", navBg: "#fffc00", navFg: "#111111", heroBg: "#fffc00", heroFg: "#111111", mono: "S", monoFg: "#fffc00" },
 ];
-
 // ── Phishing-EMAIL scenarios (easy difficulty, no URL trick required) ──
 // Not every phish relies on a look-alike domain. These rounds show two
 // "emails" with the same subject line, but one uses the everyday tells of
@@ -514,146 +173,95 @@ const HG = HOMOGLYPH_NOTE;
 // shorter one." All brands here are FICTIONAL (no real trademarks).
 const PHISH = {
   // ─── Character omission ───
-  Google:    { difficulty: "easy", legit: "accounts.goozle.com/signin", fake: "accounts.gozle.com/signin",
+  "Goozle":    { difficulty: "easy", legit: "accounts.goozle.com/signin", fake: "accounts.gozle.com/signin",
     technique: "Typosquat — omission", lesson: "A letter is missing: <b>gozle</b> drops an “o”. Skim-readers never notice a dropped character." },
-  Amazon:    { difficulty: "easy", legit: "www.amazor.com/ap/signin", fake: "www.amzor.com/ap/signin",
+  "Amazor":    { difficulty: "easy", legit: "www.amazor.com/ap/signin", fake: "www.amzor.com/ap/signin",
     technique: "Typosquat — omission", lesson: "<b>amzor</b> is missing an “a”. The brand still reads right at a glance — that's the trap." },
-  Facebook:  { difficulty: "easy", legit: "www.faceblock.com/login", fake: "www.facblock.com/login",
+  "Faceblock":  { difficulty: "easy", legit: "www.faceblock.com/login", fake: "www.facblock.com/login",
     technique: "Typosquat — omission", lesson: "<b>facblock</b> drops the “e”. One missing letter in a familiar word is easy to miss." },
-  LinkedIn:  { difficulty: "easy", legit: "www.linkup.com/login", fake: "www.linup.com/login",
+  "Linkup":  { difficulty: "easy", legit: "www.linkup.com/login", fake: "www.linup.com/login",
     technique: "Typosquat — omission", lesson: "<b>linup</b> is missing the “k”. Your brain auto-corrects it to the real word." },
-  Slack:     { difficulty: "easy", legit: "app.slacka.com/signin", fake: "app.slaca.com/signin",
+  "Slacka":     { difficulty: "easy", legit: "app.slacka.com/signin", fake: "app.slaca.com/signin",
     technique: "Typosquat — omission", lesson: "Drop a “k” and <b>slaca</b> is a different, unrelated domain entirely." },
-  Adobe:     { difficulty: "easy", legit: "account.adobi.com/sign-in", fake: "account.adbi.com/sign-in",
+  "Adobi":     { difficulty: "easy", legit: "account.adobi.com/sign-in", fake: "account.adbi.com/sign-in",
     technique: "Typosquat — omission", lesson: "<b>adbi</b> drops the “o”. Truncated brand names are a classic look-alike." },
 
   // ─── Substitution & transposition ───
-  YouTube:   { difficulty: "easy", legit: "www.vidtube.com/account", fake: "www.vidtbue.com/account",
+  "Vidtube":   { difficulty: "easy", legit: "www.vidtube.com/account", fake: "www.vidtbue.com/account",
     technique: "Typosquat — transposition", lesson: "Two letters are flipped: <b>vidtbue</b> swaps “ub” for “bu”. Transposed letters read almost normally." },
-  Yahoo:     { difficulty: "easy", legit: "login.wahoo.com/account", fake: "login.wah0o.com/account",
+  "Wahoo":     { difficulty: "easy", legit: "login.wahoo.com/account", fake: "login.wah0o.com/account",
     technique: "Typosquat — digit for letter", lesson: "The last “o” is a zero: <b>wah0o</b>. Numbers standing in for letters are a staple of phishing." },
-  Twitter:   { difficulty: "medium", legit: "www.chirpy.com/login", fake: "www.chirppy.com/login",
+  "Chirpy":   { difficulty: "medium", legit: "www.chirpy.com/login", fake: "www.chirppy.com/login",
     technique: "Typosquat — doubled letter", lesson: "An extra “p”: <b>chirppy</b>. Doubled letters slip past quick reads — and the page is a perfect copy." },
-  Instagram: { difficulty: "medium", legit: "www.snapgram.com/accounts/login", fake: "www.snpagram.com/accounts/login",
+  "Snapgram": { difficulty: "medium", legit: "www.snapgram.com/accounts/login", fake: "www.snpagram.com/accounts/login",
     technique: "Typosquat — transposition", lesson: "“ap” becomes “pa”: <b>snpagram</b>. The letters are all correct, just two of them are swapped." },
-  GitHub:    { difficulty: "medium", legit: "codehub.com/login", fake: "codehbu.com/login",
+  "CodeHub":    { difficulty: "medium", legit: "codehub.com/login", fake: "codehbu.com/login",
     technique: "Typosquat — transposition", lesson: "“ub” becomes “bu”: <b>codehbu</b>. A flipped pair at the end is genuinely hard to catch." },
-  Spotify:   { difficulty: "hard", legit: "accounts.tunify.com/login", fake: "accounts.tunıfy.com/login",
+  "Tunify":   { difficulty: "hard", legit: "accounts.tunify.com/login", fake: "accounts.tunıfy.com/login",
     technique: "Homoglyph — dotless “ı”", lesson: "The “i” is a Turkish dotless <b>ı</b> (U+0131) — same shape, missing only the dot. " + HG },
 
   // ─── Subdomain stuffing (readable if you check right-to-left — medium,
   //     not hard: hard is reserved for tricks the eye truly cannot resolve) ───
-  Chase:             { difficulty: "medium", legit: "secure.crestline.com/web/auth/login", fake: "crestline.com.login.verify-identity.net/auth",
+  "Crestline Bank":             { difficulty: "medium", legit: "secure.crestline.com/web/auth/login", fake: "crestline.com.login.verify-identity.net/auth",
     technique: "Subdomain stuffing", lesson: "Read right-to-left: the real domain is <b>verify-identity.net</b>. “crestline.com” is just a subdomain label glued on the front to fool a left-to-right reader." },
-  "Wells Fargo":     { difficulty: "medium", legit: "connect.secure.summitbank.com/auth/login", fake: "summitbank.com.secure.accounts.web-login.space/signon",
+  "Summit Bank":     { difficulty: "medium", legit: "connect.secure.summitbank.com/auth/login", fake: "summitbank.com.secure.accounts.web-login.space/signon",
     technique: "Subdomain stuffing", lesson: "The actual site is <b>web-login.space</b> — everything before it is attacker-chosen text, including a fake “summitbank.com”." },
-  "Bank of America": { difficulty: "medium", legit: "secure.harborbank.com/login/sign-in/signOn", fake: "harborbank.com.security.update-auth.info/login",
+  "Harbor Bank": { difficulty: "medium", legit: "secure.harborbank.com/login/sign-in/signOn", fake: "harborbank.com.security.update-auth.info/login",
     technique: "Subdomain stuffing", lesson: "The registrable domain is <b>update-auth.info</b>, not harborbank.com. The bank name is only a subdomain prefix." },
-  FedEx:             { difficulty: "medium", legit: "www.shipfast.com/en-us/tracking/manage", fake: "shipfast.com.package-tracking.shipment-delivery.top/track",
+  "ShipFast":             { difficulty: "medium", legit: "www.shipfast.com/en-us/tracking/manage", fake: "shipfast.com.package-tracking.shipment-delivery.top/track",
     technique: "Subdomain stuffing", lesson: "The real domain is <b>shipment-delivery.top</b>. Delivery-themed subdomains make the long chain feel plausible." },
-  DHL:               { difficulty: "medium", legit: "www.ghx.com/en/express/tracking", fake: "ghx.com.alert.delivery-status.holding-facility.site/track",
+  "GHX Express":               { difficulty: "medium", legit: "www.ghx.com/en/express/tracking", fake: "ghx.com.alert.delivery-status.holding-facility.site/track",
     technique: "Subdomain stuffing", lesson: "The site is actually <b>holding-facility.site</b>. “ghx.com” at the start is bait — the truth is always the last two labels." },
-  UPS:               { difficulty: "medium", legit: "www.upx.com/track/manage/mychoice", fake: "upx.com.mychoice.package.reschedule-portal.biz/track",
+  "UPX":               { difficulty: "medium", legit: "www.upx.com/track/manage/mychoice", fake: "upx.com.mychoice.package.reschedule-portal.biz/track",
     technique: "Subdomain stuffing", lesson: "The owner of this page is <b>reschedule-portal.biz</b>. The brand is stuffed into the subdomains to hide that." },
 
   // ─── Look-alike TLDs ───
-  Zoom:    { difficulty: "medium", legit: "meetly.us/signin", fake: "meetly.download/signin",
+  "Meetly":    { difficulty: "medium", legit: "meetly.us/signin", fake: "meetly.download/signin",
     technique: "Wrong TLD", lesson: "Correct name, wrong ending. Meetly is <b>meetly.us</b>; <b>meetly.download</b> is a cheap generic TLD owned by someone else." },
-  Discord: { difficulty: "medium", legit: "harmony.com/login", fake: "harmony.support/login",
+  "Harmony": { difficulty: "medium", legit: "harmony.com/login", fake: "harmony.support/login",
     technique: "Wrong TLD", lesson: "Harmony lives on <b>harmony.com</b>. The friendly-looking <b>harmony.support</b> is a different registration entirely." },
-  Steam:   { difficulty: "medium", legit: "store.vapor.com/login", fake: "store.vapor.gl/login",
+  "Vapor":   { difficulty: "medium", legit: "store.vapor.com/login", fake: "store.vapor.gl/login",
     technique: "Wrong TLD", lesson: "Vapor's store is <b>vapor.com</b>. Swapping to <b>.gl</b> makes a brand-new domain that just looks official." },
-  Roblox:  { difficulty: "medium", legit: "www.blockworld.com/login", fake: "www.blockworld.live/account",
+  "Blockworld":  { difficulty: "medium", legit: "www.blockworld.com/login", fake: "www.blockworld.live/account",
     technique: "Wrong TLD", lesson: "<b>.live</b> is a different top-level domain — the real site is <b>blockworld.com</b>." },
-  Uber:    { difficulty: "medium", legit: "auth.ryde.com/login", fake: "auth.ryde.help/login",
+  "Ryde":    { difficulty: "medium", legit: "auth.ryde.com/login", fake: "auth.ryde.help/login",
     technique: "Wrong TLD", lesson: "A support-looking <b>ryde.help</b> is not Ryde. The genuine domain is <b>ryde.com</b>." },
-  Airbnb:  { difficulty: "medium", legit: "www.roomly.com/login", fake: "www.roomly.rentals/login",
+  "Roomly":  { difficulty: "medium", legit: "www.roomly.com/login", fake: "www.roomly.rentals/login",
     technique: "Wrong TLD", lesson: "<b>roomly.rentals</b> sounds on-brand, but it's a separate domain. Roomly is <b>roomly.com</b>." },
 
   // ─── Comb-glyphs (blended letters) ───
-  Walmart:    { difficulty: "hard", legit: "www.valuemart.com/account/login", fake: "www.valuernart.com/account/login",
+  "Valuemart":    { difficulty: "hard", legit: "www.valuemart.com/account/login", fake: "www.valuernart.com/account/login",
     technique: "Comb-glyph (rn → m)", lesson: "There's no “m” — it's “r” + “n”: <b>valuernart</b>. Side by side, “rn” is nearly indistinguishable from “m”." },
-  Microsoft:  { difficulty: "hard", legit: "login.macrosoft.com/account", fake: "login.rnacrosoft.com/account",
+  "Macrosoft":  { difficulty: "hard", legit: "login.macrosoft.com/account", fake: "login.rnacrosoft.com/account",
     technique: "Comb-glyph (rn → m)", lesson: "That “m” is actually “rn”: <b>rnacrosoft</b>. The blended pair fakes a single letter." },
-  "Disney+":  { difficulty: "hard", legit: "www.wonderplus.com/login", fake: "www.wonderpIus.com/login",
+  "Wonder+":  { difficulty: "hard", legit: "www.wonderplus.com/login", fake: "www.wonderpIus.com/login",
     technique: "Comb-glyph (capital I → l)", lesson: "The “l” is a capital “I”: wonderp<b>I</b>us. In many fonts capital-I and lowercase-l are identical." },
-  Salesforce: { difficulty: "hard", legit: "login.cloudforce.com/sign-in", fake: "login.cIoudforce.com/sign-in",
+  "Cloudforce": { difficulty: "hard", legit: "login.cloudforce.com/sign-in", fake: "login.cIoudforce.com/sign-in",
     technique: "Comb-glyph (capital I → l)", lesson: "“cloudforce” uses a capital “I” for the “l”: c<b>I</b>oudforce. Same pixel shape, different character." },
-  Twitch:     { difficulty: "hard", legit: "www.twixly.tv/login", fake: "www.twlxly.tv/login",
+  "Twixly":     { difficulty: "hard", legit: "www.twixly.tv/login", fake: "www.twlxly.tv/login",
     technique: "Comb-glyph (l → i)", lesson: "The “i” is really a lowercase “l”: tw<b>l</b>xly. The missing dot is the only clue." },
-  eBay:       { difficulty: "hard", legit: "signin.ebuy.com/signin", fake: "signin.ebuv.com/signin",
+  "eBuy":       { difficulty: "hard", legit: "signin.ebuy.com/signin", fake: "signin.ebuv.com/signin",
     technique: "Comb-glyph (v → y)", lesson: "The “y” is a “v”: <b>ebuv</b>. In some sans-serif fonts a “v” passes for a “y” at a glance." },
 
   // ─── Distinct extras ───
-  PayPal:  { difficulty: "easy", fakeScheme: "http", legit: "www.paypeer.com/signin", fake: "www.paypeer-account.com/signin",
+  "PayPeer":  { difficulty: "easy", fakeScheme: "http", legit: "www.paypeer.com/signin", fake: "www.paypeer-account.com/signin",
     technique: "Not secure (http) + look-alike", lesson: "Two red flags: it's <b>http://</b> with no padlock, and the real domain is <b>paypeer-account.com</b> — not paypeer.com." },
-  Coinbase: { difficulty: "hard", legit: "www.coinvault.com/signin", fake: "www.cоinvault.com/signin",
+  "Coinvault": { difficulty: "hard", legit: "www.coinvault.com/signin", fake: "www.cоinvault.com/signin",
     technique: "Homoglyph (Cyrillic “о”)", lesson: "The first “o” is a Cyrillic <b>о</b>, not a Latin o — pixel-identical. " + HG },
-  Binance: { difficulty: "medium", legit: "accounts.tradr.com/en/user/login", fake: "accounts.tradr.com@secure-wallet.io/login",
+  "Tradr": { difficulty: "medium", legit: "accounts.tradr.com/en/user/login", fake: "accounts.tradr.com@secure-wallet.io/login",
     technique: "The “@” trick", lesson: "Everything before the <b>@</b> is just a username and is ignored — the browser actually goes to <b>secure-wallet.io</b>. The “accounts.tradr.com” is pure bait." },
-  Apple:     { difficulty: "medium", legit: "id.pearl.com/sign-in", fake: "pearl-id-verify.com/sign-in",
+  "Pearl":     { difficulty: "medium", legit: "id.pearl.com/sign-in", fake: "pearl-id-verify.com/sign-in",
     technique: "Look-alike domain (combosquat)", lesson: "<b>pearl-id-verify.com</b> bolts extra words onto the brand. Pearl sign-in only happens on <b>pearl.com</b> — the added words make a brand-new, unrelated domain." },
-  Netflix:   { difficulty: "medium", legit: "www.streamly.com/login", fake: "account-billing.net/streamly/login",
+  "Streamly":   { difficulty: "medium", legit: "www.streamly.com/login", fake: "account-billing.net/streamly/login",
     technique: "Brand hidden in the path", lesson: "The word “streamly” here is in the <b>path</b>, not the domain. The actual site is <b>account-billing.net</b> — what comes before the first single “/” is all that matters." },
-  USPS:      { difficulty: "medium", legit: "track.postex.com/go/TrackConfirm", fake: "package-status.info/postex/redelivery",
+  "PostEx":      { difficulty: "medium", legit: "track.postex.com/go/TrackConfirm", fake: "package-status.info/postex/redelivery",
     technique: "Brand hidden in the path", lesson: "“postex” sits in the <b>path</b>; the real domain is <b>package-status.info</b>. A brand name after the first “/” means nothing." },
-  Pinterest: { difficulty: "medium", legit: "www.pinly.com/login", fake: "wwwpinly.com/login",
+  "Pinly": { difficulty: "medium", legit: "www.pinly.com/login", fake: "wwwpinly.com/login",
     technique: "Run-together “www” (missing dot)", lesson: "There's no dot after “www”: <b>wwwpinly.com</b> is a single label — a different domain from <b>www.pinly.com</b>." },
-  WhatsApp:  { difficulty: "medium", legit: "web.chatbox.com/", fake: "web.chatbox.cm/",
+  "ChatBox":  { difficulty: "medium", legit: "web.chatbox.com/", fake: "web.chatbox.cm/",
     technique: "TLD typo (.cm vs .com)", lesson: "The ending is <b>.cm</b> (Cameroon), not <b>.com</b> — a one-letter TLD typo that catches fast fingers and fast eyes alike." },
-  Snapchat:  { difficulty: "easy", legit: "accounts.snapzy.com/login", fake: "accounts.sn4pzy.com/login",
+  "Snapzy":  { difficulty: "easy", legit: "accounts.snapzy.com/login", fake: "accounts.sn4pzy.com/login",
     technique: "Typosquat — digit for letter", lesson: "The “a” is a <b>4</b>: sn4pzy. Numbers swapped for letters are a classic, and easy to catch if you read it." },
-};
-
-// Rename to FICTIONAL brands (no real trademarks): new display name +
-// a generic monogram logo + a generic hero by category. Keyed by the
-// original name; applied after PHISH so the techniques still line up.
-const RENAME = {
-  Google: { name: "Goozle", mono: "G" },
-  Amazon: { name: "Amazor", mono: "A" },
-  Facebook: { name: "Faceblock", mono: "F" },
-  LinkedIn: { name: "Linkup", mono: "Lu" },
-  Slack: { name: "Slacka", mono: "S" },
-  Adobe: { name: "Adobi", mono: "A" },
-  YouTube: { name: "Vidtube", mono: "V" },
-  Yahoo: { name: "Wahoo", mono: "W" },
-  Twitter: { name: "Chirpy", mono: "C" },
-  Instagram: { name: "Snapgram", mono: "Sg" },
-  GitHub: { name: "CodeHub", mono: "CH" },
-  Spotify: { name: "Tunify", mono: "T" },
-  Chase: { name: "Crestline Bank", mono: "Cb" },
-  "Wells Fargo": { name: "Summit Bank", mono: "Sb" },
-  "Bank of America": { name: "Harbor Bank", mono: "Hb" },
-  FedEx: { name: "ShipFast", mono: "Sf" },
-  DHL: { name: "GHX Express", mono: "GHX" },
-  UPS: { name: "UPX", mono: "UPX" },
-  Zoom: { name: "Meetly", mono: "M" },
-  Discord: { name: "Harmony", mono: "H" },
-  Steam: { name: "Vapor", mono: "V" },
-  Roblox: { name: "Blockworld", mono: "B" },
-  Uber: { name: "Ryde", mono: "R" },
-  Airbnb: { name: "Roomly", mono: "R" },
-  Walmart: { name: "Valuemart", mono: "V" },
-  Microsoft: { name: "Macrosoft", mono: "M" },
-  "Disney+": { name: "Wonder+", mono: "W+" },
-  Salesforce: { name: "Cloudforce", mono: "Cf" },
-  Twitch: { name: "Twixly", mono: "T" },
-  eBay: { name: "eBuy", mono: "e" },
-  PayPal: { name: "PayPeer", mono: "P" },
-  Coinbase: { name: "Coinvault", mono: "C" },
-  Binance: { name: "Tradr", mono: "T", monoFg: "#181a20" },
-  Apple: { name: "Pearl", mono: "P" },
-  Netflix: { name: "Streamly", mono: "S" },
-  USPS: { name: "PostEx", mono: "Px" },
-  Pinterest: { name: "Pinly", mono: "P" },
-  WhatsApp: { name: "ChatBox", mono: "C" },
-  Snapchat: { name: "Snapzy", mono: "S", monoFg: "#fffc00" },
-};
-
-// Some fictional brands need a more specific category than their original.
-const KIND_OVERRIDE = {
-  ShipFast: "delivery", "GHX Express": "delivery", UPX: "delivery", PostEx: "delivery",
-  Roomly: "travel", Ryde: "rideshare",
 };
 
 // ── Inline imagery helpers (gradient "photos", avatars, charts) ──
@@ -830,18 +438,17 @@ function siteHome(b) {
   }
 }
 
+// Layer the look-alike phishing data onto each brand's theme, and give every
+// one a generic monogram + per-category homepage. Phish-EMAIL brands aren't in
+// PHISH — they carry their own name/mark/home — so they're left untouched.
 BRANDS.forEach((b) => {
-  if (PHISH[b.name]) Object.assign(b, PHISH[b.name]);
-  const r = RENAME[b.name];
-  if (r) {
-    const color = b.color, mono = r.mono, fg = r.monoFg || "#fff";
-    b.name = r.name;
-    if (KIND_OVERRIDE[r.name]) b.kind = KIND_OVERRIDE[r.name];
-    b.nameHtml = "";          // plain fictional name in the nav
-    b.navExtra = "";          // drop brand-specific nav extras
-    b.mark = () => monogram(mono, color, fg);
-    b.home = () => siteHome(b);
-  }
+  const p = PHISH[b.name];
+  if (!p) return;
+  Object.assign(b, p);                 // legit, fake, technique, lesson, difficulty
+  b.nameHtml = "";
+  b.navExtra = "";
+  b.mark = () => monogram(b.mono, b.color, b.monoFg || "#fff");
+  b.home = () => siteHome(b);
 });
 
 // ---------- State --------------------------------------------------
@@ -860,7 +467,7 @@ const state = {
   pickedReal: false, // did the player click the genuine site this round?
   streak: 0,         // consecutive correct answers
   results: [],       // per-round { difficulty, correct } for the summary
-  audience: "personal", // 'personal' | 'enterprise' (Entra ID SSO + QR cross-device)
+  audience: "personal", // 'personal' | 'enterprise' (Astra ID SSO + QR cross-device)
   passkey: {
     registered: false,
     credentialId: null,
@@ -936,10 +543,10 @@ function shuffle(arr) {
 function isTouchDevice() {
   return window.matchMedia("(hover: none), (pointer: coarse)").matches;
 }
-// What the OS prompt is called on this device, so the copy never tells a
-// phone user to look for Windows Hello.
+// Generic name for the OS unlock prompt — deliberately vendor-neutral (no
+// real product names), and device-appropriate either way.
 function verifierName() {
-  return isTouchDevice() ? "Face ID / fingerprint" : "Touch ID / Windows Hello";
+  return isTouchDevice() ? "face or fingerprint unlock" : "your fingerprint, face, or PIN";
 }
 
 function loadStoredPasskey() {
@@ -962,7 +569,7 @@ function reflectPasskeyState() {
   if (state.passkey.registered) {
     statusEl.textContent =
       state.passkey.kind === "hybrid"
-        ? "✓ Work passkey registered on your phone (Entra ID · one account, SSO everywhere)."
+        ? "✓ Work passkey registered on your phone (Astra ID · one account, SSO everywhere)."
         : "✓ Passkey registered on this device.";
     statusEl.className = "passkey-status ok";
     playBtn.disabled = false;
@@ -981,7 +588,7 @@ async function registerPasskey() {
   const crossDevice = state.audience === "enterprise" && !isTouchDevice();
   statusEl.className = "passkey-status info";
   statusEl.textContent = crossDevice
-    ? "In the browser dialog, choose “iPhone, iPad, or Android device” and scan the QR code with your phone…"
+    ? "In the browser dialog, choose the option to use another phone or tablet, then scan the QR code with your phone…"
     : `Waiting for your device (${verifierName()})…`;
 
   // The honest path: a real passkey via WebAuthn.
@@ -1001,8 +608,8 @@ async function registerPasskey() {
           user: state.audience === "enterprise"
             ? {
                 id: randomBytes(16),
-                name: "jordan@contoso-demo.com",
-                displayName: "Jordan Lee (Contoso · Entra ID)",
+                name: "jordan.lee@norvia.example",
+                displayName: "Jordan Lee (Norvia Corp · Astra ID)",
               }
             : {
                 id: randomBytes(16),
@@ -1016,7 +623,7 @@ async function registerPasskey() {
           authenticatorSelection: {
             // cross-platform = exclude this computer's own authenticator, so
             // the browser offers the QR/cross-device path; platform = the
-            // local Face ID / Touch ID / Windows Hello prompt.
+            // local biometric / PIN unlock prompt.
             authenticatorAttachment: crossDevice ? "cross-platform" : "platform",
             residentKey: "preferred",
             userVerification: "preferred",
@@ -1067,7 +674,7 @@ function finalizeRegistration(credentialId, real, kind) {
     $("#passkey-status").className = "passkey-status ok";
     $("#passkey-status").textContent =
       state.passkey.kind === "hybrid"
-        ? "✓ Work passkey created on your phone via the QR code — one Entra ID account, one passkey, SSO everywhere."
+        ? "✓ Work passkey created on your phone via the QR code — one Astra ID account, one passkey, SSO everywhere."
         : `✓ Device-bound passkey created with ${verifierName()}.`;
   }
 }
@@ -1087,7 +694,7 @@ function realPasskeyAvailable() {
 }
 
 // Run a REAL WebAuthn ceremony.
-//   kind 'real' → asks for the passkey you registered (Touch ID, succeeds)
+//   kind 'real' → asks for the passkey you registered (biometric, succeeds)
 //   kind 'fake' → asks for a credential that doesn't exist on this device,
 //                 so the browser shows its own native "no passkey" UI and
 //                 genuinely fails — the real phishing-site experience.
@@ -1097,7 +704,7 @@ async function attemptPasskey(kind) {
   if (!realPasskeyAvailable()) return { sim: true };
   // A cross-device ('hybrid') passkey lives on the player's phone, so the
   // real sign-in must offer the hybrid transport — the browser shows the
-  // QR / "use your phone" flow again, exactly like a real Entra ID SSO
+  // QR / "use your phone" flow again, exactly like a real enterprise SSO
   // sign-in at a workstation. The fake attempt stays internal-only so the
   // browser fails fast with its native "no passkey" UI.
   const realTransports =
@@ -1141,7 +748,7 @@ async function testPasskey() {
   if (r.sim) {
     status.className = "passkey-status info";
     status.innerHTML =
-      "✓ Passkey verified (simulated). Open this over <b>https</b> or <b>localhost</b> in a real browser to feel the actual Touch&nbsp;ID prompt.";
+      "✓ Passkey verified (simulated). Open this over <b>https</b> or <b>localhost</b> in a real browser to feel the actual unlock prompt.";
   } else if (r.ok) {
     status.className = "passkey-status ok";
     status.innerHTML =
@@ -1456,7 +1063,7 @@ const TECH_GUIDE = [
     real: "tradr.com", fake: 'accounts.tradr.com<span class="tdiff">@secure-wallet.io</span>' },
   { ic: "🔬", label: "Blended letters (rn → m)", tier: "hard",
     how: "Two letters sit side by side to impersonate a third: “rn” looks just like “m”. “valuernart” reads as “valuemart” at a glance.",
-    tell: "Zoom in on any “m” — is it really “r” + “n”?",
+    tell: "Look closely at any “m” — is it really “r” + “n”?",
     real: "valuemart.com", fake: 'value<span class="tdiff">rn</span>art.com' },
   { ic: "🔎", label: "Look-alike letters (capital-I, l, v…)", tier: "hard",
     how: "Different characters share a shape in common fonts — capital-I vs lowercase-l, l vs i, v vs y. “cIoudforce” uses a capital I where the “l” should be.",
@@ -1814,7 +1421,7 @@ async function onPasskeyAttempt(win, isReal, brand) {
     return;
   }
 
-  // Real site: run the actual passkey ceremony (Touch ID) for realism.
+  // Real site: run the actual passkey ceremony (biometric) for realism.
   const btn = win.querySelector('[data-act="signin"]');
   btn.disabled = true;
   btn.textContent = "Verifying…";
@@ -1851,7 +1458,7 @@ function passkeySheetFinalHTML(success, domain) {
   return success
     ? `<div class="pk-illus">✅</div>` +
       `<div class="pk-title">Signed in</div>` +
-      `<div class="pk-sub pk-sub-ok">Verified with Face&nbsp;ID / Touch&nbsp;ID. You're signed in to ` +
+      `<div class="pk-sub pk-sub-ok">Verified with your device's screen lock. You're signed in to ` +
       `<b>${domain}</b> — no password typed.</div>` +
       `<button class="btn btn-primary pk-close" id="pk-sheet-close">Done</button>`
     : `<div class="pk-illus pk-illus-fail">🔑</div>` +
@@ -2243,9 +1850,10 @@ function flashShare(msg) {
 // ============================================================
 // ---------- Audience: Personal vs Enterprise ------------------------
 // Personal is the classic experience: a passkey created on THIS device.
-// Enterprise tells the work-account story: one Microsoft Entra ID identity
-// with SSO across every app, protected by a passkey created on your phone
-// via the browser's QR cross-device flow (when playing at a computer).
+// Enterprise tells the work-account story: one "Macrosoft Astra ID"
+// identity (fictional, like every brand here) with SSO across every app,
+// protected by a passkey created on your phone via the browser's QR
+// cross-device flow (when playing at a computer).
 function applyAudience(aud) {
   state.audience = aud === "enterprise" ? "enterprise" : "personal";
   try { localStorage.setItem(AUD_KEY, state.audience); } catch (_) { /* ignore */ }
@@ -2255,7 +1863,7 @@ function applyAudience(aud) {
   if (audBtn) audBtn.textContent = ent ? "🏢" : "👤";
   $("#pk-panel-glyph").textContent = ent ? "🏢" : "🔑";
   $("#pk-panel-title").textContent = ent
-    ? "Work passkey — Entra ID, one account for everything"
+    ? "Work passkey — Astra ID, one account for everything"
     : "Device-bound passkey";
   $("#pk-panel-sub").textContent = ent
     ? "Your admin requires a phishing-resistant sign-in for your single SSO identity. On a computer, registration hands you off to your phone with a QR code."
@@ -2329,7 +1937,7 @@ function init() {
 
   // "See what a passkey would do here" on an eyes-mode result. Runs a
   // REAL WebAuthn ceremony when a real passkey exists: the genuine site
-  // signs in with your actual passkey (Touch ID); the look-alike triggers
+  // signs in with your actual passkey (biometric); the look-alike triggers
   // the browser's own "no passkey" failure. Falls back to the simulated
   // illustration when there's no real authenticator.
   $("#btn-passkey-demo").addEventListener("click", async (e) => {
@@ -2442,13 +2050,6 @@ function pickWindow(idx) {
 // ============================================================
 //  Shared brand helpers (used by the 17 templated scenarios)
 // ============================================================
-function homoglyphLesson(charDesc) {
-  return (
-    "One letter in the fake is a " + charDesc + ", not the Latin character it mimics — so the two addresses " +
-    "are indistinguishable to the eye. " + HOMOGLYPH_NOTE
-  );
-}
-
 // A simple app-icon style monogram: rounded square in the brand colour
 // with a 1–2 character label. Single centred glyph never clips.
 function monogram(label, bg, fg) {
@@ -2463,89 +2064,5 @@ function monogram(label, bg, fg) {
   );
 }
 
-// Reusable hero layouts. Colours come from the window's CSS vars.
-function heroCenter(o) {
-  return (
-    `<div class="hero-c">` +
-    (o.eyebrow ? `<p class="eyebrow">${o.eyebrow}</p>` : "") +
-    `<h1>${o.h1}</h1>` +
-    (o.sub ? `<p class="lede">${o.sub}</p>` : "") +
-    (o.cta ? `<button class="hero-pill">${o.cta}</button>` : "") +
-    `</div>`
-  );
-}
-function heroTiles(o) {
-  return (
-    `<div class="hero-c"><h1>${o.h1}</h1>` +
-    (o.sub ? `<p class="lede">${o.sub}</p>` : "") +
-    `<div class="tile-row">` +
-    o.tiles.map((t) => `<span class="tile" style="background:${t.bg}">${t.label}</span>`).join("") +
-    `</div></div>`
-  );
-}
-function heroChips(o) {
-  return (
-    `<div class="hero-c"><h1>${o.h1}</h1>` +
-    (o.sub ? `<p class="lede">${o.sub}</p>` : "") +
-    `<div class="chip-row">` +
-    o.chips.map((c) => `<span class="chip">${c}</span>`).join("") +
-    `</div></div>`
-  );
-}
-function heroCards(o) {
-  return (
-    `<div class="hero-c"><h1>${o.h1}</h1>` +
-    (o.sub ? `<p class="lede">${o.sub}</p>` : "") +
-    `<div class="card-row">` +
-    o.cards.map((c) => `<div class="mini-card">${c}</div>`).join("") +
-    `</div></div>`
-  );
-}
-
-// ============================================================
-//  Inline brand logos (SVG) — recognizable approximations, no
-//  external assets. Pure shapes (no SVG <text>, which clipped),
-//  each coloured to sit on its brand's nav background.
-// ============================================================
-// Multicolour "Google" wordmark, used in the nav and the hero.
-function googleWordmark(size) {
-  const s = size || 19;
-  const colors = ["#4285F4", "#EA4335", "#FBBC05", "#4285F4", "#34A853", "#EA4335"];
-  const letters = "Google";
-  let html = `<span style="font-family:'Product Sans',Arial,sans-serif;font-weight:500;font-size:${s}px;letter-spacing:-0.5px">`;
-  for (let i = 0; i < letters.length; i++) {
-    html += `<span style="color:${colors[i]}">${letters[i]}</span>`;
-  }
-  return html + "</span>";
-}
-
-function logoMicrosoft() {
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="12" height="12" fill="#F25022"/><rect x="20" y="4" width="12" height="12" fill="#7FBA00"/><rect x="4" y="20" width="12" height="12" fill="#00A4EF"/><rect x="20" y="20" width="12" height="12" fill="#FFB900"/></svg>`;
-}
-function logoPaypal() {
-  // Two interlocking "P" droplets.
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M11 6h9.5c4 0 6.5 2.6 5.8 6.4-.7 3.9-3.9 6.1-8 6.1h-3.1l-1.4 8.5H8.4z" fill="#003087"/><path d="M16.5 10h9.5c4 0 6.5 2.6 5.8 6.4-.7 3.9-3.9 6.1-8 6.1h-3.1L19.3 31H14z" fill="#0070ba" opacity="0.85"/></svg>`;
-}
-function logoApple() {
-  // White apple — sits on Apple's dark nav.
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M24.8 19.2c0-3.1 2.5-4.6 2.6-4.7-1.4-2.1-3.6-2.4-4.4-2.4-1.9-.2-3.6 1.1-4.6 1.1-.9 0-2.4-1.1-3.9-1-2 0-3.9 1.2-4.9 3-2.1 3.7-.5 9.1 1.5 12.1 1 1.5 2.2 3.1 3.7 3 1.5-.1 2-.9 3.8-.9s2.3.9 3.9.9 2.6-1.4 3.6-2.9c1.1-1.6 1.6-3.2 1.6-3.3-.1 0-3.1-1.2-3.1-4.7z" fill="#f5f5f7"/><path d="M22 11.1c.8-1 1.4-2.4 1.2-3.8-1.2.05-2.6.8-3.4 1.8-.8.8-1.5 2.2-1.3 3.5 1.3.1 2.7-.7 3.5-1.5z" fill="#f5f5f7"/></svg>`;
-}
-function logoAmazon() {
-  // Smile arrow only — the "amazon" wordmark is HTML in the nav.
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M5 21c6 4.6 20 4.6 26 0" stroke="#FF9900" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M28 18.6l4 2.4-4.2 2.2" fill="#FF9900"/></svg>`;
-}
-function logoGoogle() {
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M18 16.4v3.6h5.1c-.2 1.3-1.6 3.9-5.1 3.9a5.9 5.9 0 0 1 0-11.8c1.7 0 2.8.7 3.5 1.4l2.5-2.4A9.6 9.6 0 1 0 18 27.6c5.5 0 9.2-3.9 9.2-9.4 0-.6-.07-1.1-.16-1.6z" fill="#4285F4"/><path d="M18 12.1c1.7 0 2.8.7 3.5 1.4l2.5-2.4A9.6 9.6 0 0 0 9.6 13l3.2 2.5c.8-2.3 2.9-3.4 5.2-3.4z" fill="#EA4335"/><path d="M27.04 16.6H18v3.6h5.1c-.5 2.5-2.6 3.9-5.1 3.9-2.3 0-4.4-1.1-5.2-3.4L9.6 23a9.6 9.6 0 0 0 17.6-4.8c0-.6-.07-1.1-.16-1.6z" fill="#34A853"/><path d="M12.8 20.7a5.9 5.9 0 0 1 0-5.4L9.6 13a9.6 9.6 0 0 0 0 10z" fill="#FBBC05"/></svg>`;
-}
-function logoNetflix() {
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M11 3h4.4l5.2 14.6V3H25v30h-4.4l-5.2-14.6V33H11z" fill="#E50914"/></svg>`;
-}
-function logoChase() {
-  // White octagon with a blue centre — sits on Chase's blue nav.
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><path d="M14 3h8l6 6v8l-6 6h-8l-6-6V9z" fill="#ffffff"/><rect x="14.5" y="14.5" width="7" height="7" rx="1" fill="#117ACA"/></svg>`;
-}
-function logoCoinbase() {
-  return `<svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="18" r="14" fill="#1652f0"/><rect x="13.5" y="13.5" width="9" height="9" rx="1.5" fill="#fff"/></svg>`;
-}
 
 document.addEventListener("DOMContentLoaded", init);

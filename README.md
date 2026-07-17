@@ -53,8 +53,8 @@ with a passkey and catch every one.
 
 ## Passkey registration
 
-Click **Register a passkey on this device** to create a real platform passkey via Touch ID /
-Windows Hello (stored in this computer's secure hardware), then **Test your passkey** to run a
+Click **Register a passkey on this device** to create a real platform passkey with your
+device's screen lock (stored in its secure hardware), then **Test your passkey** to run a
 real sign-in ceremony and feel it work. In passkey mode the demo runs **genuine WebAuthn**:
 the real site signs you in with your actual passkey, and the look-alike triggers the browser's
 own "no passkey for this site" refusal (a credential the device doesn't have). Where there's no
@@ -75,7 +75,7 @@ Two ways to play:
 Tune it on the title screen: **rounds** (5 / 10 / 15 / 20), **difficulty** (Mixed / Easy–Med /
 Med–Hard / All Hard), and a per-round **timer** (Off / Chill 25s / Normal 15s / Blitz ⚡ 8s —
 run out and you're "phished," because a hesitating user is a phished user). It's built to feel
-like a quiz game: **Kahoot-style background music and sound effects** (all synthesized with the
+like a quiz game: **quiz-show-style sound effects** (all synthesized with the
 Web Audio API — no asset files), a **🔊 mute toggle** (top-right, remembered), **streak**
 tracking 🔥, **confetti** on hot streaks and strong finishes, count-up score, and slide-in
 rounds. Play from the keyboard too: **`1` / `2`** (or `←` / `→`) to pick, **Enter** to advance.
@@ -120,10 +120,10 @@ The passkey will then be bound to your `*.vercel.app` domain (or a custom domain
 code leaves the WebAuthn Relying Party ID unset, so it auto-binds to whatever origin
 serves it — no edits needed. Netlify, Cloudflare Pages, and GitHub Pages work the same way.
 
-On a device with Touch ID / Windows Hello, "Register a passkey" triggers a real platform
-passkey ceremony. If no authenticator is available (or you open it as a plain file), the
-game falls back to a simulated passkey so the demo still runs — but the *real* Touch ID
-prompt is the part worth showing off.
+On a device with a biometric or PIN screen lock, "Register a passkey" triggers a real
+platform passkey ceremony. If no authenticator is available (or you open it as a plain
+file), the game falls back to a simulated passkey so the demo still runs — but the *real*
+unlock prompt is the part worth showing off.
 
 ## Files
 

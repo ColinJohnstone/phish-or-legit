@@ -16,7 +16,7 @@
   <!-- Apply saved/system theme before first paint (no flash of dark).
        External (not inline) so the CSP can stay strict: script-src 'self'. -->
   <script src="theme-init.js?v=10"></script>
-  <link rel="stylesheet" href="styles.css?v=29" />
+  <link rel="stylesheet" href="styles.css?v=30" />
 </head>
 <body>
   <div id="app">
@@ -34,14 +34,14 @@
         <button class="aud-half" data-aud="personal">
           <span class="aud-ic">👤</span>
           <h2>Personal</h2>
-          <p>Play as yourself. Your passkey is created right on this device — Face&nbsp;ID, Touch&nbsp;ID, or Windows&nbsp;Hello.</p>
+          <p>Play as yourself. Your passkey is created right on this device — unlocked with your face, fingerprint, or PIN.</p>
           <span class="aud-cta">Play as Personal ›</span>
         </button>
         <div class="aud-divider" aria-hidden="true"></div>
         <button class="aud-half" data-aud="enterprise">
           <span class="aud-ic">🏢</span>
           <h2>Enterprise</h2>
-          <p>One work account for everything — Microsoft Entra&nbsp;ID with SSO. On a computer, your passkey is created on your phone via QR&nbsp;code.</p>
+          <p>One work account for everything — Macrosoft Astra&nbsp;ID with SSO. On a computer, your passkey is created on your phone via QR&nbsp;code.</p>
           <span class="aud-cta">Play as Enterprise ›</span>
         </button>
       </div>
@@ -66,7 +66,7 @@
               </div>
             </div>
             <div class="enterprise-note" id="enterprise-note" style="display:none">
-              <b>One account, everywhere.</b> Your org signs you in with <b>Microsoft Entra ID</b> —
+              <b>One account, everywhere.</b> Your org signs you in with <b>Macrosoft Astra ID</b> —
               single sign-on means that one work account opens every app, so there's exactly one
               identity to protect, and one passkey that protects it. On a computer, registering
               shows a <b>QR code</b>: scan it with your phone and the passkey is created there,
@@ -216,12 +216,12 @@
           <li>
             <strong>A passkey is locked to a domain.</strong>
             When you register, the secret key is bound to the exact site
-            (e.g. <code>coinbase.com</code>) — and stored in your device's secure hardware.
+            (e.g. <code>coinvault.com</code>) — and stored in your device's secure hardware.
           </li>
           <li>
             <strong>Your browser checks the domain for you.</strong>
             It will only offer a passkey whose domain matches the site you're on.
-            A homoglyph look-alike like <code>cоinbase.com</code> (Cyrillic “о”) is a
+            A homoglyph look-alike like <code>cоinvault.com</code> (Cyrillic “о”) is a
             <em>different domain</em> at the byte level — so it gets nothing.
           </li>
           <li>
@@ -259,6 +259,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=18"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
