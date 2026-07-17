@@ -451,7 +451,7 @@ body:has(#screen-audience.active) .audience-toggle { display: none; }
   .aud-half p { font-size: 0.9rem; }
 }
 
-/* Enterprise explainer: one Astra ID account + SSO + QR cross-device */
+/* Enterprise explainer: one Entra ID account + SSO + QR cross-device */
 .enterprise-note {
   background: color-mix(in srgb, #3a76d6 10%, transparent);
   border: 1px solid color-mix(in srgb, #3a76d6 35%, var(--border));

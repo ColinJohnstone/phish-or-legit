@@ -467,7 +467,7 @@ const state = {
   pickedReal: false, // did the player click the genuine site this round?
   streak: 0,         // consecutive correct answers
   results: [],       // per-round { difficulty, correct } for the summary
-  audience: "personal", // 'personal' | 'enterprise' (Astra ID SSO + QR cross-device)
+  audience: "personal", // 'personal' | 'enterprise' (Entra ID SSO + QR cross-device)
   passkey: {
     registered: false,
     credentialId: null,
@@ -569,7 +569,7 @@ function reflectPasskeyState() {
   if (state.passkey.registered) {
     statusEl.textContent =
       state.passkey.kind === "hybrid"
-        ? "✓ Work passkey registered on your phone (Astra ID · one account, SSO everywhere)."
+        ? "✓ Work passkey registered on your phone (Entra ID · one account, SSO everywhere)."
         : "✓ Passkey registered on this device.";
     statusEl.className = "passkey-status ok";
     playBtn.disabled = false;
@@ -609,7 +609,7 @@ async function registerPasskey() {
             ? {
                 id: randomBytes(16),
                 name: "jordan.lee@norvia.example",
-                displayName: "Jordan Lee (Norvia Corp · Astra ID)",
+                displayName: "Jordan Lee (Norvia Corp · Entra ID)",
               }
             : {
                 id: randomBytes(16),
@@ -674,7 +674,7 @@ function finalizeRegistration(credentialId, real, kind) {
     $("#passkey-status").className = "passkey-status ok";
     $("#passkey-status").textContent =
       state.passkey.kind === "hybrid"
-        ? "✓ Work passkey created on your phone via the QR code — one Astra ID account, one passkey, SSO everywhere."
+        ? "✓ Work passkey created on your phone via the QR code — one Entra ID account, one passkey, SSO everywhere."
         : `✓ Device-bound passkey created with ${verifierName()}.`;
   }
 }
@@ -1850,7 +1850,7 @@ function flashShare(msg) {
 // ============================================================
 // ---------- Audience: Personal vs Enterprise ------------------------
 // Personal is the classic experience: a passkey created on THIS device.
-// Enterprise tells the work-account story: one "Macrosoft Astra ID"
+// Enterprise tells the work-account story: one "Microsoft Entra ID"
 // identity (fictional, like every brand here) with SSO across every app,
 // protected by a passkey created on your phone via the browser's QR
 // cross-device flow (when playing at a computer).
@@ -1863,7 +1863,7 @@ function applyAudience(aud) {
   if (audBtn) audBtn.textContent = ent ? "🏢" : "👤";
   $("#pk-panel-glyph").textContent = ent ? "🏢" : "🔑";
   $("#pk-panel-title").textContent = ent
-    ? "Work passkey — Astra ID, one account for everything"
+    ? "Work passkey — Entra ID, one account for everything"
     : "Device-bound passkey";
   $("#pk-panel-sub").textContent = ent
     ? "Your admin requires a phishing-resistant sign-in for your single SSO identity. On a computer, registration hands you off to your phone with a QR code."
